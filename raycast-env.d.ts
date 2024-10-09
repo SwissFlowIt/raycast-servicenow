@@ -26,7 +26,10 @@ declare namespace Preferences {
 
 declare namespace Arguments {
   /** Arguments passed to the `search-text` command */
-  export type SearchText = {}
+  export type SearchText = {
+  /** Text */
+  "text": string
+}
 }
 
 

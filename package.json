@@ -13,9 +13,17 @@
   "commands": [
     {
       "name": "search-text",
-      "title": "Search text",
+      "title": "Search",
       "description": "Use this command to perform a search within your ServiceNow instance. Simply enter your search query, and the extension will return relevant results in real-time, allowing you to quickly find tickets, incidents, knowledge articles, and other records",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
