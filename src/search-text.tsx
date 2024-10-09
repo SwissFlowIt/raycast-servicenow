@@ -12,10 +12,19 @@ import {
   Clipboard,
   LaunchProps,
 } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
-import { useCachedState } from "@raycast/utils";
 import axios from "axios";
-import { filter, map, flattenDeep, find, keys, some, pick } from "lodash";
+import {
+  filter,
+  map,
+  flattenDeep,
+  find,
+  keys,
+  some,
+  pick,
+  sumBy,
+} from "lodash";
 import { useEffect, useState } from "react";
 
 const tagsColorMap = {
@@ -151,6 +160,8 @@ export default function Command(
 
   return (
     <List
+      navigationTitle={`ServiceNow - ${isLoading ? "Loading" : sumBy(results, (r) => r.record_count)} results for "${text}"`}
+      searchBarPlaceholder="Filter by title..."
       isLoading={isLoading}
       searchBarAccessory={
         <TableDropdown tables={results} onTableTypeChange={onTableTypeChange} />
@@ -158,13 +169,25 @@ export default function Command(
     >
       {filteredResults.map((result) => {
         const records = result.records;
+        const { icon: iconName, color: colorName } = getTableIconAndColor(
+          result.name
+        );
+        var icon: any = {
+          source: Icon[iconName as keyof typeof Icon],
+          tintColor: Color[colorName as keyof typeof Color],
+        };
+
         return (
           <List.Section
             key={result.label}
             title={`${result.label_plural} (${result.record_count})`}
           >
             {records.map((record: any) => {
-              const { icon, color } = getTableIconAndColor(record.table);
+              if (record.metadata.thumbnailURL)
+                icon = `${instanceUrl}/${record.metadata.thumbnailURL}`;
+              else {
+              }
+
               const accessories: List.Item.Accessory[] = [];
               const dataKeys = keys(record.data);
               const tags = keys(tagsColorMap);
@@ -200,10 +223,7 @@ export default function Command(
                   key={record.sys_id}
                   title={record.metadata.title}
                   subtitle={record.metadata.description}
-                  icon={{
-                    source: Icon[icon as keyof typeof Icon],
-                    tintColor: Color[color as keyof typeof Color],
-                  }}
+                  icon={icon}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser
