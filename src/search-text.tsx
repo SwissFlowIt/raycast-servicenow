@@ -1,4 +1,5 @@
 /* eslint-disable @raycast/prefer-title-case */
+import { useEffect, useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -11,10 +12,11 @@ import {
   showHUD,
   Clipboard,
   LaunchProps,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, useFetch } from "@raycast/utils";
 
-import axios from "axios";
 import {
   filter,
   map,
@@ -25,7 +27,6 @@ import {
   pick,
   sumBy,
 } from "lodash";
-import { useEffect, useState } from "react";
 
 const tagsColorMap = {
   category: "Yellow",
@@ -57,7 +58,7 @@ function getTableIconAndColor(tableName: string) {
 }
 
 function TableDropdown(props: {
-  tables: any[];
+  tables: any[] | undefined;
   onTableTypeChange: (newValue: string) => void;
 }) {
   const { tables = [], onTableTypeChange: onTableTypeChange } = props;
@@ -93,57 +94,42 @@ function TableDropdown(props: {
 export default function Command(
   props: LaunchProps<{ arguments: Arguments.SearchText }>
 ) {
+  const { instance, username, password } = getPreferenceValues<Preferences>();
   const { text } = props.arguments;
 
-  /* const [showDetails, setShowDetails] = useCachedState("show-details", false);
-  const [showPreview, setShowPreview] = useCachedState("show-preview", false); */
-  /* const [showRecordInformation, setShowRecordInformation] = useCachedState(
-    "show-record-information",
-    false
-  ); */
-  const [isLoading, setIsLoading] = useState(true);
   //const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<any[]>([]);
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table, setTable] = useState<string>("all");
 
-  const preferences = getPreferenceValues<Preferences>();
+  const instanceUrl = `https://${instance}.service-now.com`;
 
-  const instanceUrl = `https://${preferences.instance}.service-now.com`;
-
-  useEffect(() => {
-    const instance = axios.create({
-      baseURL: `${instanceUrl}/api/now/`,
-      auth: {
-        username: preferences.username,
-        password: preferences.password,
+  const { isLoading, data } = useFetch(
+    `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${text}`,
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
-    });
+      execute: !!text,
+      onError: (error) => {
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch packages");
+      },
 
-    const fetchRecords = async () => {
-      instance
-        .get(`globalsearch/search?sysparm_search=${text}`)
-        .then((response) => {
-          const recordsWithResults = filter(
-            response.data.result.groups,
-            (r) => r.result_count > 0
-          );
-          var results = flattenDeep(
-            map(recordsWithResults, (r) =>
-              filter(r.search_results, (x) => x.record_count > 0)
-            )
-          );
-
-          setResults(results);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error: ", error.response?.data || error.message);
-          setIsLoading(false);
-        });
-    };
-    fetchRecords();
-  }, []);
+      mapResult(response: any) {
+        const recordsWithResults = filter(
+          response.result.groups,
+          (r) => r.result_count > 0
+        );
+        const data = flattenDeep(
+          map(recordsWithResults, (r) =>
+            filter(r.search_results, (x) => x.record_count > 0)
+          )
+        );
+        return { data };
+      },
+      keepPreviousData: true,
+    }
+  );
 
   const onTableTypeChange = (newValue: string) => {
     setTable(newValue);
@@ -151,20 +137,20 @@ export default function Command(
 
   useEffect(() => {
     if (table !== "all") {
-      const filteredResults = filter(results, (r) => r.name === table);
+      const filteredResults = filter(data, (r) => r.name === table);
       setFilteredResults(filteredResults);
-    } else {
-      setFilteredResults(results);
+    } else if (data) {
+      setFilteredResults(data);
     }
-  }, [table, results]);
+  }, [table, data]);
 
   return (
     <List
-      navigationTitle={`ServiceNow - ${isLoading ? "Loading" : sumBy(results, (r) => r.record_count)} results for "${text}"`}
+      navigationTitle={`ServiceNow - ${isLoading ? "Loading" : sumBy(data, (r) => r.record_count)} results for "${text}"`}
       searchBarPlaceholder="Filter by title..."
       isLoading={isLoading}
       searchBarAccessory={
-        <TableDropdown tables={results} onTableTypeChange={onTableTypeChange} />
+        <TableDropdown tables={data} onTableTypeChange={onTableTypeChange} />
       }
     >
       {filteredResults.map((result) => {
