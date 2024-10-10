@@ -33,7 +33,9 @@ export default function SearchResultListItem({
   const accessories: List.Item.Accessory[] = [];
   const dataKeys = keys(result.data);
   const tags = keys(tagsColorMap);
-  const keywords = [result.metadata.description];
+  let keywords = result.metadata.description
+    .split(/\s|\n/)
+    .filter((token: string) => token !== "");
 
   tags.forEach((tag) => {
     const foundKey = find(dataKeys, (dataKey) => dataKey.includes(tag));
@@ -41,7 +43,13 @@ export default function SearchResultListItem({
     if (foundKey) {
       const value = result.data[foundKey];
       if (value.display) {
-        keywords.push(value.display);
+        keywords = [
+          ...keywords,
+          ...value.display
+            .split(/\s|\n/)
+            .filter((token: string) => token !== ""),
+        ];
+
         accessories.push({
           tag: {
             value: value.display,

@@ -98,7 +98,7 @@ export default function ({
   return (
     <List
       navigationTitle={navigationTitle}
-      searchBarPlaceholder="Filter by title..."
+      searchBarPlaceholder="Filter by title, description, state, category or number..."
       isLoading={isLoading}
       searchBarAccessory={
         <TableDropdown tables={data} onTableTypeChange={onTableTypeChange} />
