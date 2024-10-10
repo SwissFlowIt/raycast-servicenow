@@ -23,7 +23,7 @@ export default function History() {
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=${username}=react.client^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=user.name=${username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,

@@ -8,12 +8,6 @@ import {
 } from "@raycast/api";
 import { find, keys } from "lodash";
 
-const tagsColorMap = {
-  category: "Green",
-  state: "Blue",
-  number: "SecondaryText",
-};
-
 export default function SearchResultListItem({
   result,
   icon,
@@ -32,33 +26,38 @@ export default function SearchResultListItem({
   if (result.metadata.thumbnailURL)
     icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
 
-  const accessories: List.Item.Accessory[] = [];
   const dataKeys = keys(result.data);
-  const tags = keys(tagsColorMap);
-  let keywords = [label, ...result.metadata.description.split(/\s|\n/)];
+  const accessories: List.Item.Accessory[] = [];
+  let keywords = [label, ...result.metadata.description?.split(/\s|\n/)];
 
-  tags.forEach((tag) => {
-    const foundKey = find(dataKeys, (dataKey) => dataKey.includes(tag));
+  if (result.data.number) keywords.push(result.data.number.display);
 
-    if (foundKey) {
-      const value = result.data[foundKey];
-      if (value.display) {
-        keywords = [...keywords, ...value.display.split(/\s|\n/)];
-
-        accessories.push({
-          tag: {
-            value: value.display,
-            color:
-              Color[
-                tagsColorMap[
-                  tag as keyof typeof tagsColorMap
-                ] as keyof typeof Color
-              ],
-          },
-        });
-      }
+  let foundKey = find(dataKeys, (dataKey) => dataKey.includes("category"));
+  if (foundKey) {
+    const value = result.data[foundKey].display;
+    if (value) {
+      keywords = keywords.concat(value.split(/\s|\n/));
+      accessories.push({
+        tag: {
+          value: value,
+          color: Color.Green,
+        },
+      });
     }
-  });
+  }
+  foundKey = find(dataKeys, (dataKey) => dataKey.includes("state"));
+  if (foundKey) {
+    const value = result.data[foundKey].display;
+    if (value) {
+      keywords = keywords.concat(value.split(/\s|\n/));
+      accessories.push({
+        tag: {
+          value: value,
+          color: Color.Blue,
+        },
+      });
+    }
+  }
 
   if (!result.record_url.startsWith("/")) {
     result.record_url = "/" + result.record_url;
@@ -68,7 +67,7 @@ export default function SearchResultListItem({
     <List.Item
       key={result.sys_id}
       title={result.metadata.title}
-      subtitle={result.metadata.description}
+      subtitle={result.data.number?.display}
       icon={icon}
       keywords={keywords}
       actions={

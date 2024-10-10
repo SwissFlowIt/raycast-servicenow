@@ -140,19 +140,23 @@ export default function ({
                 />
               ))}
               <List.Item
+                icon={Icon.MagnifyingGlass}
                 key={`${result.label}-all`}
                 title={`View all ${result.label} matches`}
-                icon={Icon.Eye}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser
-                      title="Open in Browser"
-                      url={`${instanceUrl}${result.all_results_url}`}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy URL"
-                      content={`${instanceUrl}${result.all_results_url}`}
-                    />
+                    <List.Dropdown.Section
+                      title={`View all ${result.label} matches`}
+                    >
+                      <Action.OpenInBrowser
+                        title="Open in Browser"
+                        url={`${instanceUrl}${result.all_results_url}`}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy URL"
+                        content={`${instanceUrl}${result.all_results_url}`}
+                      />
+                    </List.Dropdown.Section>
                   </ActionPanel>
                 }
               />
