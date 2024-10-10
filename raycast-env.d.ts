@@ -20,16 +20,13 @@ type ExtensionPreferences = {
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `search-text` command */
-  export type SearchText = ExtensionPreferences & {}
+  /** Preferences accessible in the `history` command */
+  export type History = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `search-text` command */
-  export type SearchText = {
-  /** Text */
-  "text": string
-}
+  /** Arguments passed to the `history` command */
+  export type History = {}
 }
 
 
