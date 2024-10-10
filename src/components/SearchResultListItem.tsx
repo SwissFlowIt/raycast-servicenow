@@ -7,16 +7,19 @@ import {
   List,
 } from "@raycast/api";
 import { find, keys } from "lodash";
+import ResultDetail from "./ResultDetail";
 
 export default function SearchResultListItem({
   result,
   icon,
   label,
+  fields,
   mutateSearchResults,
 }: {
   result: any;
   icon: string;
   label: string;
+  fields: any;
   mutateSearchResults: () => Promise<void>;
 }) {
   const { instance } = getPreferenceValues<Preferences>();
@@ -31,33 +34,48 @@ export default function SearchResultListItem({
   let keywords = [label, ...result.metadata.description?.split(/\s|\n/)];
 
   if (result.data.number) keywords.push(result.data.number.display);
+  if (result.data.priority) {
+    const priority = result.data.priority.value;
+    if (priority == 1) {
+      keywords.push("Critical");
+      accessories.push({
+        icon: {
+          source: Icon.Bell,
+          tintColor: Color.Red,
+        },
+        tooltip: "Critical Priority",
+      });
+    }
 
-  let foundKey = find(dataKeys, (dataKey) => dataKey.includes("category"));
-  if (foundKey) {
-    const value = result.data[foundKey].display;
-    if (value) {
-      keywords = keywords.concat(value.split(/\s|\n/));
+    if (priority == 2) {
+      keywords.push("High");
       accessories.push({
-        tag: {
-          value: value,
-          color: Color.Green,
+        icon: {
+          source: Icon.Bell,
+          tintColor: Color.Orange,
         },
+        tooltip: "High Priority",
       });
     }
   }
-  foundKey = find(dataKeys, (dataKey) => dataKey.includes("state"));
-  if (foundKey) {
-    const value = result.data[foundKey].display;
-    if (value) {
+  const keysToCheck = [
+    { key: "category", color: Color.Green },
+    { key: "state", color: Color.Blue },
+  ];
+
+  keysToCheck.forEach(({ key, color }) => {
+    const dataKey = dataKeys.find((dataKey) => dataKey.includes(key));
+    if (dataKey && result.data[dataKey].display) {
+      const value = result.data[dataKey].display;
       keywords = keywords.concat(value.split(/\s|\n/));
       accessories.push({
         tag: {
-          value: value,
-          color: Color.Blue,
+          value,
+          color,
         },
       });
     }
-  }
+  });
 
   if (!result.record_url.startsWith("/")) {
     result.record_url = "/" + result.record_url;
@@ -73,11 +91,21 @@ export default function SearchResultListItem({
       actions={
         <ActionPanel>
           <List.Dropdown.Section title={result.metadata.title}>
+            <Action.Push
+              title="Show Details"
+              icon={Icon.Sidebar}
+              target={
+                <ResultDetail
+                  result={result}
+                  fields={fields}
+                  accessories={accessories}
+                />
+              }
+            />
             <Action.OpenInBrowser
               title="Open in Browser"
               url={`${instanceUrl}${result.record_url}`}
             />
-            <Action title="Show Details" icon={Icon.Sidebar} />
           </List.Dropdown.Section>
           <List.Dropdown.Section>
             <Action.CopyToClipboard

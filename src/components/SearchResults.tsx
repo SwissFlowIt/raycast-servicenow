@@ -136,6 +136,7 @@ export default function ({
                   result={record}
                   icon={icon}
                   label={result.label}
+                  fields={result.fields}
                   mutateSearchResults={mutate}
                 />
               ))}

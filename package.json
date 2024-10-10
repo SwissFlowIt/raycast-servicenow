@@ -44,6 +44,7 @@
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
