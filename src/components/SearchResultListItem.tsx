@@ -9,7 +9,7 @@ import {
 import { find, keys } from "lodash";
 
 const tagsColorMap = {
-  category: "Yellow",
+  category: "Green",
   state: "Blue",
   number: "SecondaryText",
 };
@@ -17,10 +17,12 @@ const tagsColorMap = {
 export default function SearchResultListItem({
   result,
   icon,
+  label,
   mutateSearchResults,
 }: {
   result: any;
   icon: string;
+  label: string;
   mutateSearchResults: () => Promise<void>;
 }) {
   const { instance } = getPreferenceValues<Preferences>();
@@ -33,9 +35,7 @@ export default function SearchResultListItem({
   const accessories: List.Item.Accessory[] = [];
   const dataKeys = keys(result.data);
   const tags = keys(tagsColorMap);
-  let keywords = result.metadata.description
-    .split(/\s|\n/)
-    .filter((token: string) => token !== "");
+  let keywords = [label, ...result.metadata.description.split(/\s|\n/)];
 
   tags.forEach((tag) => {
     const foundKey = find(dataKeys, (dataKey) => dataKey.includes(tag));
@@ -43,12 +43,7 @@ export default function SearchResultListItem({
     if (foundKey) {
       const value = result.data[foundKey];
       if (value.display) {
-        keywords = [
-          ...keywords,
-          ...value.display
-            .split(/\s|\n/)
-            .filter((token: string) => token !== ""),
-        ];
+        keywords = [...keywords, ...value.display.split(/\s|\n/)];
 
         accessories.push({
           tag: {

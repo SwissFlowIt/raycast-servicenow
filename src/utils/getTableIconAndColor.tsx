@@ -6,7 +6,7 @@ const tableIconColorMap = {
   pm_project: { icon: "Clipboard", color: "Purple" },
   change: { icon: "Cog", color: "Yellow" },
   problem: { icon: "Bug", color: "Magenta" },
-  kb_knowledge: { icon: "Book", color: "Blue" },
+  kb_knowledge: { icon: "Book", color: "Yellow" },
   cat_item: { icon: "Cart", color: "Green" },
   req_item: { icon: "Box", color: "Green" },
   request: { icon: "Envelope", color: "Green" },

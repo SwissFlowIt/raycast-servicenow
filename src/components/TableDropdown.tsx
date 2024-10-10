@@ -15,22 +15,24 @@ export default function TableDropdown(props: {
         onTableTypeChange(newValue);
       }}
     >
-      <List.Dropdown.Item key="all" title="All" value="all" />
-      {tables.map((table) => {
-        const { icon, color } = getTableIconAndColor(table.name);
+      <List.Dropdown.Item key="all" title="All" value="all" icon={Icon.Globe} />
+      <List.Dropdown.Section title="Tables">
+        {tables.map((table) => {
+          const { icon, color } = getTableIconAndColor(table.name);
 
-        return (
-          <List.Dropdown.Item
-            key={table.name}
-            title={`${table.label_plural} (${table.record_count})`}
-            value={table.name}
-            icon={{
-              source: Icon[icon as keyof typeof Icon],
-              tintColor: Color[color as keyof typeof Color],
-            }}
-          />
-        );
-      })}
+          return (
+            <List.Dropdown.Item
+              key={table.name}
+              title={`${table.label_plural} (${table.record_count})`}
+              value={table.name}
+              icon={{
+                source: Icon[icon as keyof typeof Icon],
+                tintColor: Color[color as keyof typeof Color],
+              }}
+            />
+          );
+        })}
+      </List.Dropdown.Section>
     </List.Dropdown>
   );
 }

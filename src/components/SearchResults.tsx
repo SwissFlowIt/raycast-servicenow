@@ -135,6 +135,7 @@ export default function ({
                   key={record.sys_id}
                   result={record}
                   icon={icon}
+                  label={result.label}
                   mutateSearchResults={mutate}
                 />
               ))}
