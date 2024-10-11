@@ -1,72 +1,55 @@
 # Servicenow
 
-Search and explore content from ServiceNow.
+The fastest way to search and explore content across your ServiceNow instances:
 
-## Table of Contents
+- Search for tickets, incidents, knowledge articles, or any other record
+- View recent search history for easy access to frequently accessed items
+- Manage and configure multiple ServiceNow instances
+- Switch between different instances seamlessly
+- Remove items from search history or clear it entirely
 
-- [Description](#description)
-- [Features](#features)
-- [Commands](#commands)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Contribution](#contribution)
-- [License](#license)
+## Recent Searches
 
-## Description
+Effortlessly recall and reuse your past searches:
 
-This is a Raycast extension for searching and exploring content from ServiceNow.
+- Browse through your recent search history
 
-## Features
+- Quickly re-run previous searches without retyping
 
-- Search for tickets, incidents, knowledge articles, and other records
-- View recent search history
-- Manage and configure ServiceNow instances
-- Quickly switch between different ServiceNow instances
+- Remove individual items from your search history when needed
 
-## Commands
+- Clear your entire search history with just one action
 
-- `Text search`: View recent search history
-- `Manage instances`: Manage and configure ServiceNow instances
+## Instance Management
 
-## Installation
+Streamline your workflow by managing multiple ServiceNow instances:
 
-To install this extension, follow these steps:
+- Add new instances easily using the "Manage Instances" command
 
-1. Open Raycast
-2. Go to the Extensions tab
-3. Search for "servicenow"
-4. Click "Add Extension"
+- Edit existing instance details at any time
 
-## Usage
+- Switch between instances quickly using keyboard shortcuts
 
-1. Launch the extension
-2. Select a ServiceNow instance from the dropdown menu
-3. Enter your search query in the search bar
-4. Browse through the search results
+- Configure each instance with its own alias, color, username, and password
 
-## Configuration
+## Advanced Search Features
 
-To add or manage ServiceNow instances:
+Enhance your search experience with these powerful features:
 
-1. Open the extension
-2. Go to the Instances tab
-3. Click "Add Instance" to add a new ServiceNow instance
-4. Configure the instance details (name, alias, username, password)
+- Filter search results by specific tables or view all results
 
-## Development
+- Access detailed information about each result item
 
-This project uses TypeScript and React for building the extension. To develop locally:
+- Copy URLs, titles, or numbers of search results for quick reference
 
-1. Clone the repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start the development server
+- Open search results directly in your web browser
 
-## Contribution
+## Quick Actions
 
-Contributions are welcome! Please feel free to submit pull requests or issues.
+Perform common actions efficiently:
 
-## License
+- Refresh search results instantly
 
-This project is licensed under the MIT License.
+- Copy search queries to clipboard
+
+- Clear all items from search history
