@@ -1,5 +1,4 @@
-import crypto from "crypto";
-
+import { useMemo } from "react";
 import {
   ActionPanel,
   Action,
@@ -10,7 +9,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { uniqBy } from "lodash";
-import { useMemo } from "react";
+import crypto from "crypto";
 
 import { Instance } from "../hooks/useInstances";
 
@@ -47,15 +46,6 @@ export default function InstanceForm({
       password: FormValidation.Required,
     },
   });
-
-  // There seems to be a bug in the Icon type, so we need to filter out the duplicates
-  const icons = useMemo(
-    () =>
-      uniqBy(Object.entries(Icon), (value) => {
-        return value[1];
-      }),
-    []
-  );
 
   const colors = useMemo(() => Object.entries(Color), []);
 

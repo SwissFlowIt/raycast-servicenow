@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { keys } from "lodash";
+
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
-import { Instance } from "../hooks/useInstances";
-import { useCachedState } from "@raycast/utils";
 import Actions from "./Actions";
+
+import { Instance } from "../hooks/useInstances";
 
 export default function SearchResultListItem({
   result,

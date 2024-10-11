@@ -1,8 +1,9 @@
-import { Color, Icon, List } from "@raycast/api";
-import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { useEffect } from "react";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { uniqBy } from "lodash";
+
+import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 
 export default function TableDropdown(props: {
   tables: any[] | undefined;

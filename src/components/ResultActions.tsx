@@ -1,6 +1,7 @@
 import { Action, ActionPanel } from "@raycast/api";
-import { Instance } from "../hooks/useInstances";
 import { useCachedState } from "@raycast/utils";
+
+import { Instance } from "../hooks/useInstances";
 
 export default function ResultActions({
   result,

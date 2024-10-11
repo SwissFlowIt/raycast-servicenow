@@ -9,6 +9,12 @@ export type Instance = {
   password: string;
 };
 
+const compareInstances = (a: Instance, b: Instance): number => {
+  const nameA = a.alias ? a.alias : a.name;
+  const nameB = b.alias ? b.alias : b.name;
+  return nameA.localeCompare(nameB);
+};
+
 export default function useInstances() {
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>(
     "saved-instances",
@@ -27,5 +33,5 @@ export default function useInstances() {
     setValue(value.filter((i) => i.id !== instanceId));
   }
 
-  return { instances: value.sort((a, b) => (a.alias?a.alias:a.name).localeCompare(b.alias?b.alias:b.name)), addInstance, editInstance, deleteInstance, mutate, isLoading };
+  return { instances: value.sort((a, b) => compareInstances(a,b)), addInstance, editInstance, deleteInstance, mutate, isLoading };
 }

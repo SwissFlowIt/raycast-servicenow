@@ -5,11 +5,12 @@ import {
   List,
   Keyboard,
   confirmAlert,
-  Color,
 } from "@raycast/api";
-import useInstances, { Instance } from "./hooks/useInstances";
-import InstanceForm from "./components/InstanceForm";
 import { useCachedState } from "@raycast/utils";
+
+import InstanceForm from "./components/InstanceForm";
+
+import useInstances, { Instance } from "./hooks/useInstances";
 
 export default function Instances() {
   const { instances, addInstance, editInstance, deleteInstance } =
@@ -21,24 +22,30 @@ export default function Instances() {
   return (
     <List searchBarPlaceholder="Filter by name, alias, username...">
       {instances.map((instance) => {
+        const {
+          id: instanceId,
+          alias,
+          name: instanceName,
+          username,
+          color,
+        } = instance;
+        const aliasOrName = alias ? alias : instanceName;
         return (
           <List.Item
-            key={instance.id}
+            key={instanceId}
             icon={{
               source:
-                selectedInstance?.id == instance.id
+                selectedInstance?.id == instanceId
                   ? Icon.CheckCircle
                   : Icon.Circle,
-              tintColor: instance.color,
+              tintColor: color,
             }}
-            title={instance.alias ? instance.alias : instance.name}
-            subtitle={instance.alias ? instance.name : ""}
-            keywords={[instance.name, instance.alias, instance.username]}
+            title={aliasOrName}
+            subtitle={alias ? instanceName : ""}
+            keywords={[instanceName, alias, username]}
             actions={
               <ActionPanel>
-                <List.Dropdown.Section
-                  title={instance.alias ? instance.alias : instance.name}
-                >
+                <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit instance"
@@ -63,10 +70,10 @@ export default function Instances() {
                       if (
                         await confirmAlert({
                           title: "Remove instance",
-                          message: `Are you sure you want to delete "${instance.alias} (${instance.name})"?`,
+                          message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
                         })
                       ) {
-                        await deleteInstance(instance.id);
+                        await deleteInstance(instanceId);
                       }
                     }}
                   />
@@ -79,7 +86,7 @@ export default function Instances() {
                 ></Action>
               </ActionPanel>
             }
-            accessories={[{ text: instance.username, icon: Icon.Person }]}
+            accessories={[{ text: username, icon: Icon.Person }]}
           />
         );
       })}
