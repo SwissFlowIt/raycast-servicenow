@@ -23,16 +23,21 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance] = useCachedState<Instance>("instance");
+  const {
+    alias = "",
+    name: instanceName = "",
+    username = "",
+    password = "",
+  } = selectedInstance || {};
 
-  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
+  const instanceUrl = `https://${instanceName}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
 
       onError: (error) => {
@@ -72,20 +77,19 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   }, [table, data]);
 
   useEffect(() => {
+    const aliasOrName = alias ? alias : instanceName;
     if (isLoading)
-      setNavigationTitle(
-        `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > Loading results...`
-      );
+      setNavigationTitle(`Text search > ${aliasOrName} > Loading results...`);
     else if (errorFetching) setNavigationTitle(`Text search`);
     else {
       const count = sumBy(data, (r) => r.record_count);
       if (count == 0)
         setNavigationTitle(
-          `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > No results found for "${searchTerm}"`
+          `Text search > ${aliasOrName} > No results found for "${searchTerm}"`
         );
       else
         setNavigationTitle(
-          `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+          `Text search > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
         );
     }
   }, [data, searchTerm, isLoading]);
@@ -93,7 +97,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   return (
     <List
       navigationTitle={navigationTitle}
-      searchBarPlaceholder="Filter by title, description, state, category or number..."
+      searchBarPlaceholder="Filter by title, description, state, category, number..."
       isLoading={isLoading}
       searchBarAccessory={<TableDropdown tables={data} isLoading={isLoading} />}
     >

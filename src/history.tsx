@@ -31,14 +31,21 @@ export default function History() {
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
+  const {
+    id: instanceId = "",
+    alias = "",
+    name: instanceName = "",
+    username = "",
+    password = "",
+  } = selectedInstance || {};
 
-  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
+  const instanceUrl = `https://${instanceName}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${selectedInstance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
       execute: !!selectedInstance,
       onError: (error) => {
@@ -71,7 +78,7 @@ export default function History() {
         fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
           method: "DELETE",
           headers: {
-            Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
           },
         })
       );
@@ -118,7 +125,7 @@ export default function History() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
           },
         }
       );
@@ -163,14 +170,14 @@ export default function History() {
 
   return (
     <List
-      navigationTitle={`Text search${selectedInstance ? " > " + (selectedInstance.alias ? selectedInstance.alias : selectedInstance.name) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Text search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
-          value={selectedInstance?.id}
+          value={instanceId}
           tooltip="Select the instance you want to search in"
           onChange={(newValue) => {
             !isLoading && !isLoadingInstances && onInstanceChange(newValue);
@@ -184,9 +191,7 @@ export default function History() {
                 value={instance.id}
                 icon={{
                   source:
-                    selectedInstance?.id == instance.id
-                      ? Icon.CheckCircle
-                      : Icon.Circle,
+                    instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
                   tintColor: instance.color,
                 }}
               />

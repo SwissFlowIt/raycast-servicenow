@@ -1,8 +1,10 @@
 import { ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import { format } from "date-fns";
-import ResultActions from "./ResultActions";
-import { Instance } from "../hooks/useInstances";
 import { useCachedState } from "@raycast/utils";
+import { format } from "date-fns";
+
+import ResultActions from "./ResultActions";
+
+import { Instance } from "../hooks/useInstances";
 
 export default function ResultDetail({
   result,
@@ -12,13 +14,9 @@ export default function ResultDetail({
   fields: any;
 }) {
   const [instance] = useCachedState<Instance>("instance");
+  const { alias = "", name: instanceName = "" } = instance || {};
 
-  const instanceUrl = `https://${instance?.name}.service-now.com`;
-
-  const keysToCheck = [
-    { key: "category", color: Color.Green },
-    { key: "state", color: Color.Blue },
-  ];
+  const instanceUrl = `https://${instanceName}.service-now.com`;
 
   let markdown = "";
   if (result.metadata.thumbnailURL)
@@ -29,7 +27,7 @@ export default function ResultDetail({
 
   return (
     <Detail
-      navigationTitle={`Text search > ${instance?.alias ? instance?.alias : instance?.name} > ${result.metadata.title}`}
+      navigationTitle={`Text search > ${alias ? alias : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
