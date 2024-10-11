@@ -18,11 +18,9 @@ import { Instance } from "../hooks/useInstances";
 export default function ({
   instance,
   searchTerm,
-  mutateHistory,
 }: {
   instance: Instance;
   searchTerm: string;
-  mutateHistory?: () => Promise<void>;
 }): JSX.Element {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
@@ -59,7 +57,6 @@ export default function ({
             filter(r.search_results, (x) => x.record_count > 0)
           )
         );
-        mutateHistory?.();
         return { data };
       },
       keepPreviousData: true,

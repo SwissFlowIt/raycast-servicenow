@@ -31,7 +31,7 @@ export default function History() {
   const instanceUrl = `https://${instance?.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=user.name=${instance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${instance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
         Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
@@ -174,11 +174,11 @@ export default function History() {
                       <SearchResults
                         instance={instance}
                         searchTerm={searchTerm}
-                        mutateHistory={mutate}
                       />
                     }
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
+                    onPop={mutate}
                   />
                   <Action.Push
                     title="Manage instances"
