@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { find, keys } from "lodash";
+import { find, keys, set } from "lodash";
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
-import { Instance } from "../hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
 import { useCachedState } from "@raycast/utils";
 import Instances from "../instances";
 
@@ -19,9 +19,11 @@ export default function SearchResultListItem({
   fields: any;
   mutateSearchResults: () => Promise<void>;
 }) {
-  const [instance] = useCachedState<Instance>("instance");
+  const { instances } = useInstances();
+  const [selectedInstance, setSelectedInstance] =
+    useCachedState<Instance>("instance");
 
-  const instanceUrl = `https://${instance?.name}.service-now.com`;
+  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
   if (result.metadata.thumbnailURL)
     icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
@@ -104,8 +106,29 @@ export default function SearchResultListItem({
             icon={Icon.Gear}
             title="Manage instances"
             target={<Instances />}
-            onPop={mutateSearchResults}
           />
+          <ActionPanel.Submenu
+            title={"Select instance for search"}
+            icon={Icon.Check}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          >
+            {instances?.map((instance) => (
+              <Action
+                key={instance.id}
+                icon={{
+                  source:
+                    selectedInstance?.id == instance.id
+                      ? Icon.CheckCircle
+                      : Icon.Circle,
+                  tintColor: instance.color,
+                }}
+                title={instance.alias ? instance.alias : instance.name}
+                onAction={() => {
+                  setSelectedInstance(instance);
+                }}
+              />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel>
       }
       accessories={accessories}

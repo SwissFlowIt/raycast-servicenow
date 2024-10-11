@@ -28,17 +28,18 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<any[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [instance, setInstance] = useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] =
+    useCachedState<Instance>("instance");
 
-  const instanceUrl = `https://${instance?.name}.service-now.com`;
+  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${instance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${selectedInstance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
       },
-      execute: !!instance,
+      execute: !!selectedInstance,
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
@@ -69,7 +70,7 @@ export default function History() {
         fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
           method: "DELETE",
           headers: {
-            Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
           },
         })
       );
@@ -116,7 +117,7 @@ export default function History() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
           },
         }
       );
@@ -155,20 +156,20 @@ export default function History() {
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
-      setInstance(aux);
+      setSelectedInstance(aux);
     }
   };
 
   return (
     <List
-      navigationTitle={`Text search${instance ? " > " + (instance.alias ? instance.alias : instance.name) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Text search${selectedInstance ? " > " + (selectedInstance.alias ? selectedInstance.alias : selectedInstance.name) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
-          defaultValue={instance?.id}
+          defaultValue={selectedInstance?.id}
           tooltip="Select the instance you want to search in"
           onChange={(newValue) => {
             !isLoadingInstances && onInstanceChange(newValue);
@@ -180,7 +181,13 @@ export default function History() {
                 key={instance.id}
                 title={instance.alias ? instance.alias : instance.name}
                 value={instance.id}
-                icon={{ source: Icon.CircleFilled, tintColor: instance.color }}
+                icon={{
+                  source:
+                    selectedInstance?.id == instance.id
+                      ? Icon.CheckCircle
+                      : Icon.Circle,
+                  tintColor: instance.color,
+                }}
               />
             ))}
           </List.Dropdown.Section>
@@ -189,7 +196,7 @@ export default function History() {
     >
       {instances.length > 0 ? (
         <>
-          {searchTerm && instance && (
+          {searchTerm && selectedInstance && (
             <List.Item
               title={`Search for "${searchTerm}"`}
               icon={Icon.MagnifyingGlass}
@@ -199,7 +206,10 @@ export default function History() {
                     target={<SearchResults searchTerm={searchTerm} />}
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
-                    onPop={mutate}
+                    onPop={() => {
+                      mutate();
+                      mutateInstances();
+                    }}
                   />
                   <Action.Push
                     icon={Icon.Gear}
@@ -218,7 +228,11 @@ export default function History() {
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
-                  <Action title="Refresh" onAction={mutate} />
+                  <Action
+                    icon={Icon.ArrowClockwise}
+                    title="Refresh"
+                    onAction={mutate}
+                  />
                   <Action.Push
                     icon={Icon.Gear}
                     title="Manage instances"
@@ -238,8 +252,9 @@ export default function History() {
                   actions={
                     <ActionPanel>
                       <Action.Push
+                        onPop={mutateInstances}
                         target={
-                          instance && (
+                          selectedInstance && (
                             <SearchResults searchTerm={item.search_term} />
                           )
                         }
@@ -290,7 +305,11 @@ export default function History() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Action title="Refresh" onAction={mutate} />
+                  <Action
+                    icon={Icon.ArrowClockwise}
+                    title="Refresh"
+                    onAction={mutate}
+                  />
                   <Action.Push
                     icon={Icon.Gear}
                     title="Manage instances"

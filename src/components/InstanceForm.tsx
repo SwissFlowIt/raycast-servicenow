@@ -98,7 +98,7 @@ export default function InstanceForm({
               key={key}
               title={key}
               value={value.toString()}
-              icon={{ source: Icon.CircleFilled, tintColor: key }}
+              icon={{ source: Icon.Circle, tintColor: key }}
             />
           );
         })}

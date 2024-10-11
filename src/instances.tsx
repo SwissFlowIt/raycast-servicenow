@@ -23,7 +23,13 @@ export default function Instances() {
         return (
           <List.Item
             key={instance.id}
-            icon={{ source: Icon.CircleFilled, tintColor: instance.color }}
+            icon={{
+              source:
+                selectedInstance?.id == instance.id
+                  ? Icon.CheckCircle
+                  : Icon.Circle,
+              tintColor: instance.color,
+            }}
             title={instance.alias ? instance.alias : instance.name}
             subtitle={instance.alias ? instance.name : ""}
             keywords={[instance.name, instance.alias]}
@@ -75,8 +81,8 @@ export default function Instances() {
               selectedInstance?.id == instance.id
                 ? [
                     {
-                      icon: Icon.CheckCircle,
-                      tooltip: "Instance currently used for search",
+                      icon: Icon.Info,
+                      tooltip: "Instance currently used for the search",
                     },
                   ]
                 : null

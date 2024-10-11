@@ -13,22 +13,25 @@ import { filter, flattenDeep, map, sumBy } from "lodash";
 import TableDropdown from "./TableDropdown";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import SearchResultListItem from "./SearchResultListItem";
-import { Instance } from "../hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
+import Instances from "../instances";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [instance] = useCachedState<Instance>("instance");
+  const { instances } = useInstances();
+  const [selectedInstance, setSelectedInstance] =
+    useCachedState<Instance>("instance");
 
-  const instanceUrl = `https://${instance?.name}.service-now.com`;
+  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(selectedInstance?.username + ":" + selectedInstance?.password).toString("base64")}`,
       },
 
       onError: (error) => {
@@ -70,18 +73,18 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   useEffect(() => {
     if (isLoading)
       setNavigationTitle(
-        `Text search > ${instance?.alias ? instance?.alias : instance?.name} > Loading results...`
+        `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > Loading results...`
       );
     else if (errorFetching) setNavigationTitle(`Text search`);
     else {
       const count = sumBy(data, (r) => r.record_count);
       if (count == 0)
         setNavigationTitle(
-          `Text search > ${instance?.alias ? instance?.alias : instance?.name} > No results found for "${searchTerm}"`
+          `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > No results found for "${searchTerm}"`
         );
       else
         setNavigationTitle(
-          `Text search > ${instance?.alias ? instance?.alias : instance?.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+          `Text search > ${selectedInstance?.alias ? selectedInstance?.alias : selectedInstance?.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
         );
     }
   }, [data, searchTerm, isLoading]);
@@ -100,11 +103,42 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
           description="Press ⏎ to refresh or try later again"
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={mutate} />
+              <Action
+                icon={Icon.ArrowClockwise}
+                title="Refresh"
+                onAction={mutate}
+              />
+              <Action.Push
+                icon={Icon.Gear}
+                title="Manage instances"
+                target={<Instances />}
+              />
+              <ActionPanel.Submenu
+                title={"Choose instance to search"}
+                icon={Icon.Check}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              >
+                {instances?.map((instance) => (
+                  <Action
+                    key={instance.id}
+                    icon={{
+                      source:
+                        selectedInstance?.id == instance.id
+                          ? Icon.CheckCircle
+                          : Icon.Circle,
+                      tintColor: instance.color,
+                    }}
+                    title={instance.alias ? instance.alias : instance.name}
+                    onAction={() => {
+                      setSelectedInstance(instance);
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
             </ActionPanel>
           }
         />
-      ) : (
+      ) : data?.length && data.length > 0 ? (
         filteredResults.map((result, index) => {
           const records = result.records;
           const { icon: iconName, color: colorName } = getTableIconAndColor(
@@ -153,12 +187,57 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                       onAction={mutate}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
+                    <Action.Push
+                      icon={Icon.Gear}
+                      title="Manage instances"
+                      target={<Instances />}
+                    />
                   </ActionPanel>
                 }
               />
             </List.Section>
           );
         })
+      ) : (
+        <List.EmptyView
+          title="No Results"
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.ArrowClockwise}
+                title="Refresh"
+                onAction={mutate}
+              />
+              <Action.Push
+                icon={Icon.Gear}
+                title="Manage instances"
+                target={<Instances />}
+              />
+              <ActionPanel.Submenu
+                title={"Choose instance to search"}
+                icon={Icon.Check}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              >
+                {instances?.map((instance) => (
+                  <Action
+                    key={instance.id}
+                    icon={{
+                      source:
+                        selectedInstance?.id == instance.id
+                          ? Icon.CheckCircle
+                          : Icon.Circle,
+                      tintColor: instance.color,
+                    }}
+                    title={instance.alias ? instance.alias : instance.name}
+                    onAction={() => {
+                      setSelectedInstance(instance);
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );
