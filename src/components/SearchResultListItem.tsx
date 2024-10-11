@@ -108,9 +108,9 @@ export default function SearchResultListItem({
             target={<Instances />}
           />
           <ActionPanel.Submenu
-            title={"Select instance for search"}
+            title={"Select instance"}
             icon={Icon.Check}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
           >
             {instances?.map((instance) => (
               <Action

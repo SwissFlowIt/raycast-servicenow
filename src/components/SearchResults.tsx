@@ -114,9 +114,9 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                 target={<Instances />}
               />
               <ActionPanel.Submenu
-                title={"Choose instance to search"}
+                title={"Select instance"}
                 icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={{ modifiers: ["cmd"], key: "i" }}
               >
                 {instances?.map((instance) => (
                   <Action
@@ -192,6 +192,30 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                       title="Manage instances"
                       target={<Instances />}
                     />
+                    <ActionPanel.Submenu
+                      title={"Select instance"}
+                      icon={Icon.Check}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    >
+                      {instances?.map((instance) => (
+                        <Action
+                          key={instance.id}
+                          icon={{
+                            source:
+                              selectedInstance?.id == instance.id
+                                ? Icon.CheckCircle
+                                : Icon.Circle,
+                            tintColor: instance.color,
+                          }}
+                          title={
+                            instance.alias ? instance.alias : instance.name
+                          }
+                          onAction={() => {
+                            setSelectedInstance(instance);
+                          }}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
                   </ActionPanel>
                 }
               />
@@ -214,9 +238,9 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                 target={<Instances />}
               />
               <ActionPanel.Submenu
-                title={"Choose instance to search"}
+                title={"Select instance"}
                 icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={{ modifiers: ["cmd"], key: "i" }}
               >
                 {instances?.map((instance) => (
                   <Action

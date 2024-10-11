@@ -5,6 +5,7 @@ import {
   List,
   Keyboard,
   confirmAlert,
+  Color,
 } from "@raycast/api";
 import useInstances, { Instance } from "./hooks/useInstances";
 import InstanceForm from "./components/InstanceForm";
@@ -18,7 +19,7 @@ export default function Instances() {
     useCachedState<Instance>("instance");
 
   return (
-    <List>
+    <List searchBarPlaceholder="Filter by name, alias, username...">
       {instances.map((instance) => {
         return (
           <List.Item
@@ -32,7 +33,7 @@ export default function Instances() {
             }}
             title={instance.alias ? instance.alias : instance.name}
             subtitle={instance.alias ? instance.name : ""}
-            keywords={[instance.name, instance.alias]}
+            keywords={[instance.name, instance.alias, instance.username]}
             actions={
               <ActionPanel>
                 <List.Dropdown.Section
@@ -72,21 +73,13 @@ export default function Instances() {
                 </List.Dropdown.Section>
                 <Action
                   icon={Icon.Checkmark}
-                  title="Use this instance for search"
+                  title="Set this instance for search"
+                  shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => setSelectedInstance(instance)}
                 ></Action>
               </ActionPanel>
             }
-            accessories={
-              selectedInstance?.id == instance.id
-                ? [
-                    {
-                      icon: Icon.Info,
-                      tooltip: "Instance currently used for the search",
-                    },
-                  ]
-                : null
-            }
+            accessories={[{ text: instance.username, icon: Icon.Person }]}
           />
         );
       })}

@@ -217,6 +217,28 @@ export default function History() {
                     target={<Instances />}
                     onPop={mutateInstances}
                   />
+                  <ActionPanel.Submenu
+                    title={"Select instance"}
+                    icon={Icon.Check}
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  >
+                    {instances?.map((instance) => (
+                      <Action
+                        key={instance.id}
+                        icon={{
+                          source:
+                            selectedInstance?.id == instance.id
+                              ? Icon.CheckCircle
+                              : Icon.Circle,
+                          tintColor: instance.color,
+                        }}
+                        title={instance.alias ? instance.alias : instance.name}
+                        onAction={() => {
+                          setSelectedInstance(instance);
+                        }}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
                 </ActionPanel>
               }
             />
@@ -239,6 +261,28 @@ export default function History() {
                     target={<Instances />}
                     onPop={mutateInstances}
                   />
+                  <ActionPanel.Submenu
+                    title={"Select instance"}
+                    icon={Icon.Check}
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  >
+                    {instances?.map((instance) => (
+                      <Action
+                        key={instance.id}
+                        icon={{
+                          source:
+                            selectedInstance?.id == instance.id
+                              ? Icon.CheckCircle
+                              : Icon.Circle,
+                          tintColor: instance.color,
+                        }}
+                        title={instance.alias ? instance.alias : instance.name}
+                        onAction={() => {
+                          setSelectedInstance(instance);
+                        }}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
                 </ActionPanel>
               }
             />
@@ -288,6 +332,30 @@ export default function History() {
                         target={<Instances />}
                         onPop={mutateInstances}
                       />
+                      <ActionPanel.Submenu
+                        title={"Select instance"}
+                        icon={Icon.Check}
+                        shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      >
+                        {instances?.map((instance) => (
+                          <Action
+                            key={instance.id}
+                            icon={{
+                              source:
+                                selectedInstance?.id == instance.id
+                                  ? Icon.CheckCircle
+                                  : Icon.Circle,
+                              tintColor: instance.color,
+                            }}
+                            title={
+                              instance.alias ? instance.alias : instance.name
+                            }
+                            onAction={() => {
+                              setSelectedInstance(instance);
+                            }}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
                     </ActionPanel>
                   }
                   accessories={[
@@ -316,6 +384,28 @@ export default function History() {
                     target={<Instances />}
                     onPop={mutateInstances}
                   />
+                  <ActionPanel.Submenu
+                    title={"Select instance"}
+                    icon={Icon.Check}
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  >
+                    {instances?.map((instance) => (
+                      <Action
+                        key={instance.id}
+                        icon={{
+                          source:
+                            selectedInstance?.id == instance.id
+                              ? Icon.CheckCircle
+                              : Icon.Circle,
+                          tintColor: instance.color,
+                        }}
+                        title={instance.alias ? instance.alias : instance.name}
+                        onAction={() => {
+                          setSelectedInstance(instance);
+                        }}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
                 </ActionPanel>
               }
             />
