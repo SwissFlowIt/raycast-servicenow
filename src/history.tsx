@@ -72,12 +72,25 @@ export default function History() {
         })
       );
 
-      await Promise.all(promises);
-      await mutate(Promise.resolve([]));
-      await showToast({
-        style: Toast.Style.Success,
-        title: `All terms removed from history`,
-      });
+      const responses = await Promise.all(promises);
+      const success = responses.every((res) => res.ok);
+
+      if (success) {
+        await mutate(Promise.resolve([]));
+        await showToast({
+          style: Toast.Style.Success,
+          title: `All terms removed from history`,
+        });
+      } else {
+        const failedResponses = responses.filter((res) => !res.ok);
+        const messages = failedResponses.map((res) => res.statusText);
+        await mutate(Promise.resolve([]));
+        showToast(
+          Toast.Style.Failure,
+          "Could not remove all items from history",
+          messages.join("\n")
+        );
+      }
     } catch (error: any) {
       console.error(error);
       await mutate(Promise.resolve([]));
@@ -96,19 +109,30 @@ export default function History() {
         title: `Removing "${item.search_term}" from history`,
       });
 
-      await fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
-        },
-      });
+      const response = await fetch(
+        `${instanceUrl}/api/now/table/ts_query/${item.sys_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
+          },
+        }
+      );
 
-      await mutate();
+      if (response.ok) {
+        await mutate();
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Term "${item.search_term}" removed from history`,
-      });
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Term "${item.search_term}" removed from history`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed removing term from history",
+          message: response.statusText,
+        });
+      }
     } catch (error: any) {
       console.error(error);
       await showToast({
@@ -181,6 +205,7 @@ export default function History() {
                     onPop={mutate}
                   />
                   <Action.Push
+                    icon={Icon.Gear}
                     title="Manage instances"
                     target={<Instances />}
                     onPop={mutateInstances}
@@ -198,6 +223,7 @@ export default function History() {
                 <ActionPanel>
                   <Action title="Refresh" onAction={mutate} />
                   <Action.Push
+                    icon={Icon.Gear}
                     title="Manage instances"
                     target={<Instances />}
                     onPop={mutateInstances}
@@ -248,7 +274,7 @@ export default function History() {
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
                       <Action.Push
-                        icon={Icon.ArrowClockwise}
+                        icon={Icon.Gear}
                         title="Manage instances"
                         target={<Instances />}
                         onPop={mutateInstances}
@@ -268,6 +294,17 @@ export default function History() {
             <List.EmptyView
               title="No recent searches found"
               description="Type something to get started"
+              actions={
+                <ActionPanel>
+                  <Action title="Refresh" onAction={mutate} />
+                  <Action.Push
+                    icon={Icon.Gear}
+                    title="Manage instances"
+                    target={<Instances />}
+                    onPop={mutateInstances}
+                  />
+                </ActionPanel>
+              }
             />
           )}
         </>
