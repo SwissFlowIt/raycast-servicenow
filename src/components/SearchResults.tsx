@@ -105,7 +105,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
           }
         />
       ) : (
-        filteredResults.map((result) => {
+        filteredResults.map((result, index) => {
           const records = result.records;
           const { icon: iconName, color: colorName } = getTableIconAndColor(
             result.name
@@ -116,7 +116,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
           };
           return (
             <List.Section
-              key={result.label}
+              key={result.name + "_" + index}
               title={`${result.label_plural} (${result.record_count})`}
             >
               {records.map((record: any) => (

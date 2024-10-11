@@ -4,6 +4,7 @@ import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import { Instance } from "../hooks/useInstances";
 import { useCachedState } from "@raycast/utils";
+import Instances from "../instances";
 
 export default function SearchResultListItem({
   result,
@@ -80,7 +81,7 @@ export default function SearchResultListItem({
   return (
     <List.Item
       key={result.sys_id}
-      title={result.metadata.title}
+      title={result.metadata.title || ""}
       subtitle={result.data.number?.display}
       icon={icon}
       keywords={keywords}
@@ -98,6 +99,12 @@ export default function SearchResultListItem({
             title="Refresh"
             onAction={mutateSearchResults}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action.Push
+            icon={Icon.Gear}
+            title="Manage instances"
+            target={<Instances />}
+            onPop={mutateSearchResults}
           />
         </ActionPanel>
       }

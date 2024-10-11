@@ -2,6 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
+import { uniqBy } from "lodash";
 
 export default function TableDropdown(props: {
   tables: any[] | undefined;
@@ -27,7 +28,7 @@ export default function TableDropdown(props: {
     >
       <List.Dropdown.Item key="all" title="All" value="all" icon={Icon.Globe} />
       <List.Dropdown.Section title="Tables">
-        {tables.map((table) => {
+        {uniqBy(tables, "name").map((table) => {
           const { icon, color } = getTableIconAndColor(table.name);
 
           return (
