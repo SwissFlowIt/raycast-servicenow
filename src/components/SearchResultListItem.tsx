@@ -3,23 +3,24 @@ import { find, keys } from "lodash";
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import { Instance } from "../hooks/useInstances";
+import { useCachedState } from "@raycast/utils";
 
 export default function SearchResultListItem({
-  instance,
   result,
   icon,
   label,
   fields,
   mutateSearchResults,
 }: {
-  instance: Instance;
   result: any;
   icon: string;
   label: string;
   fields: any;
   mutateSearchResults: () => Promise<void>;
 }) {
-  const instanceUrl = `https://${instance.name}.service-now.com`;
+  const [instance] = useCachedState<Instance>("instance");
+
+  const instanceUrl = `https://${instance?.name}.service-now.com`;
 
   if (result.metadata.thumbnailURL)
     icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
@@ -85,17 +86,11 @@ export default function SearchResultListItem({
       keywords={keywords}
       actions={
         <ActionPanel>
-          <ResultActions instance={instance} result={result}>
+          <ResultActions result={result}>
             <Action.Push
               title="Show Details"
               icon={Icon.Sidebar}
-              target={
-                <ResultDetail
-                  instance={instance}
-                  result={result}
-                  fields={fields}
-                />
-              }
+              target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
           <Action

@@ -10,7 +10,7 @@ export type Instance = {
 };
 
 export default function useInstances() {
-  const { value, setValue, mutate } = useLocalStorage<Instance[]>(
+  const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>(
     "saved-instances",
     []
   );
@@ -27,5 +27,5 @@ export default function useInstances() {
     setValue(value.filter((i) => i.id !== instanceId));
   }
 
-  return { instances: value.sort((a, b) => (a.alias?a.alias:a.name).localeCompare(b.alias?b.alias:b.name)), addInstance, editInstance, deleteInstance, mutate };
+  return { instances: value.sort((a, b) => (a.alias?a.alias:a.name).localeCompare(b.alias?b.alias:b.name)), addInstance, editInstance, deleteInstance, mutate, isLoading };
 }

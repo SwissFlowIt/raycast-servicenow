@@ -2,17 +2,18 @@ import { ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { format } from "date-fns";
 import ResultActions from "./ResultActions";
 import { Instance } from "../hooks/useInstances";
+import { useCachedState } from "@raycast/utils";
 
 export default function ResultDetail({
-  instance,
   result,
   fields,
 }: {
-  instance: Instance;
   result: any;
   fields: any;
 }) {
-  const instanceUrl = `https://${instance.name}.service-now.com`;
+  const [instance] = useCachedState<Instance>("instance");
+
+  const instanceUrl = `https://${instance?.name}.service-now.com`;
 
   const keysToCheck = [
     { key: "category", color: Color.Green },
@@ -28,7 +29,7 @@ export default function ResultDetail({
 
   return (
     <Detail
-      navigationTitle={`Text search > ${instance.alias ? instance.alias : instance.name} > ${result.metadata.title}`}
+      navigationTitle={`Text search > ${instance?.alias ? instance?.alias : instance?.name} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
@@ -130,7 +131,7 @@ export default function ResultDetail({
       }
       actions={
         <ActionPanel>
-          <ResultActions instance={instance} result={result} />
+          <ResultActions result={result} />
         </ActionPanel>
       }
     />

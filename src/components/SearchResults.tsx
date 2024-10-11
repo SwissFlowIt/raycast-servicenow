@@ -15,25 +15,20 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import SearchResultListItem from "./SearchResultListItem";
 import { Instance } from "../hooks/useInstances";
 
-export default function ({
-  instance,
-  searchTerm,
-}: {
-  instance: Instance;
-  searchTerm: string;
-}): JSX.Element {
+export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
+  const [instance] = useCachedState<Instance>("instance");
 
-  const instanceUrl = `https://${instance.name}.service-now.com`;
+  const instanceUrl = `https://${instance?.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(instance.username + ":" + instance.password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
       },
 
       onError: (error) => {
@@ -75,18 +70,18 @@ export default function ({
   useEffect(() => {
     if (isLoading)
       setNavigationTitle(
-        `Text search > ${instance.alias ? instance.alias : instance.name} > Loading results...`
+        `Text search > ${instance?.alias ? instance?.alias : instance?.name} > Loading results...`
       );
     else if (errorFetching) setNavigationTitle(`Text search`);
     else {
       const count = sumBy(data, (r) => r.record_count);
       if (count == 0)
         setNavigationTitle(
-          `Text search > ${instance.alias ? instance.alias : instance.name} > No results found for "${searchTerm}"`
+          `Text search > ${instance?.alias ? instance?.alias : instance?.name} > No results found for "${searchTerm}"`
         );
       else
         setNavigationTitle(
-          `Text search > ${instance.alias ? instance.alias : instance.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+          `Text search > ${instance?.alias ? instance?.alias : instance?.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
         );
     }
   }, [data, searchTerm, isLoading]);
@@ -126,7 +121,6 @@ export default function ({
             >
               {records.map((record: any) => (
                 <SearchResultListItem
-                  instance={instance}
                   key={record.sys_id}
                   result={record}
                   icon={icon}
@@ -153,6 +147,12 @@ export default function ({
                         content={`${instanceUrl}${result.all_results_url}`}
                       />
                     </List.Dropdown.Section>
+                    <Action
+                      icon={Icon.ArrowClockwise}
+                      title="Refresh"
+                      onAction={mutate}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
                   </ActionPanel>
                 }
               />

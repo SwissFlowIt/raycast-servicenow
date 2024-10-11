@@ -18,15 +18,17 @@ import InstanceForm from "./components/InstanceForm";
 import Instances from "./instances";
 
 export default function History() {
-  const { instances, addInstance, mutate: mutateInstances } = useInstances();
+  const {
+    instances,
+    addInstance,
+    mutate: mutateInstances,
+    isLoading: isLoadingInstances,
+  } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<any[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [instance, setInstance] = useCachedState<Instance | null>(
-    "instance",
-    null
-  );
+  const [instance, setInstance] = useCachedState<Instance>("instance");
 
   const instanceUrl = `https://${instance?.name}.service-now.com`;
 
@@ -165,11 +167,11 @@ export default function History() {
       onSearchTextChange={setSearchTerm}
       searchBarAccessory={
         <List.Dropdown
-          isLoading={isLoading}
+          isLoading={isLoadingInstances}
           defaultValue={instance?.id}
           tooltip="Select the instance you want to search in"
           onChange={(newValue) => {
-            onInstanceChange(newValue);
+            !isLoadingInstances && onInstanceChange(newValue);
           }}
         >
           <List.Dropdown.Section title="Instances">
@@ -194,12 +196,7 @@ export default function History() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={
-                      <SearchResults
-                        instance={instance}
-                        searchTerm={searchTerm}
-                      />
-                    }
+                    target={<SearchResults searchTerm={searchTerm} />}
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={mutate}
@@ -243,10 +240,7 @@ export default function History() {
                       <Action.Push
                         target={
                           instance && (
-                            <SearchResults
-                              instance={instance}
-                              searchTerm={item.search_term}
-                            />
+                            <SearchResults searchTerm={item.search_term} />
                           )
                         }
                         title={`Search for "${item.search_term}"`}
