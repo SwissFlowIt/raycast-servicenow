@@ -138,7 +138,10 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                 />
               ))}
               <List.Item
-                icon={Icon.MagnifyingGlass}
+                icon={{
+                  source: Icon.MagnifyingGlass,
+                  tintColor: Color.SecondaryText,
+                }}
                 key={`${result.label}-all`}
                 title={`View all ${result.label} matches`}
                 actions={

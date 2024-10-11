@@ -205,7 +205,10 @@ export default function History() {
           {searchTerm && selectedInstance && (
             <List.Item
               title={`Search for "${searchTerm}"`}
-              icon={Icon.MagnifyingGlass}
+              icon={{
+                source: Icon.MagnifyingGlass,
+                tintColor: Color.SecondaryText,
+              }}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -239,7 +242,10 @@ export default function History() {
                 <List.Item
                   key={item.sys_id}
                   title={item.search_term}
-                  icon={Icon.Stopwatch}
+                  icon={{
+                    source: Icon.Stopwatch,
+                    tintColor: Color.SecondaryText,
+                  }}
                   actions={
                     <ActionPanel>
                       <Action.Push
