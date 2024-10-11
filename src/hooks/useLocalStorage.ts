@@ -22,7 +22,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): UseLocalStorag
         return JSON.parse(item);
       }
     },
-    [key],
+    [key]
   );
 
   async function setValue(value: T) {

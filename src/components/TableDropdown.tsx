@@ -20,7 +20,7 @@ export default function TableDropdown(props: {
   return (
     <List.Dropdown
       tooltip="Select Table"
-      defaultValue={table}
+      value={table}
       isLoading={isLoading}
       onChange={(newValue) => {
         !isLoading && setTable(newValue);

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -7,21 +8,21 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { filter, flattenDeep, map, sumBy } from "lodash";
+
 import TableDropdown from "./TableDropdown";
-import { getTableIconAndColor } from "../utils/getTableIconAndColor";
+import Actions from "./Actions";
 import SearchResultListItem from "./SearchResultListItem";
-import useInstances, { Instance } from "../hooks/useInstances";
-import Instances from "../instances";
+
+import { getTableIconAndColor } from "../utils/getTableIconAndColor";
+import { Instance } from "../hooks/useInstances";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const { instances } = useInstances();
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
 
@@ -103,38 +104,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
           description="Press ⏎ to refresh or try later again"
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Refresh"
-                onAction={mutate}
-              />
-              <Action.Push
-                icon={Icon.Gear}
-                title="Manage instances"
-                target={<Instances />}
-              />
-              <ActionPanel.Submenu
-                title={"Select instance"}
-                icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd"], key: "i" }}
-              >
-                {instances?.map((instance) => (
-                  <Action
-                    key={instance.id}
-                    icon={{
-                      source:
-                        selectedInstance?.id == instance.id
-                          ? Icon.CheckCircle
-                          : Icon.Circle,
-                      tintColor: instance.color,
-                    }}
-                    title={instance.alias ? instance.alias : instance.name}
-                    onAction={() => {
-                      setSelectedInstance(instance);
-                    }}
-                  />
-                ))}
-              </ActionPanel.Submenu>
+              <Actions mutate={mutate} />
             </ActionPanel>
           }
         />
@@ -181,41 +151,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         content={`${instanceUrl}${result.all_results_url}`}
                       />
                     </List.Dropdown.Section>
-                    <Action
-                      icon={Icon.ArrowClockwise}
-                      title="Refresh"
-                      onAction={mutate}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                    <Action.Push
-                      icon={Icon.Gear}
-                      title="Manage instances"
-                      target={<Instances />}
-                    />
-                    <ActionPanel.Submenu
-                      title={"Select instance"}
-                      icon={Icon.Check}
-                      shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    >
-                      {instances?.map((instance) => (
-                        <Action
-                          key={instance.id}
-                          icon={{
-                            source:
-                              selectedInstance?.id == instance.id
-                                ? Icon.CheckCircle
-                                : Icon.Circle,
-                            tintColor: instance.color,
-                          }}
-                          title={
-                            instance.alias ? instance.alias : instance.name
-                          }
-                          onAction={() => {
-                            setSelectedInstance(instance);
-                          }}
-                        />
-                      ))}
-                    </ActionPanel.Submenu>
+                    <Actions mutate={mutate} />
                   </ActionPanel>
                 }
               />
@@ -227,38 +163,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
           title="No Results"
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Refresh"
-                onAction={mutate}
-              />
-              <Action.Push
-                icon={Icon.Gear}
-                title="Manage instances"
-                target={<Instances />}
-              />
-              <ActionPanel.Submenu
-                title={"Select instance"}
-                icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd"], key: "i" }}
-              >
-                {instances?.map((instance) => (
-                  <Action
-                    key={instance.id}
-                    icon={{
-                      source:
-                        selectedInstance?.id == instance.id
-                          ? Icon.CheckCircle
-                          : Icon.Circle,
-                      tintColor: instance.color,
-                    }}
-                    title={instance.alias ? instance.alias : instance.name}
-                    onAction={() => {
-                      setSelectedInstance(instance);
-                    }}
-                  />
-                ))}
-              </ActionPanel.Submenu>
+              <Actions mutate={mutate} />
             </ActionPanel>
           }
         />

@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { find, keys, set } from "lodash";
+import { keys } from "lodash";
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
-import useInstances, { Instance } from "../hooks/useInstances";
+import { Instance } from "../hooks/useInstances";
 import { useCachedState } from "@raycast/utils";
-import Instances from "../instances";
+import Actions from "./Actions";
 
 export default function SearchResultListItem({
   result,
@@ -19,9 +19,7 @@ export default function SearchResultListItem({
   fields: any;
   mutateSearchResults: () => Promise<void>;
 }) {
-  const { instances } = useInstances();
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance] = useCachedState<Instance>("instance");
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -96,39 +94,7 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
-          <Action
-            icon={Icon.ArrowClockwise}
-            title="Refresh"
-            onAction={mutateSearchResults}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action.Push
-            icon={Icon.Gear}
-            title="Manage instances"
-            target={<Instances />}
-          />
-          <ActionPanel.Submenu
-            title={"Select instance"}
-            icon={Icon.Check}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-          >
-            {instances?.map((instance) => (
-              <Action
-                key={instance.id}
-                icon={{
-                  source:
-                    selectedInstance?.id == instance.id
-                      ? Icon.CheckCircle
-                      : Icon.Circle,
-                  tintColor: instance.color,
-                }}
-                title={instance.alias ? instance.alias : instance.name}
-                onAction={() => {
-                  setSelectedInstance(instance);
-                }}
-              />
-            ))}
-          </ActionPanel.Submenu>
+          <Actions mutate={mutateSearchResults} />
         </ActionPanel>
       }
       accessories={accessories}

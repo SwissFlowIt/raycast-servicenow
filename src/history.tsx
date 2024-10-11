@@ -8,14 +8,15 @@ import {
   Toast,
   Color,
 } from "@raycast/api";
-import fetch from "node-fetch";
 import { useCachedState, useFetch } from "@raycast/utils";
+import fetch from "node-fetch";
 import { filter } from "lodash";
 
 import SearchResults from "./components/SearchResults";
-import useInstances, { Instance } from "./hooks/useInstances";
 import InstanceForm from "./components/InstanceForm";
-import Instances from "./instances";
+import Actions from "./components/Actions";
+
+import useInstances, { Instance } from "./hooks/useInstances";
 
 export default function History() {
   const {
@@ -169,10 +170,10 @@ export default function History() {
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
-          defaultValue={selectedInstance?.id}
+          value={selectedInstance?.id}
           tooltip="Select the instance you want to search in"
           onChange={(newValue) => {
-            !isLoadingInstances && onInstanceChange(newValue);
+            !isLoading && !isLoadingInstances && onInstanceChange(newValue);
           }}
         >
           <List.Dropdown.Section title="Instances">
@@ -211,34 +212,7 @@ export default function History() {
                       mutateInstances();
                     }}
                   />
-                  <Action.Push
-                    icon={Icon.Gear}
-                    title="Manage instances"
-                    target={<Instances />}
-                    onPop={mutateInstances}
-                  />
-                  <ActionPanel.Submenu
-                    title={"Select instance"}
-                    icon={Icon.Check}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  >
-                    {instances?.map((instance) => (
-                      <Action
-                        key={instance.id}
-                        icon={{
-                          source:
-                            selectedInstance?.id == instance.id
-                              ? Icon.CheckCircle
-                              : Icon.Circle,
-                          tintColor: instance.color,
-                        }}
-                        title={instance.alias ? instance.alias : instance.name}
-                        onAction={() => {
-                          setSelectedInstance(instance);
-                        }}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
+                  <Actions mutate={mutate} />
                 </ActionPanel>
               }
             />
@@ -250,39 +224,7 @@ export default function History() {
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.ArrowClockwise}
-                    title="Refresh"
-                    onAction={mutate}
-                  />
-                  <Action.Push
-                    icon={Icon.Gear}
-                    title="Manage instances"
-                    target={<Instances />}
-                    onPop={mutateInstances}
-                  />
-                  <ActionPanel.Submenu
-                    title={"Select instance"}
-                    icon={Icon.Check}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  >
-                    {instances?.map((instance) => (
-                      <Action
-                        key={instance.id}
-                        icon={{
-                          source:
-                            selectedInstance?.id == instance.id
-                              ? Icon.CheckCircle
-                              : Icon.Circle,
-                          tintColor: instance.color,
-                        }}
-                        title={instance.alias ? instance.alias : instance.name}
-                        onAction={() => {
-                          setSelectedInstance(instance);
-                        }}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
+                  <Actions mutate={mutate} />
                 </ActionPanel>
               }
             />
@@ -305,7 +247,8 @@ export default function History() {
                         title={`Search for "${item.search_term}"`}
                         icon={Icon.MagnifyingGlass}
                       />
-                      <List.Dropdown.Section>
+                      <Actions mutate={mutate} />
+                      <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
                           icon={Icon.XMarkCircle}
@@ -320,42 +263,6 @@ export default function History() {
                           onAction={removeAllItemsFromHistory}
                         />
                       </List.Dropdown.Section>
-                      <Action
-                        icon={Icon.ArrowClockwise}
-                        title="Refresh"
-                        onAction={mutate}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      />
-                      <Action.Push
-                        icon={Icon.Gear}
-                        title="Manage instances"
-                        target={<Instances />}
-                        onPop={mutateInstances}
-                      />
-                      <ActionPanel.Submenu
-                        title={"Select instance"}
-                        icon={Icon.Check}
-                        shortcut={{ modifiers: ["cmd"], key: "i" }}
-                      >
-                        {instances?.map((instance) => (
-                          <Action
-                            key={instance.id}
-                            icon={{
-                              source:
-                                selectedInstance?.id == instance.id
-                                  ? Icon.CheckCircle
-                                  : Icon.Circle,
-                              tintColor: instance.color,
-                            }}
-                            title={
-                              instance.alias ? instance.alias : instance.name
-                            }
-                            onAction={() => {
-                              setSelectedInstance(instance);
-                            }}
-                          />
-                        ))}
-                      </ActionPanel.Submenu>
                     </ActionPanel>
                   }
                   accessories={[
@@ -373,39 +280,7 @@ export default function History() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.ArrowClockwise}
-                    title="Refresh"
-                    onAction={mutate}
-                  />
-                  <Action.Push
-                    icon={Icon.Gear}
-                    title="Manage instances"
-                    target={<Instances />}
-                    onPop={mutateInstances}
-                  />
-                  <ActionPanel.Submenu
-                    title={"Select instance"}
-                    icon={Icon.Check}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  >
-                    {instances?.map((instance) => (
-                      <Action
-                        key={instance.id}
-                        icon={{
-                          source:
-                            selectedInstance?.id == instance.id
-                              ? Icon.CheckCircle
-                              : Icon.Circle,
-                          tintColor: instance.color,
-                        }}
-                        title={instance.alias ? instance.alias : instance.name}
-                        onAction={() => {
-                          setSelectedInstance(instance);
-                        }}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
+                  <Actions mutate={mutate} />
                 </ActionPanel>
               }
             />
