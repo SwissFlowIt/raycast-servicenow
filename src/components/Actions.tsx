@@ -24,7 +24,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
         <Action.Push
           icon={Icon.Gear}
           title="Manage Instances"
-          target={<Instances />}
+          target={<Instances mutate={mutateInstances} />}
           onPop={mutateInstances}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />

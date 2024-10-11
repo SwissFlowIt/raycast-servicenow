@@ -236,7 +236,7 @@ export default function History() {
           {errorFetching ? (
             <List.EmptyView
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              title="Could not fetch history"
+              title="Could Not Fetch History"
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
@@ -298,7 +298,7 @@ export default function History() {
             </List.Section>
           ) : (
             <List.EmptyView
-              title="No recent searches found"
+              title="No Recent Searches Found"
               description="Type something to get started"
               actions={
                 <ActionPanel>
@@ -310,12 +310,12 @@ export default function History() {
         </>
       ) : (
         <List.EmptyView
-          title="No instances found"
+          title="No Instances Found"
           description="Add an instance to get started"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add instance"
+                title="Add Instance"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>
