@@ -5,34 +5,46 @@ import {
   Icon,
   List,
   showToast,
-  getPreferenceValues,
   Toast,
   Color,
 } from "@raycast/api";
 import fetch from "node-fetch";
-import { useFetch } from "@raycast/utils";
-import SearchResults from "./components/SearchResults";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { filter } from "lodash";
 
+import SearchResults from "./components/SearchResults";
+import useInstances, { Instance } from "./hooks/useInstances";
+import InstanceForm from "./components/InstanceForm";
+import Instances from "./instances";
+
 export default function History() {
-  const { instance, username, password } = getPreferenceValues<Preferences>();
-  const instanceUrl = `https://${instance}.service-now.com`;
+  const { instances, addInstance, mutate: mutateInstances } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<any[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
+  const [instance, setInstance] = useCachedState<Instance | null>(
+    "instance",
+    null
+  );
+
+  const instanceUrl = `https://${instance?.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=user.name=${username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=user.name=${instance?.username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
       },
-      execute: !!username,
+      execute: !!instance,
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history");
+        showToast(
+          Toast.Style.Failure,
+          "Could not fetch history",
+          error.message
+        );
       },
 
       mapResult(response: any) {
@@ -55,7 +67,7 @@ export default function History() {
         fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
           method: "DELETE",
           headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
           },
         })
       );
@@ -66,10 +78,14 @@ export default function History() {
         style: Toast.Style.Success,
         title: `All terms removed from history`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       await mutate(Promise.resolve([]));
-      showToast(Toast.Style.Failure, "Could not remove all items from history");
+      showToast(
+        Toast.Style.Failure,
+        "Could not remove all items from history",
+        error.message
+      );
     }
   }
 
@@ -83,7 +99,7 @@ export default function History() {
       await fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+          Authorization: `Basic ${Buffer.from(instance?.username + ":" + instance?.password).toString("base64")}`,
         },
       });
 
@@ -93,11 +109,12 @@ export default function History() {
         style: Toast.Style.Success,
         title: `Term "${item.search_term}" removed from history`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed removing term from history",
+        message: error.message,
       });
     }
   }
@@ -109,95 +126,163 @@ export default function History() {
     } else setFilteredTerms(data);
   }, [data, searchTerm]);
 
+  const onInstanceChange = (newValue: string) => {
+    const aux = instances.find((instance) => instance.id === newValue);
+    if (aux) {
+      setInstance(aux);
+    }
+  };
+
   return (
     <List
-      navigationTitle={`Text search${isLoading ? " - Loading history..." : ""}`}
+      navigationTitle={`Text search${instance ? " > " + (instance.alias ? instance.alias : instance.name) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
-    >
-      {searchTerm && (
-        <List.Item
-          title={`Search for "${searchTerm}"`}
-          icon={Icon.MagnifyingGlass}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                target={
-                  <SearchResults
-                    searchTerm={searchTerm}
-                    mutateHistory={mutate}
-                    setSearchTerm={setSearchTerm}
-                  />
-                }
-                title={`Search for "${searchTerm}"`}
-                icon={Icon.MagnifyingGlass}
+      searchBarAccessory={
+        <List.Dropdown
+          isLoading={isLoading}
+          defaultValue={instance?.id}
+          tooltip="Select the instance you want to search in"
+          onChange={(newValue) => {
+            onInstanceChange(newValue);
+          }}
+        >
+          <List.Dropdown.Section title="Instances">
+            {instances.map((instance: Instance) => (
+              <List.Dropdown.Item
+                key={instance.id}
+                title={instance.alias ? instance.alias : instance.name}
+                value={instance.id}
+                icon={{ source: Icon.CircleFilled, tintColor: instance.color }}
               />
-            </ActionPanel>
-          }
-        />
-      )}
-      {errorFetching ? (
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Could not fetch history"
-          description="Press ⏎ to refresh or try again later"
-          actions={
-            <ActionPanel>
-              <Action title="Refresh" onAction={mutate} />
-            </ActionPanel>
-          }
-        />
-      ) : data?.length && data.length > 0 ? (
-        <List.Section title="History">
-          {filteredTerms?.map((item: any) => (
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      {instances.length > 0 ? (
+        <>
+          {searchTerm && instance && (
             <List.Item
-              key={item.sys_id}
-              title={item.search_term}
-              icon={Icon.Stopwatch}
+              title={`Search for "${searchTerm}"`}
+              icon={Icon.MagnifyingGlass}
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={<SearchResults searchTerm={item.search_term} />}
-                    title={`Search for "${item.search_term}"`}
+                    target={
+                      <SearchResults
+                        instance={instance}
+                        searchTerm={searchTerm}
+                        mutateHistory={mutate}
+                      />
+                    }
+                    title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                   />
-                  <List.Dropdown.Section>
-                    <Action
-                      title="Remove from History"
-                      icon={Icon.XMarkCircle}
-                      style={Action.Style.Destructive}
-                      onAction={() => removeItemFromHistory(item)}
-                    />
-                    <Action
-                      title="Clear All Items from History"
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                      icon={Icon.XMarkCircleFilled}
-                      style={Action.Style.Destructive}
-                      onAction={removeAllItemsFromHistory}
-                    />
-                  </List.Dropdown.Section>
-                  <Action
-                    icon={Icon.ArrowClockwise}
-                    title="Refresh"
-                    onAction={mutate}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  <Action.Push
+                    title="Manage instances"
+                    target={<Instances />}
+                    onPop={mutateInstances}
                   />
                 </ActionPanel>
               }
-              accessories={[
-                {
-                  icon: Icon.ArrowRightCircle,
-                  tooltip: "Search for this term",
-                },
-              ]}
             />
-          ))}
-        </List.Section>
+          )}
+          {errorFetching ? (
+            <List.EmptyView
+              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              title="Could not fetch history"
+              description="Press ⏎ to refresh or try later again"
+              actions={
+                <ActionPanel>
+                  <Action title="Refresh" onAction={mutate} />
+                  <Action.Push
+                    title="Manage instances"
+                    target={<Instances />}
+                    onPop={mutateInstances}
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : data?.length && data.length > 0 ? (
+            <List.Section title="History">
+              {filteredTerms?.map((item: any) => (
+                <List.Item
+                  key={item.sys_id}
+                  title={item.search_term}
+                  icon={Icon.Stopwatch}
+                  actions={
+                    <ActionPanel>
+                      <Action.Push
+                        target={
+                          instance && (
+                            <SearchResults
+                              instance={instance}
+                              searchTerm={item.search_term}
+                            />
+                          )
+                        }
+                        title={`Search for "${item.search_term}"`}
+                        icon={Icon.MagnifyingGlass}
+                      />
+                      <List.Dropdown.Section>
+                        <Action
+                          title="Remove from History"
+                          icon={Icon.XMarkCircle}
+                          style={Action.Style.Destructive}
+                          onAction={() => removeItemFromHistory(item)}
+                        />
+                        <Action
+                          title="Clear All Items from History"
+                          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                          icon={Icon.XMarkCircleFilled}
+                          style={Action.Style.Destructive}
+                          onAction={removeAllItemsFromHistory}
+                        />
+                      </List.Dropdown.Section>
+                      <Action
+                        icon={Icon.ArrowClockwise}
+                        title="Refresh"
+                        onAction={mutate}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                      <Action.Push
+                        icon={Icon.ArrowClockwise}
+                        title="Manage instances"
+                        target={<Instances />}
+                        onPop={mutateInstances}
+                      />
+                    </ActionPanel>
+                  }
+                  accessories={[
+                    {
+                      icon: Icon.ArrowRightCircle,
+                      tooltip: "Search for this term",
+                    },
+                  ]}
+                />
+              ))}
+            </List.Section>
+          ) : (
+            <List.EmptyView
+              title="No recent searches found"
+              description="Type something to get started"
+            />
+          )}
+        </>
       ) : (
         <List.EmptyView
-          title="No recent searches found"
-          description="Type something to get started"
+          title="No instances found"
+          description="Add an instance to get started"
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add instance"
+                target={<InstanceForm onSubmit={addInstance} />}
+              />
+            </ActionPanel>
+          }
         />
       )}
     </List>

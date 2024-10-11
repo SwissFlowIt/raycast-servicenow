@@ -1,30 +1,25 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { find, keys } from "lodash";
 import ResultDetail from "./ResultDetail";
+import ResultActions from "./ResultActions";
+import { Instance } from "../hooks/useInstances";
 
 export default function SearchResultListItem({
+  instance,
   result,
   icon,
   label,
   fields,
   mutateSearchResults,
 }: {
+  instance: Instance;
   result: any;
   icon: string;
   label: string;
   fields: any;
   mutateSearchResults: () => Promise<void>;
 }) {
-  const { instance } = getPreferenceValues<Preferences>();
-
-  const instanceUrl = `https://${instance}.service-now.com`;
+  const instanceUrl = `https://${instance.name}.service-now.com`;
 
   if (result.metadata.thumbnailURL)
     icon = `${instanceUrl}/${result.metadata.thumbnailURL}`;
@@ -90,40 +85,19 @@ export default function SearchResultListItem({
       keywords={keywords}
       actions={
         <ActionPanel>
-          <List.Dropdown.Section title={result.metadata.title}>
+          <ResultActions instance={instance} result={result}>
             <Action.Push
               title="Show Details"
               icon={Icon.Sidebar}
               target={
                 <ResultDetail
+                  instance={instance}
                   result={result}
                   fields={fields}
-                  accessories={accessories}
                 />
               }
             />
-            <Action.OpenInBrowser
-              title="Open in Browser"
-              url={`${instanceUrl}${result.record_url}`}
-            />
-          </List.Dropdown.Section>
-          <List.Dropdown.Section>
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={`${instanceUrl}${result.record_url}`}
-            />
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={`${instanceUrl}${result.metadata.title}`}
-            />
-            {result.data.number && (
-              <Action.CopyToClipboard
-                title="Copy Number"
-                content={result.data.number.display}
-              />
-            )}
-          </List.Dropdown.Section>
-
+          </ResultActions>
           <Action
             icon={Icon.ArrowClockwise}
             title="Refresh"

@@ -2,49 +2,50 @@ import {
   Action,
   ActionPanel,
   Color,
-  Detail,
-  getPreferenceValues,
   Icon,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useFetch } from "@raycast/utils";
-import { filter, find, flattenDeep, map, sumBy } from "lodash";
+import { useCachedState, useFetch } from "@raycast/utils";
+import { filter, flattenDeep, map, sumBy } from "lodash";
 import TableDropdown from "./TableDropdown";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import SearchResultListItem from "./SearchResultListItem";
+import { Instance } from "../hooks/useInstances";
 
 export default function ({
+  instance,
   searchTerm,
   mutateHistory,
-  setSearchTerm,
 }: {
+  instance: Instance;
   searchTerm: string;
   mutateHistory?: () => Promise<void>;
-  setSearchTerm?: (value: string) => void;
 }): JSX.Element {
-  const { instance, username, password } = getPreferenceValues<Preferences>();
-
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
-  const [table, setTable] = useState<string>("all");
+  const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
 
-  const instanceUrl = `https://${instance}.service-now.com`;
+  const instanceUrl = `https://${instance.name}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(instance.username + ":" + instance.password).toString("base64")}`,
       },
 
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch results");
+        showToast(
+          Toast.Style.Failure,
+          "Could not fetch results",
+          error.message
+        );
       },
 
       mapResult(response: any) {
@@ -59,16 +60,11 @@ export default function ({
           )
         );
         mutateHistory?.();
-        setSearchTerm?.("");
         return { data };
       },
       keepPreviousData: true,
     }
   );
-
-  const onTableTypeChange = (newValue: string) => {
-    setTable(newValue);
-  };
 
   useEffect(() => {
     if (table !== "all") {
@@ -80,17 +76,20 @@ export default function ({
   }, [table, data]);
 
   useEffect(() => {
-    if (isLoading) setNavigationTitle(`Text search - Loading results...`);
+    if (isLoading)
+      setNavigationTitle(
+        `Text search > ${instance.alias ? instance.alias : instance.name} > Loading results...`
+      );
     else if (errorFetching) setNavigationTitle(`Text search`);
     else {
       const count = sumBy(data, (r) => r.record_count);
       if (count == 0)
         setNavigationTitle(
-          `Text search - No results found for "${searchTerm}"`
+          `Text search > ${instance.alias ? instance.alias : instance.name} > No results found for "${searchTerm}"`
         );
       else
         setNavigationTitle(
-          `Text search - ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+          `Text search > ${instance.alias ? instance.alias : instance.name} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
         );
     }
   }, [data, searchTerm, isLoading]);
@@ -100,15 +99,13 @@ export default function ({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by title, description, state, category or number..."
       isLoading={isLoading}
-      searchBarAccessory={
-        <TableDropdown tables={data} onTableTypeChange={onTableTypeChange} />
-      }
+      searchBarAccessory={<TableDropdown tables={data} isLoading={isLoading} />}
     >
       {errorFetching ? (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could not fetch results"
-          description="Press ⏎ to refresh or try again later"
+          description="Press ⏎ to refresh or try later again"
           actions={
             <ActionPanel>
               <Action title="Refresh" onAction={mutate} />
@@ -132,6 +129,7 @@ export default function ({
             >
               {records.map((record: any) => (
                 <SearchResultListItem
+                  instance={instance}
                   key={record.sys_id}
                   result={record}
                   icon={icon}

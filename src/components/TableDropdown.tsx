@@ -1,18 +1,28 @@
 import { Color, Icon, List } from "@raycast/api";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
+import { useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
 
 export default function TableDropdown(props: {
   tables: any[] | undefined;
-  onTableTypeChange: (newValue: string) => void;
+  isLoading: boolean;
 }) {
-  const { tables = [], onTableTypeChange: onTableTypeChange } = props;
+  const { tables = [], isLoading } = props;
+  const [table, setTable] = useCachedState<string>("table", "all");
+
+  useEffect(() => {
+    if (!isLoading && !tables.find((t) => t.name === table)) {
+      setTable("all");
+    }
+  }, [tables, isLoading, table]);
 
   return (
     <List.Dropdown
       tooltip="Select Table"
-      storeValue={false}
+      defaultValue={table}
+      isLoading={isLoading}
       onChange={(newValue) => {
-        onTableTypeChange(newValue);
+        !isLoading && setTable(newValue);
       }}
     >
       <List.Dropdown.Item key="all" title="All" value="all" icon={Icon.Globe} />

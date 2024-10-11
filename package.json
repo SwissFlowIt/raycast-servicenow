@@ -16,29 +16,12 @@
       "title": "Text search",
       "description": "Use this command to perform a search within your ServiceNow instance. Simply enter your search query, and the extension will return relevant results in real-time, allowing you to quickly find tickets, incidents, knowledge articles, and other records",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "instance",
-      "title": "ServiceNow instance",
-      "description": "Just the instance identifier. Not the URL",
-      "type": "textfield",
-      "required": true
     },
     {
-      "name": "username",
-      "title": "User name",
-      "description": "",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "password",
-      "title": "Password",
-      "description": "",
-      "type": "password",
-      "required": true
+      "name": "instances",
+      "title": "Manage instances",
+      "description": "Configure and manage your ServiceNow instances for use in search queries",
+      "mode": "view"
     }
   ],
   "dependencies": {

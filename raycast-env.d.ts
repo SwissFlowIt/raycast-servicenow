@@ -7,14 +7,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {
-  /** ServiceNow instance - Just the instance identifier. Not the URL */
-  "instance": string,
-  /** User name -  */
-  "username": string,
-  /** Password -  */
-  "password": string
-}
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
@@ -22,11 +15,15 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `history` command */
   export type History = ExtensionPreferences & {}
+  /** Preferences accessible in the `instances` command */
+  export type Instances = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `history` command */
   export type History = {}
+  /** Arguments passed to the `instances` command */
+  export type Instances = {}
 }
 
 
