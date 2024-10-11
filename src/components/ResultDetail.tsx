@@ -27,7 +27,7 @@ export default function ResultDetail({
 
   return (
     <Detail
-      navigationTitle={`Text search > ${alias ? alias : instanceName} > ${result.metadata.title}`}
+      navigationTitle={`Search > ${alias ? alias : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>

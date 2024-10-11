@@ -17,6 +17,8 @@ declare namespace Preferences {
   export type History = ExtensionPreferences & {}
   /** Preferences accessible in the `instances` command */
   export type Instances = ExtensionPreferences & {}
+  /** Preferences accessible in the `quickly-search` command */
+  export type QuicklySearch = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -24,6 +26,11 @@ declare namespace Arguments {
   export type History = {}
   /** Arguments passed to the `instances` command */
   export type Instances = {}
+  /** Arguments passed to the `quickly-search` command */
+  export type QuicklySearch = {
+  /** Query */
+  "query": string
+}
 }
 
 

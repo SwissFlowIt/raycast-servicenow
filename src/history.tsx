@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   Color,
+  environment,
 } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
@@ -41,8 +42,10 @@ export default function History() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
+  const { commandName } = environment;
+
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
@@ -170,7 +173,7 @@ export default function History() {
 
   return (
     <List
-      navigationTitle={`Text search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
@@ -212,7 +215,12 @@ export default function History() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={<SearchResults searchTerm={searchTerm} />}
+                    target={
+                      <SearchResults
+                        searchTerm={searchTerm}
+                        command={commandName}
+                      />
+                    }
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={() => {
@@ -252,7 +260,10 @@ export default function History() {
                         onPop={mutateInstances}
                         target={
                           selectedInstance && (
-                            <SearchResults searchTerm={item.search_term} />
+                            <SearchResults
+                              searchTerm={item.search_term}
+                              command={commandName}
+                            />
                           )
                         }
                         title={`Search for "${item.search_term}"`}

@@ -23,13 +23,13 @@ export default function Actions({ mutate }: { mutate: () => void }) {
       <List.Dropdown.Section title="Instances">
         <Action.Push
           icon={Icon.Gear}
-          title="Manage instances"
+          title="Manage Instances"
           target={<Instances />}
           onPop={mutateInstances}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />
         <ActionPanel.Submenu
-          title={"Select instance"}
+          title={"Select Instance"}
           icon={Icon.Check}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
         >
