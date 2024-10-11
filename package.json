@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "servicenow",
+  "title": "ServiceNow",
+  "description": "Search and explore content from ServiceNow.",
+  "icon": "servicenow.ico",
+  "author": "ralvarez",
+  "owner": "swissflowit",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "history",
+      "title": "Text search",
+      "description": "Use this command to perform a search within your ServiceNow instance. Simply enter your search query, and the extension will return relevant results in real-time, allowing you to quickly find tickets, incidents, knowledge articles, and other records",
+      "mode": "view"
+    },
+    {
+      "name": "instances",
+      "title": "Manage instances",
+      "description": "Configure and manage your ServiceNow instances for use in search queries",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
