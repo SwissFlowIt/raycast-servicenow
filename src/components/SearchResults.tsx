@@ -147,8 +147,9 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                       title={`View all ${result.label} matches`}
                     >
                       <Action.OpenInBrowser
-                        title="Open in Browser"
+                        title="Open in ServiceNow"
                         url={`${instanceUrl}${result.all_results_url}`}
+                        icon={{ source: "servicenow.ico" }}
                       />
                       <Action.CopyToClipboard
                         title="Copy URL"

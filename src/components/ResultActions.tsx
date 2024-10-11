@@ -17,11 +17,12 @@ export default function ResultActions({
   return (
     <>
       <ActionPanel.Section title={result.metadata.title}>
-        {children}
         <Action.OpenInBrowser
-          title="Open in Browser"
+          title="Open in ServiceNow"
           url={`${instanceUrl}${result.record_url}`}
+          icon={{ source: "servicenow.ico" }}
         />
+        {children}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
