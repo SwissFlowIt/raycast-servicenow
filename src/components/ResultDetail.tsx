@@ -40,10 +40,14 @@ export default function ResultDetail({
                     <Detail.Metadata.Label
                       key={field.name}
                       title={field.label}
-                      text={format(
-                        new Date(result.data[field.name].display),
-                        "dd MMM yyyy"
-                      )}
+                      text={
+                        result.data[field.name]
+                          ? format(
+                              new Date(result.data[field.name]?.display),
+                              "dd MMM yyyy"
+                            )
+                          : ""
+                      }
                     />
                   );
                 case "glide_date_time":
@@ -51,10 +55,14 @@ export default function ResultDetail({
                     <Detail.Metadata.Label
                       key={field.name}
                       title={field.label}
-                      text={format(
-                        new Date(result.data[field.name].display),
-                        "dd MMM yyyy HH:mm"
-                      )}
+                      text={
+                        result.data[field.name]
+                          ? format(
+                              new Date(result.data[field.name]?.display),
+                              "dd MMM yyyy HH:mm"
+                            )
+                          : ""
+                      }
                     />
                   );
                 case "reference":
@@ -63,8 +71,8 @@ export default function ResultDetail({
                       <Detail.Metadata.Link
                         key={field.name}
                         title={field.label}
-                        text={result.data[field.name].display}
-                        target={`${instanceUrl}/${field.reference}.do?sys_id=${result.data[field.name].value}`}
+                        text={result.data[field.name]?.display}
+                        target={`${instanceUrl}/${field.reference}.do?sys_id=${result.data[field.name]?.value}`}
                       />
                     );
                 default:
@@ -75,7 +83,7 @@ export default function ResultDetail({
                         title="Category"
                       >
                         <Detail.Metadata.TagList.Item
-                          text={result.data[field.name].display}
+                          text={result.data[field.name]?.display}
                           color={Color.Green}
                         />
                       </Detail.Metadata.TagList>
@@ -84,7 +92,7 @@ export default function ResultDetail({
                     return (
                       <Detail.Metadata.TagList key={field.name} title="State">
                         <Detail.Metadata.TagList.Item
-                          text={result.data[field.name].display}
+                          text={result.data[field.name]?.display}
                           color={Color.Blue}
                         />
                       </Detail.Metadata.TagList>
@@ -95,17 +103,17 @@ export default function ResultDetail({
                         key={field.name}
                         title={field.label}
                         icon={
-                          result.data[field.name].value < 3
+                          result.data[field.name]?.value < 3
                             ? {
                                 source: Icon.Bell,
                                 tintColor:
-                                  result.data[field.name].value == 1
+                                  result.data[field.name]?.value == 1
                                     ? Color.Red
                                     : Color.Orange,
                               }
                             : null
                         }
-                        text={result.data[field.name].display}
+                        text={result.data[field.name]?.display}
                       />
                     );
                   else
@@ -113,7 +121,7 @@ export default function ResultDetail({
                       <Detail.Metadata.Label
                         key={field.name}
                         title={field.label}
-                        text={result.data[field.name].display}
+                        text={result.data[field.name]?.display}
                       />
                     );
               }
