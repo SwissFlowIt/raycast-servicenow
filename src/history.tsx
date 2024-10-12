@@ -7,7 +7,6 @@ import {
   showToast,
   Toast,
   Color,
-  environment,
 } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
@@ -41,8 +40,6 @@ export default function History() {
   } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
-
-  const { commandName } = environment;
 
   const { isLoading, data, mutate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
@@ -186,7 +183,7 @@ export default function History() {
             !isLoading && !isLoadingInstances && onInstanceChange(newValue);
           }}
         >
-          <List.Dropdown.Section title="Instances">
+          <List.Dropdown.Section title="Instance Profiles">
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
@@ -203,9 +200,9 @@ export default function History() {
         </List.Dropdown>
       }
     >
-      {instances.length > 0 ? (
+      {selectedInstance ? (
         <>
-          {searchTerm && selectedInstance && (
+          {searchTerm && (
             <List.Item
               title={`Search for "${searchTerm}"`}
               icon={{
@@ -215,12 +212,7 @@ export default function History() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    target={
-                      <SearchResults
-                        searchTerm={searchTerm}
-                        command={commandName}
-                      />
-                    }
+                    target={<SearchResults searchTerm={searchTerm} />}
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={() => {
@@ -233,6 +225,7 @@ export default function History() {
               }
             />
           )}
+
           {errorFetching ? (
             <List.EmptyView
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
@@ -257,13 +250,13 @@ export default function History() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        onPop={mutateInstances}
+                        onPop={() => {
+                          mutate();
+                          mutateInstances();
+                        }}
                         target={
                           selectedInstance && (
-                            <SearchResults
-                              searchTerm={item.search_term}
-                              command={commandName}
-                            />
+                            <SearchResults searchTerm={item.search_term} />
                           )
                         }
                         title={`Search for "${item.search_term}"`}
@@ -310,12 +303,12 @@ export default function History() {
         </>
       ) : (
         <List.EmptyView
-          title="No Instances Found"
-          description="Add an instance to get started"
+          title="No Instance Profiles Found"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>

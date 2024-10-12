@@ -1,4 +1,5 @@
-import { ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { useState } from "react";
+import { ActionPanel, Color, Detail, environment, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -13,6 +14,8 @@ export default function ResultDetail({
   result: any;
   fields: any;
 }) {
+  const { commandName } = environment;
+
   const [instance] = useCachedState<Instance>("instance");
   const { alias = "", name: instanceName = "" } = instance || {};
 
@@ -27,7 +30,7 @@ export default function ResultDetail({
 
   return (
     <Detail
-      navigationTitle={`Search > ${alias ? alias : instanceName} > ${result.metadata.title}`}
+      navigationTitle={`${commandName == "history" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>

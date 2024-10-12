@@ -6,7 +6,7 @@ import Instances from "../instances";
 import useInstances, { Instance } from "../hooks/useInstances";
 
 export default function Actions({ mutate }: { mutate: () => void }) {
-  const { instances, mutate: mutateInstances } = useInstances();
+  const { instances } = useInstances();
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
 
@@ -20,16 +20,15 @@ export default function Actions({ mutate }: { mutate: () => void }) {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
       </List.Dropdown.Section>
-      <List.Dropdown.Section title="Instances">
+      <List.Dropdown.Section title="Instance Profiles">
         <Action.Push
           icon={Icon.Gear}
-          title="Manage Instances"
-          target={<Instances mutate={mutateInstances} />}
-          onPop={mutateInstances}
+          title="Manage Instance Profiles"
+          target={<Instances />}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />
         <ActionPanel.Submenu
-          title={"Select Instance"}
+          title={"Select Instance Profile"}
           icon={Icon.Check}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
         >

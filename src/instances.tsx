@@ -11,13 +11,20 @@ import { useCachedState } from "@raycast/utils";
 import InstanceForm from "./components/InstanceForm";
 
 import useInstances, { Instance } from "./hooks/useInstances";
+import { useEffect } from "react";
 
-export default function Instances({ mutate }: { mutate: () => void }) {
+export default function Instances() {
   const { instances, addInstance, editInstance, deleteInstance } =
     useInstances();
 
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
+
+  useEffect(() => {
+    if (!selectedInstance && instances.length > 0) {
+      setSelectedInstance(instances[0]);
+    }
+  }, [instances, selectedInstance]);
 
   return (
     <List searchBarPlaceholder="Filter by name, alias, username...">
@@ -27,6 +34,7 @@ export default function Instances({ mutate }: { mutate: () => void }) {
           alias,
           name: instanceName,
           username,
+          password,
           color,
         } = instance;
         const aliasOrName = alias ? alias : instanceName;
@@ -48,7 +56,7 @@ export default function Instances({ mutate }: { mutate: () => void }) {
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
                     icon={Icon.Pencil}
-                    title="Edit Instance"
+                    title="Edit Instance Profile"
                     target={
                       <InstanceForm
                         onSubmit={editInstance}
@@ -58,11 +66,11 @@ export default function Instances({ mutate }: { mutate: () => void }) {
                   />
                   <Action.Push
                     icon={Icon.Plus}
-                    title="Add Instance"
+                    title="Add Instance Profile"
                     target={<InstanceForm onSubmit={addInstance} />}
                   />
                   <Action
-                    title="Delete Instance"
+                    title="Delete Instance Profile"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
@@ -74,20 +82,20 @@ export default function Instances({ mutate }: { mutate: () => void }) {
                         })
                       ) {
                         await deleteInstance(instanceId);
-                        if (selectedInstance?.id == instanceId) {
-                          setSelectedInstance(undefined);
-                          mutate();
-                        }
                       }
                     }}
                   />
                 </List.Dropdown.Section>
                 <Action
                   icon={Icon.Checkmark}
-                  title="Select Instance"
+                  title="Select Instance Profile"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => setSelectedInstance(instance)}
                 ></Action>
+                <Action.OpenInBrowser
+                  shortcut={{ modifiers: ["cmd"], key: "b" }}
+                  url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
+                ></Action.OpenInBrowser>
               </ActionPanel>
             }
             accessories={[{ text: username, icon: Icon.Person }]}
@@ -97,13 +105,13 @@ export default function Instances({ mutate }: { mutate: () => void }) {
 
       {instances.length === 0 ? (
         <List.EmptyView
-          title="No Instances Found"
-          description="Press ⏎ to create your first instance"
+          title="No Instance Profiles Found"
+          description="Press ⏎ to create your first instance profile"
           actions={
             <ActionPanel>
               <Action.Push
                 icon={Icon.Plus}
-                title="Add Instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>
@@ -116,7 +124,7 @@ export default function Instances({ mutate }: { mutate: () => void }) {
             <ActionPanel>
               <Action.Push
                 icon={Icon.Plus}
-                title="Add Instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>

@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  environment,
   Icon,
   List,
   showToast,
@@ -19,22 +20,11 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances, { Instance } from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
 
-export default function ({
-  searchTerm,
-  command,
-}: {
-  searchTerm: string;
-  command: string;
-}): JSX.Element {
-  const {
-    instances,
-    addInstance,
-    mutate: mutateInstances,
-    isLoading: isLoadingInstances,
-  } = useInstances();
-  const [commandName] = useState<string>(
-    command == "history" ? "Search" : "Quickly Search"
-  );
+export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
+  const { addInstance, mutate: mutateInstances } = useInstances();
+  const { commandName } = environment;
+  const command = commandName == "history" ? "Search" : "Quickly Search";
+
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
@@ -86,14 +76,6 @@ export default function ({
   );
 
   useEffect(() => {
-    if (isLoadingInstances) return;
-
-    if (!selectedInstance && instances.length > 0) {
-      setSelectedInstance(instances[0]);
-    }
-  });
-
-  useEffect(() => {
     if (table !== "all") {
       const filteredResults = filter(data, (r) => r.name === table);
       setFilteredResults(filteredResults);
@@ -104,26 +86,24 @@ export default function ({
 
   useEffect(() => {
     if (!selectedInstance || errorFetching) {
-      setNavigationTitle(commandName);
+      setNavigationTitle(command);
       return;
     }
 
     const aliasOrName = alias ? alias : instanceName;
 
     if (isLoading) {
-      setNavigationTitle(
-        `${commandName} > ${aliasOrName} > Loading results...`
-      );
+      setNavigationTitle(`${command} > ${aliasOrName} > Loading results...`);
       return;
     }
     const count = sumBy(data, (r) => r.record_count);
     if (count == 0)
       setNavigationTitle(
-        `${commandName} > ${aliasOrName} > No results found for "${searchTerm}"`
+        `${command} > ${aliasOrName} > No results found for "${searchTerm}"`
       );
     else
       setNavigationTitle(
-        `${commandName} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+        `${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
       );
   }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
 
@@ -132,13 +112,15 @@ export default function ({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by title, description, state, category, number..."
       isLoading={isLoading}
-      searchBarAccessory={<TableDropdown tables={data} isLoading={isLoading} />}
+      searchBarAccessory={
+        data ? <TableDropdown tables={data} isLoading={isLoading} /> : undefined
+      }
     >
-      {!!selectedInstance ? (
+      {selectedInstance ? (
         errorFetching ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-            title="Could not fetch results"
+            title="Could Not Fetch Results"
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
@@ -212,12 +194,12 @@ export default function ({
         )
       ) : (
         <List.EmptyView
-          title="No instances found"
-          description="Add an instance to get started"
+          title="No Instance Profiles Found"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
                 onPop={mutateInstances}
               />

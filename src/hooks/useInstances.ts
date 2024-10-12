@@ -1,3 +1,4 @@
+import { useCachedState } from "@raycast/utils";
 import { useLocalStorage } from "./useLocalStorage";
 
 export type Instance = {
@@ -16,6 +17,9 @@ const compareInstances = (a: Instance, b: Instance): number => {
 };
 
 export default function useInstances() {
+  const [selectedInstance, setSelectedInstance] =
+    useCachedState<Instance>("instance");
+
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>(
     "saved-instances",
     []
@@ -23,14 +27,24 @@ export default function useInstances() {
 
   async function addInstance (instance: Instance) {
     setValue([...value, instance]);
+    if(value.length === 0){
+      setSelectedInstance(instance);
+    }
   }
 
   async function editInstance(instance: Instance) {
     setValue(value.map((i) => (i.id === instance.id ? instance : i)));
+    if(selectedInstance?.id === instance.id){
+      setSelectedInstance(instance);
+    }
   }
 
   async function deleteInstance(instanceId: string) {
+    const selectedInstanceId = selectedInstance?.id;
     setValue(value.filter((i) => i.id !== instanceId));
+    if(selectedInstanceId === instanceId){
+      setSelectedInstance(undefined);
+    }
   }
 
   return { instances: value.sort((a, b) => compareInstances(a,b)), addInstance, editInstance, deleteInstance, mutate, isLoading };

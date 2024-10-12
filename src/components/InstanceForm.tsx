@@ -51,27 +51,29 @@ export default function InstanceForm({
 
   let title;
   if (instance) {
-    title = "Edit instance";
+    title = "Edit";
   } else {
-    title = "Add instance";
+    title = "Add";
   }
 
   return (
     <Form
+      navigationTitle={"Manage Instance Profiles - " + title}
+      isLoading={false}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={handleSubmit}
-            icon={Icon.Plus}
-            title={title}
+            icon={Icon.SaveDocument}
+            title={"Save"}
           />
         </ActionPanel>
       }
-      navigationTitle={title}
     >
       <Form.TextField
         {...itemProps.name}
         title="Name"
+        defaultValue="dev205727"
         placeholder="Enter the instance name"
         info="The name is the unique identifier of your ServiceNow instance"
       />
@@ -96,12 +98,14 @@ export default function InstanceForm({
 
       <Form.TextField
         {...itemProps.username}
+        defaultValue="react.client"
         title="Username"
         placeholder="Enter a username"
         info="The minimum distance in meters from the place that would trigger the reminder"
       />
       <Form.PasswordField
         {...itemProps.password}
+        defaultValue="SN-React2023"
         title="Password"
         info="The minimum distance in meters from the place that would trigger the reminder"
       />

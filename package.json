@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "servicenow-search",
-  "title": "ServiceNow Search",
-  "description": "Search and explore content from ServiceNow.",
+  "name": "servicenow",
+  "title": "ServiceNow",
+  "description": "Search and explore content from ServiceNow",
   "icon": "servicenow.ico",
   "author": "ralvarezalonso",
   "owner": "swissflowit",
@@ -14,19 +14,19 @@
     {
       "name": "history",
       "title": "Search",
-      "description": "Use this command to perform a search within your ServiceNow instance. Simply enter your search query, and the extension will return relevant results in real-time, allowing you to quickly find tickets, incidents, knowledge articles, and other records",
+      "description": "View past searches, perform new queries, and switch between ServiceNow instances",
       "mode": "view"
     },
     {
       "name": "instances",
-      "title": "Manage Instances",
-      "description": "Configure and manage your ServiceNow instances for use in search queries",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
       "mode": "view"
     },
     {
       "name": "quickly-search",
       "title": "Quickly Search",
-      "description": "",
+      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
       "mode": "view",
       "arguments": [
         {
