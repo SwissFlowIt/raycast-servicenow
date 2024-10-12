@@ -13,11 +13,11 @@ import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
 
-import SearchResults from "./components/SearchResults";
-import InstanceForm from "./components/InstanceForm";
-import Actions from "./components/Actions";
+import SearchResults from "./SearchResults";
+import InstanceForm from "./InstanceForm";
+import Actions from "./Actions";
 
-import useInstances, { Instance } from "./hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
 
 export default function History() {
   const {
@@ -166,7 +166,7 @@ export default function History() {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
       setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+      LocalStorage.setItem("selected-instance", aux.name);
     }
   };
 

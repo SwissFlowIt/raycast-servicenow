@@ -8,7 +8,6 @@ import {
   Color,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { uniqBy } from "lodash";
 import crypto from "crypto";
 
 import { Instance } from "../hooks/useInstances";
@@ -59,6 +58,7 @@ export default function InstanceForm({
   return (
     <Form
       navigationTitle={"Manage Instance Profiles - " + title}
+      enableDrafts
       isLoading={false}
       actions={
         <ActionPanel>

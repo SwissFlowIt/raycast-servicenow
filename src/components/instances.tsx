@@ -9,9 +9,9 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import InstanceForm from "./components/InstanceForm";
+import InstanceForm from "./InstanceForm";
 
-import useInstances, { Instance } from "./hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
 import { useEffect } from "react";
 
 export default function Instances() {
@@ -93,16 +93,21 @@ export default function Instances() {
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => {
                     setSelectedInstance(instance);
-                    LocalStorage.setItem(
-                      "selected-instance",
-                      JSON.stringify(instance)
-                    );
+                    LocalStorage.setItem("selected-instance", instance.name);
                   }}
                 ></Action>
-                <Action.OpenInBrowser
-                  shortcut={{ modifiers: ["cmd"], key: "b" }}
-                  url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
-                ></Action.OpenInBrowser>
+                <List.Dropdown.Section>
+                  <Action.OpenInBrowser
+                    title={"Open Instance"}
+                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    url={`https://${instanceName}.service-now.com`}
+                  />
+                  <Action.OpenInBrowser
+                    title="Login in Instance with Profile"
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
+                  />
+                </List.Dropdown.Section>
               </ActionPanel>
             }
             accessories={[{ text: username, icon: Icon.Person }]}

@@ -30,7 +30,7 @@ export default function useInstances() {
     setValue([...value, instance]);
     if(value.length === 0){
       setSelectedInstance(instance);
-      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
+      LocalStorage.setItem("selected-instance", instance.name);
     }
   }
 
@@ -38,7 +38,7 @@ export default function useInstances() {
     setValue(value.map((i) => (i.id === instance.id ? instance : i)));
     if(selectedInstance?.id === instance.id){
       setSelectedInstance(instance);
-      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
+      LocalStorage.setItem("selected-instance", instance.name);
     }
   }
 

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "servicenow",
   "title": "ServiceNow",
-  "description": "Search and explore content from ServiceNow",
+  "description": "Search and explore content across your ServiceNow instances",
   "icon": "servicenow.ico",
   "author": "ralvarezalonso",
   "owner": "swissflowit",
@@ -12,13 +12,13 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "history",
+      "name": "search",
       "title": "Search",
       "description": "View past searches, perform new queries, and switch between ServiceNow instances",
       "mode": "view"
     },
     {
-      "name": "instances",
+      "name": "manage-instance-profiles",
       "title": "Manage Instance Profiles",
       "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
       "mode": "view"
@@ -45,7 +45,7 @@
     },
     {
       "name": "quickly-search-selected-instance",
-      "title": "Quickly Search Selected Instance",
+      "title": "Quickly Search in Selected Instance",
       "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
       "mode": "view",
       "arguments": [
@@ -60,14 +60,40 @@
     {
       "name": "open-all-instances",
       "title": "Open All Instances",
-      "description": "",
+      "description": "Open all configured ServiceNow instances in the browser",
       "mode": "no-view"
     },
     {
       "name": "open-selected-instance",
       "title": "Open Selected Instance",
-      "description": "",
+      "description": "Open the currently selected ServiceNow instance in the browser",
       "mode": "no-view"
+    },
+    {
+      "name": "open-current-url",
+      "title": "Open Current URL",
+      "description": "Open the current ServiceNow URL in the specified instance",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-current-url-in-selected-instance",
+      "title": "Open Current URL in Selected Instance",
+      "description": "Open the current ServiceNow URL in the selected instance",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-instance-profile",
+      "title": "Add Instance Profile",
+      "description": "Add a new instance profile for your searches",
+      "mode": "view"
     }
   ],
   "dependencies": {
