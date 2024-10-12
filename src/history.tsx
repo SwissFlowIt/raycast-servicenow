@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   Color,
+  LocalStorage,
 } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
@@ -165,6 +166,7 @@ export default function History() {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
       setSelectedInstance(aux);
+      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
     }
   };
 

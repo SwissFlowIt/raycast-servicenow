@@ -19,6 +19,12 @@ declare namespace Preferences {
   export type Instances = ExtensionPreferences & {}
   /** Preferences accessible in the `quickly-search` command */
   export type QuicklySearch = ExtensionPreferences & {}
+  /** Preferences accessible in the `quickly-search-selected-instance` command */
+  export type QuicklySearchSelectedInstance = ExtensionPreferences & {}
+  /** Preferences accessible in the `open-all-instances` command */
+  export type OpenAllInstances = ExtensionPreferences & {}
+  /** Preferences accessible in the `open-selected-instance` command */
+  export type OpenSelectedInstance = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -28,9 +34,20 @@ declare namespace Arguments {
   export type Instances = {}
   /** Arguments passed to the `quickly-search` command */
   export type QuicklySearch = {
+  /** Instance name or alias */
+  "instanceName": string,
   /** Query */
   "query": string
 }
+  /** Arguments passed to the `quickly-search-selected-instance` command */
+  export type QuicklySearchSelectedInstance = {
+  /** Query */
+  "query": string
+}
+  /** Arguments passed to the `open-all-instances` command */
+  export type OpenAllInstances = {}
+  /** Arguments passed to the `open-selected-instance` command */
+  export type OpenSelectedInstance = {}
 }
 
 

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import Instances from "../instances";
@@ -45,6 +45,10 @@ export default function Actions({ mutate }: { mutate: () => void }) {
               title={instance.alias ? instance.alias : instance.name}
               onAction={() => {
                 setSelectedInstance(instance);
+                LocalStorage.setItem(
+                  "selected-instance",
+                  JSON.stringify(instance)
+                );
               }}
             />
           ))}

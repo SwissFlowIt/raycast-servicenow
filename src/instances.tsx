@@ -5,6 +5,7 @@ import {
   List,
   Keyboard,
   confirmAlert,
+  LocalStorage,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
@@ -90,7 +91,13 @@ export default function Instances() {
                   icon={Icon.Checkmark}
                   title="Select Instance Profile"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  onAction={() => setSelectedInstance(instance)}
+                  onAction={() => {
+                    setSelectedInstance(instance);
+                    LocalStorage.setItem(
+                      "selected-instance",
+                      JSON.stringify(instance)
+                    );
+                  }}
                 ></Action>
                 <Action.OpenInBrowser
                   shortcut={{ modifiers: ["cmd"], key: "b" }}

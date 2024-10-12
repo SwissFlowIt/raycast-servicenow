@@ -27,6 +27,26 @@
       "name": "quickly-search",
       "title": "Quickly Search",
       "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "quickly-search-selected-instance",
+      "title": "Quickly Search Selected Instance",
+      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
       "mode": "view",
       "arguments": [
         {
@@ -36,6 +56,18 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "open-all-instances",
+      "title": "Open All Instances",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected-instance",
+      "title": "Open Selected Instance",
+      "description": "",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
