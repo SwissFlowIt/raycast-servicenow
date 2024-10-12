@@ -1,7 +1,7 @@
 {
   "version": 3,
   "sources": ["../src/open-selected-instance.ts"],
-  "sourcesContent": ["import { open, LocalStorage, showToast, Toast } from \"@raycast/api\";\n\nexport default async () => {\n  const instanceName = await LocalStorage.getItem<string>(\"selected-instance\");\n  if (!instanceName){\n    showToast(Toast.Style.Failure, \"Instance not found\", \"Please create an instance profile first\");\n    return;\n  }\n\n  open(`https://${instanceName}.service-now.com`);\n};\n\n"],
-  "mappings": "yaAAA,IAAAA,EAAA,GAAAC,EAAAD,EAAA,aAAAE,IAAA,eAAAC,EAAAH,GAAA,IAAAI,EAAqD,wBAE9CF,EAAQ,SAAY,CACzB,IAAMG,EAAe,MAAM,eAAa,QAAgB,mBAAmB,EAC3E,GAAI,CAACA,EAAa,IAChB,aAAU,QAAM,MAAM,QAAS,qBAAsB,yCAAyC,EAC9F,MACF,IAEA,QAAK,WAAWA,CAAY,kBAAkB,CAChD",
+  "sourcesContent": ["import { open, LocalStorage, showToast, Toast } from \"@raycast/api\";\n\nexport default async () => {\n  const instanceName = await LocalStorage.getItem<string>(\"selected-instance\");\n  if (!instanceName) {\n    showToast(Toast.Style.Failure, \"Instance not found\", \"Please create an instance profile first\");\n    return;\n  }\n\n  open(`https://${instanceName}.service-now.com`);\n};\n"],
+  "mappings": "yaAAA,IAAAA,EAAA,GAAAC,EAAAD,EAAA,aAAAE,IAAA,eAAAC,EAAAH,GAAA,IAAAI,EAAqD,wBAE9CF,EAAQ,SAAY,CACzB,IAAMG,EAAe,MAAM,eAAa,QAAgB,mBAAmB,EAC3E,GAAI,CAACA,EAAc,IACjB,aAAU,QAAM,MAAM,QAAS,qBAAsB,yCAAyC,EAC9F,MACF,IAEA,QAAK,WAAWA,CAAY,kBAAkB,CAChD",
   "names": ["open_selected_instance_exports", "__export", "open_selected_instance_default", "__toCommonJS", "import_api", "instanceName"]
 }

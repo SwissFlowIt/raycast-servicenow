@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import ResultActions from "./ResultActions";
 
 import { Instance } from "../hooks/useInstances";
-import { Field, Record } from "../types";
+import { Field, Record, Data } from "../types";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
@@ -29,7 +29,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
         <Detail.Metadata>
           {fields.map((field: Field) => {
             if (field.name != "sys_id") {
-              const fieldData = result.data[field.name];
+              const fieldData = result.data[field.name as keyof Data];
 
               if (field.type == "glide_date")
                 return (
@@ -65,13 +65,19 @@ export default function ResultDetail({ result, fields }: { result: Record; field
               if (field.name.includes("category"))
                 return (
                   <Detail.Metadata.TagList key={field.name} title="Category">
-                    <Detail.Metadata.TagList.Item text={result.data[field.name]?.display} color={Color.Green} />
+                    <Detail.Metadata.TagList.Item
+                      text={result.data[field.name as keyof Data]?.display}
+                      color={Color.Green}
+                    />
                   </Detail.Metadata.TagList>
                 );
               else if (field.name.includes("state"))
                 return (
                   <Detail.Metadata.TagList key={field.name} title="State">
-                    <Detail.Metadata.TagList.Item text={result.data[field.name]?.display} color={Color.Blue} />
+                    <Detail.Metadata.TagList.Item
+                      text={result.data[field.name as keyof Data]?.display}
+                      color={Color.Blue}
+                    />
                   </Detail.Metadata.TagList>
                 );
               else if (field.name.includes("priority"))
@@ -80,19 +86,23 @@ export default function ResultDetail({ result, fields }: { result: Record; field
                     key={field.name}
                     title={field.label}
                     icon={
-                      fieldData && parseInt(fieldData.value) < 3
+                      fieldData && (fieldData.value as number) < 3
                         ? {
                             source: Icon.Bell,
-                            tintColor: parseInt(fieldData.value) == 1 ? Color.Red : Color.Orange,
+                            tintColor: (fieldData.value as number) == 1 ? Color.Red : Color.Orange,
                           }
                         : null
                     }
-                    text={result.data[field.name]?.display}
+                    text={result.data[field.name as keyof Data]?.display}
                   />
                 );
               else
                 return (
-                  <Detail.Metadata.Label key={field.name} title={field.label} text={result.data[field.name]?.display} />
+                  <Detail.Metadata.Label
+                    key={field.name}
+                    title={field.label}
+                    text={result.data[field.name as keyof Data]?.display}
+                  />
                 );
             }
           })}
