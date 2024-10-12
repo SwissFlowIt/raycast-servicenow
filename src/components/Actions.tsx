@@ -1,12 +1,11 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import Instances from "../instances";
-
 import useInstances, { Instance } from "../hooks/useInstances";
+import Instances from "./InstancesList";
 
 export default function Actions({ mutate }: { mutate: () => void }) {
-  const { instances, mutate: mutateInstances } = useInstances();
+  const { instances } = useInstances();
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
 
@@ -20,16 +19,15 @@ export default function Actions({ mutate }: { mutate: () => void }) {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
       </List.Dropdown.Section>
-      <List.Dropdown.Section title="Instances">
+      <List.Dropdown.Section title="Instance Profiles">
         <Action.Push
           icon={Icon.Gear}
-          title="Manage instances"
+          title="Manage Instance Profiles"
           target={<Instances />}
-          onPop={mutateInstances}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />
         <ActionPanel.Submenu
-          title={"Select instance"}
+          title={"Select Instance Profile"}
           icon={Icon.Check}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
         >
@@ -46,6 +44,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
               title={instance.alias ? instance.alias : instance.name}
               onAction={() => {
                 setSelectedInstance(instance);
+                LocalStorage.setItem("selected-instance", instance.name);
               }}
             />
           ))}

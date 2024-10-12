@@ -7,18 +7,19 @@ import {
   showToast,
   Toast,
   Color,
+  LocalStorage,
 } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
 
-import SearchResults from "./components/SearchResults";
-import InstanceForm from "./components/InstanceForm";
-import Actions from "./components/Actions";
+import SearchResults from "./SearchResults";
+import InstanceForm from "./InstanceForm";
+import Actions from "./Actions";
 
-import useInstances, { Instance } from "./hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
 
-export default function History() {
+export default function SearchList() {
   const {
     instances,
     addInstance,
@@ -42,7 +43,7 @@ export default function History() {
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
   const { isLoading, data, mutate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_created_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
@@ -165,12 +166,13 @@ export default function History() {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
       setSelectedInstance(aux);
+      LocalStorage.setItem("selected-instance", aux.name);
     }
   };
 
   return (
     <List
-      navigationTitle={`Text search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
@@ -183,7 +185,7 @@ export default function History() {
             !isLoading && !isLoadingInstances && onInstanceChange(newValue);
           }}
         >
-          <List.Dropdown.Section title="Instances">
+          <List.Dropdown.Section title="Instance Profiles">
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
@@ -200,12 +202,15 @@ export default function History() {
         </List.Dropdown>
       }
     >
-      {instances.length > 0 ? (
+      {selectedInstance ? (
         <>
-          {searchTerm && selectedInstance && (
+          {searchTerm && (
             <List.Item
               title={`Search for "${searchTerm}"`}
-              icon={Icon.MagnifyingGlass}
+              icon={{
+                source: Icon.MagnifyingGlass,
+                tintColor: Color.SecondaryText,
+              }}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -222,10 +227,11 @@ export default function History() {
               }
             />
           )}
+
           {errorFetching ? (
             <List.EmptyView
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              title="Could not fetch history"
+              title="Could Not Fetch History"
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
@@ -239,11 +245,17 @@ export default function History() {
                 <List.Item
                   key={item.sys_id}
                   title={item.search_term}
-                  icon={Icon.Stopwatch}
+                  icon={{
+                    source: Icon.Stopwatch,
+                    tintColor: Color.SecondaryText,
+                  }}
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        onPop={mutateInstances}
+                        onPop={() => {
+                          mutate();
+                          mutateInstances();
+                        }}
                         target={
                           selectedInstance && (
                             <SearchResults searchTerm={item.search_term} />
@@ -281,7 +293,7 @@ export default function History() {
             </List.Section>
           ) : (
             <List.EmptyView
-              title="No recent searches found"
+              title="No Recent Searches Found"
               description="Type something to get started"
               actions={
                 <ActionPanel>
@@ -293,12 +305,12 @@ export default function History() {
         </>
       ) : (
         <List.EmptyView
-          title="No instances found"
-          description="Add an instance to get started"
+          title="No Instance Profiles Found"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>

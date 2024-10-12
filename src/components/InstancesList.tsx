@@ -5,28 +5,40 @@ import {
   List,
   Keyboard,
   confirmAlert,
+  LocalStorage,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import InstanceForm from "./components/InstanceForm";
+import InstanceForm from "./InstanceForm";
 
-import useInstances, { Instance } from "./hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
+import { useEffect } from "react";
 
-export default function Instances() {
+export default function InstancesList() {
   const { instances, addInstance, editInstance, deleteInstance } =
     useInstances();
 
   const [selectedInstance, setSelectedInstance] =
     useCachedState<Instance>("instance");
 
+  useEffect(() => {
+    if (!selectedInstance && instances.length > 0) {
+      setSelectedInstance(instances[0]);
+    }
+  }, [instances, selectedInstance]);
+
   return (
-    <List searchBarPlaceholder="Filter by name, alias, username...">
+    <List
+      searchBarPlaceholder="Filter by name, alias, username..."
+      isLoading={!instances}
+    >
       {instances.map((instance) => {
         const {
           id: instanceId,
           alias,
           name: instanceName,
           username,
+          password,
           color,
         } = instance;
         const aliasOrName = alias ? alias : instanceName;
@@ -48,7 +60,7 @@ export default function Instances() {
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
                     icon={Icon.Pencil}
-                    title="Edit instance"
+                    title="Edit Instance Profile"
                     target={
                       <InstanceForm
                         onSubmit={editInstance}
@@ -58,18 +70,18 @@ export default function Instances() {
                   />
                   <Action.Push
                     icon={Icon.Plus}
-                    title="Add instance"
+                    title="Add Instance Profile"
                     target={<InstanceForm onSubmit={addInstance} />}
                   />
                   <Action
-                    title="Delete instance"
+                    title="Delete Instance Profile"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={async () => {
                       if (
                         await confirmAlert({
-                          title: "Remove instance",
+                          title: "Remove Instance",
                           message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
                         })
                       ) {
@@ -80,10 +92,27 @@ export default function Instances() {
                 </List.Dropdown.Section>
                 <Action
                   icon={Icon.Checkmark}
-                  title="Set this instance for search"
+                  title="Select Instance Profile"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  onAction={() => setSelectedInstance(instance)}
+                  onAction={() => {
+                    setSelectedInstance(instance);
+                    LocalStorage.setItem("selected-instance", instance.name);
+                  }}
                 ></Action>
+                <List.Dropdown.Section>
+                  <Action.OpenInBrowser
+                    icon={{ source: "servicenow.svg" }}
+                    title={"Open Instance"}
+                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    url={`https://${instanceName}.service-now.com`}
+                  />
+                  <Action.OpenInBrowser
+                    icon={{ source: "servicenow.svg" }}
+                    title="Login to ServiceNow Instance"
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
+                  />
+                </List.Dropdown.Section>
               </ActionPanel>
             }
             accessories={[{ text: username, icon: Icon.Person }]}
@@ -93,13 +122,13 @@ export default function Instances() {
 
       {instances.length === 0 ? (
         <List.EmptyView
-          title="You don't have any saved instances."
-          description="Press ⏎ to create your first instance"
+          title="No Instance Profiles Found"
+          description="Press ⏎ to create your first instance profile"
           actions={
             <ActionPanel>
               <Action.Push
                 icon={Icon.Plus}
-                title="Add instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>
@@ -112,7 +141,7 @@ export default function Instances() {
             <ActionPanel>
               <Action.Push
                 icon={Icon.Plus}
-                title="Add instance"
+                title="Add Instance Profile"
                 target={<InstanceForm onSubmit={addInstance} />}
               />
             </ActionPanel>

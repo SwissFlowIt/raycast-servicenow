@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  environment,
   Icon,
   List,
   showToast,
@@ -16,14 +17,20 @@ import Actions from "./Actions";
 import SearchResultListItem from "./SearchResultListItem";
 
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
-import { Instance } from "../hooks/useInstances";
+import useInstances, { Instance } from "../hooks/useInstances";
+import InstanceForm from "./InstanceForm";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
+  const { addInstance, mutate: mutateInstances } = useInstances();
+  const { commandName } = environment;
+  const command = commandName == "history" ? "Search" : "Quickly Search";
+
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance] = useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] =
+    useCachedState<Instance>("instance");
   const {
     alias = "",
     name: instanceName = "",
@@ -39,6 +46,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
+      execute: !!selectedInstance,
 
       onError: (error) => {
         setErrorFetching(true);
@@ -77,97 +85,124 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   }, [table, data]);
 
   useEffect(() => {
-    const aliasOrName = alias ? alias : instanceName;
-    if (isLoading)
-      setNavigationTitle(`Text search > ${aliasOrName} > Loading results...`);
-    else if (errorFetching) setNavigationTitle(`Text search`);
-    else {
-      const count = sumBy(data, (r) => r.record_count);
-      if (count == 0)
-        setNavigationTitle(
-          `Text search > ${aliasOrName} > No results found for "${searchTerm}"`
-        );
-      else
-        setNavigationTitle(
-          `Text search > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
-        );
+    if (!selectedInstance || errorFetching) {
+      setNavigationTitle(command);
+      return;
     }
-  }, [data, searchTerm, isLoading]);
+
+    const aliasOrName = alias ? alias : instanceName;
+
+    if (isLoading) {
+      setNavigationTitle(`${command} > ${aliasOrName} > Loading results...`);
+      return;
+    }
+    const count = sumBy(data, (r) => r.record_count);
+    if (count == 0)
+      setNavigationTitle(
+        `${command} > ${aliasOrName} > No results found for "${searchTerm}"`
+      );
+    else
+      setNavigationTitle(
+        `${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`
+      );
+  }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
 
   return (
     <List
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by title, description, state, category, number..."
       isLoading={isLoading}
-      searchBarAccessory={<TableDropdown tables={data} isLoading={isLoading} />}
+      searchBarAccessory={
+        data ? <TableDropdown tables={data} isLoading={isLoading} /> : undefined
+      }
     >
-      {errorFetching ? (
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Could not fetch results"
-          description="Press ⏎ to refresh or try later again"
-          actions={
-            <ActionPanel>
-              <Actions mutate={mutate} />
-            </ActionPanel>
-          }
-        />
-      ) : data?.length && data.length > 0 ? (
-        filteredResults.map((result, index) => {
-          const records = result.records;
-          const { icon: iconName, color: colorName } = getTableIconAndColor(
-            result.name
-          );
-          var icon: any = {
-            source: Icon[iconName as keyof typeof Icon],
-            tintColor: Color[colorName as keyof typeof Color],
-          };
-          return (
-            <List.Section
-              key={result.name + "_" + index}
-              title={`${result.label_plural} (${result.record_count})`}
-            >
-              {records.map((record: any) => (
-                <SearchResultListItem
-                  key={record.sys_id}
-                  result={record}
-                  icon={icon}
-                  label={result.label}
-                  fields={result.fields}
-                  mutateSearchResults={mutate}
+      {selectedInstance ? (
+        errorFetching ? (
+          <List.EmptyView
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title="Could Not Fetch Results"
+            description="Press ⏎ to refresh or try later again"
+            actions={
+              <ActionPanel>
+                <Actions mutate={mutate} />
+              </ActionPanel>
+            }
+          />
+        ) : data?.length && data.length > 0 ? (
+          filteredResults.map((result, index) => {
+            const records = result.records;
+            const { icon: iconName, color: colorName } = getTableIconAndColor(
+              result.name
+            );
+            var icon: any = {
+              source: Icon[iconName as keyof typeof Icon],
+              tintColor: Color[colorName as keyof typeof Color],
+            };
+            return (
+              <List.Section
+                key={result.name + "_" + index}
+                title={`${result.label_plural} (${result.record_count})`}
+              >
+                {records.map((record: any) => (
+                  <SearchResultListItem
+                    key={record.sys_id}
+                    result={record}
+                    icon={icon}
+                    label={result.label}
+                    fields={result.fields}
+                    mutateSearchResults={mutate}
+                  />
+                ))}
+                <List.Item
+                  icon={{
+                    source: Icon.MagnifyingGlass,
+                    tintColor: Color.SecondaryText,
+                  }}
+                  key={`${result.label}-all`}
+                  title={`View all ${result.label} matches`}
+                  actions={
+                    <ActionPanel>
+                      <List.Dropdown.Section
+                        title={`View all ${result.label} matches`}
+                      >
+                        <Action.OpenInBrowser
+                          title="Open in ServiceNow"
+                          url={`${instanceUrl}${result.all_results_url}`}
+                          icon={{ source: "servicenow.svg" }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy URL"
+                          content={`${instanceUrl}${result.all_results_url}`}
+                        />
+                      </List.Dropdown.Section>
+                      <Actions mutate={mutate} />
+                    </ActionPanel>
+                  }
                 />
-              ))}
-              <List.Item
-                icon={Icon.MagnifyingGlass}
-                key={`${result.label}-all`}
-                title={`View all ${result.label} matches`}
-                actions={
-                  <ActionPanel>
-                    <List.Dropdown.Section
-                      title={`View all ${result.label} matches`}
-                    >
-                      <Action.OpenInBrowser
-                        title="Open in Browser"
-                        url={`${instanceUrl}${result.all_results_url}`}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy URL"
-                        content={`${instanceUrl}${result.all_results_url}`}
-                      />
-                    </List.Dropdown.Section>
-                    <Actions mutate={mutate} />
-                  </ActionPanel>
-                }
-              />
-            </List.Section>
-          );
-        })
+              </List.Section>
+            );
+          })
+        ) : (
+          <List.EmptyView
+            title="No Results"
+            actions={
+              <ActionPanel>
+                <Actions mutate={mutate} />
+              </ActionPanel>
+            }
+          />
+        )
       ) : (
         <List.EmptyView
-          title="No Results"
+          title="No Instance Profiles Found"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
-              <Actions mutate={mutate} />
+              <Action.Push
+                title="Add Instance Profile"
+                target={<InstanceForm onSubmit={addInstance} />}
+                onPop={mutateInstances}
+              />
             </ActionPanel>
           }
         />

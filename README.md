@@ -4,7 +4,7 @@ The fastest way to search and explore content across your ServiceNow instances:
 
 - Search for tickets, incidents, knowledge articles, or any other record
 - View recent search history for easy access to frequently accessed items
-- Manage and configure multiple ServiceNow instances
+- Manage and configure multiple ServiceNow instances profiles
 - Switch between different instances seamlessly
 - Remove items from search history or clear it entirely
 
@@ -17,14 +17,14 @@ Effortlessly recall and reuse your past searches:
 - Remove individual items from your search history when needed
 - Clear your entire search history with just one action
 
-## Instance Management
+## Instance Profile Management
 
-Streamline your workflow by managing multiple ServiceNow instances:
+Streamline your workflow by managing multiple ServiceNow instance profiles:
 
-- Add new instances easily using the "Manage Instances" command
-- Edit existing instance details at any time
-- Switch between instances quickly using keyboard shortcuts
-- Configure each instance with its own alias, color, username, and password
+- Add new instance profiles easily using the "Manage Instance Profiles" command
+- Edit existing profile details at any time
+- Switch between instance profiles quickly using keyboard shortcuts
+- Configure each profile with its own alias, color, username, and password
 
 ## Advanced Search Features
 

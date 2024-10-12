@@ -2,25 +2,98 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "servicenow",
   "title": "ServiceNow",
-  "description": "Search and explore content from ServiceNow.",
-  "icon": "servicenow.ico",
-  "author": "ralvarez",
+  "description": "Search and explore content across your ServiceNow instances",
+  "icon": "servicenow.png",
+  "author": "ralvarezalonso",
   "owner": "swissflowit",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "history",
-      "title": "Text search",
-      "description": "Use this command to perform a search within your ServiceNow instance. Simply enter your search query, and the extension will return relevant results in real-time, allowing you to quickly find tickets, incidents, knowledge articles, and other records",
+      "name": "search",
+      "title": "Search",
+      "description": "View past searches, perform new queries, and switch between ServiceNow instances",
       "mode": "view"
     },
     {
-      "name": "instances",
-      "title": "Manage instances",
-      "description": "Configure and manage your ServiceNow instances for use in search queries",
+      "name": "manage-instance-profiles",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
+      "mode": "view"
+    },
+    {
+      "name": "quickly-search",
+      "title": "Quickly Search",
+      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "quickly-search-selected-instance",
+      "title": "Quickly Search in Selected Instance",
+      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-all-instances",
+      "title": "Open All Instances",
+      "description": "Open all configured ServiceNow instances in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected-instance",
+      "title": "Open Selected Instance",
+      "description": "Open the currently selected ServiceNow instance in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-current-url",
+      "title": "Open Current URL",
+      "description": "Open the current ServiceNow URL in the specified instance",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-current-url-in-selected-instance",
+      "title": "Open Current URL in Selected Instance",
+      "description": "Open the current ServiceNow URL in the selected instance",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-instance-profile",
+      "title": "Add Instance Profile",
+      "description": "Add a new instance profile for your searches",
       "mode": "view"
     }
   ],

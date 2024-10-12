@@ -8,7 +8,6 @@ import {
   Color,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { uniqBy } from "lodash";
 import crypto from "crypto";
 
 import { Instance } from "../hooks/useInstances";
@@ -51,23 +50,25 @@ export default function InstanceForm({
 
   let title;
   if (instance) {
-    title = "Edit instance";
+    title = "Edit";
   } else {
-    title = "Add instance";
+    title = "Add";
   }
 
   return (
     <Form
+      navigationTitle={"Manage Instance Profiles - " + title}
+      enableDrafts
+      isLoading={false}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={handleSubmit}
-            icon={Icon.Plus}
-            title={title}
+            icon={Icon.SaveDocument}
+            title={"Save"}
           />
         </ActionPanel>
       }
-      navigationTitle={title}
     >
       <Form.TextField
         {...itemProps.name}
