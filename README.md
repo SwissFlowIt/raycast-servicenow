@@ -4,6 +4,12 @@
 
 The **ServiceNow Raycast Extension** allows you to easily search and explore content across your ServiceNow instances. With this extension, you can perform quick searches, manage instance profiles, and open specific instances or ServiceNow records in your browser.
 
+![Search history](metadata/servicenow-1.png)
+
+![Search results](metadata/servicenow-2.png)
+
+![Record details](metadata/servicenow-3.png)
+
 ## Features
 
 - **Search:** View past searches, perform new queries, and switch between ServiceNow instances.
