@@ -1,4 +1,4 @@
-import History from "./components/history";
+import SearchList from "./components/SearchList";
 export default function Search() {
-  return <History />;
+  return <SearchList />;
 }

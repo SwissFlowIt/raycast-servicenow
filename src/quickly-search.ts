@@ -1,4 +1,4 @@
-import { open, LocalStorage, launchCommand, LaunchType, LaunchProps, showToast, Toast } from "@raycast/api";
+import {  LocalStorage, launchCommand, LaunchType, LaunchProps, showToast, Toast } from "@raycast/api";
 
 export default async (props: LaunchProps) => {
     const { instanceName, query } = props.arguments;

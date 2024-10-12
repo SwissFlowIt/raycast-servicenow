@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import Instances from "./instances";
-
 import useInstances, { Instance } from "../hooks/useInstances";
+import Instances from "./InstancesList";
 
 export default function Actions({ mutate }: { mutate: () => void }) {
   const { instances } = useInstances();

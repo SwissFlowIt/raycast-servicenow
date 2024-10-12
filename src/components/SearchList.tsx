@@ -19,7 +19,7 @@ import Actions from "./Actions";
 
 import useInstances, { Instance } from "../hooks/useInstances";
 
-export default function History() {
+export default function SearchList() {
   const {
     instances,
     addInstance,

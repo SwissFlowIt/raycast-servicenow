@@ -1,6 +1,5 @@
 import { BrowserExtension,  LocalStorage, showToast, Toast, open } from "@raycast/api";
 
-
 export default async () => {
   const tabs = await BrowserExtension.getTabs();
   const instanceName = await LocalStorage.getItem<string>("selected-instance");

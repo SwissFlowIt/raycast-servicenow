@@ -14,7 +14,7 @@ import InstanceForm from "./InstanceForm";
 import useInstances, { Instance } from "../hooks/useInstances";
 import { useEffect } from "react";
 
-export default function Instances() {
+export default function InstancesList() {
   const { instances, addInstance, editInstance, deleteInstance } =
     useInstances();
 

@@ -1,5 +1,4 @@
 import { LaunchProps } from "@raycast/api";
-import SearchResults from "./components/SearchResults";
 import InstanceForm from "./components/InstanceForm";
 import useInstances from "./hooks/useInstances";
 

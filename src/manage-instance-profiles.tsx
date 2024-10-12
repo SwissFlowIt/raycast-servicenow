@@ -1,4 +1,4 @@
-import Instances from "./components/instances";
+import InstancesList from "./components/InstancesList";
 export default function Search() {
-  return <Instances />;
+  return <InstancesList />;
 }
