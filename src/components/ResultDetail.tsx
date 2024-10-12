@@ -30,7 +30,7 @@ export default function ResultDetail({
 
   return (
     <Detail
-      navigationTitle={`${commandName == "history" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
+      navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>

@@ -23,7 +23,7 @@ import InstanceForm from "./InstanceForm";
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const { addInstance, mutate: mutateInstances } = useInstances();
   const { commandName } = environment;
-  const command = commandName == "history" ? "Search" : "Quickly Search";
+  const command = commandName == "search" ? "Search" : "Quickly Search";
 
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
