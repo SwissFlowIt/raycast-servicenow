@@ -5,7 +5,6 @@
   "description": "Search and explore content across your ServiceNow instances",
   "icon": "servicenow.png",
   "author": "ralvarezalonso",
-  "owner": "swissflowit",
   "categories": [
     "Productivity",
     "Web"
