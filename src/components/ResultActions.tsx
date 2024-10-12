@@ -20,7 +20,7 @@ export default function ResultActions({
         <Action.OpenInBrowser
           title="Open in ServiceNow"
           url={`${instanceUrl}${result.record_url}`}
-          icon={{ source: "servicenow.ico" }}
+          icon={{ source: "servicenow.svg" }}
         />
         {children}
       </ActionPanel.Section>

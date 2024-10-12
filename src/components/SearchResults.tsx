@@ -168,7 +168,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         <Action.OpenInBrowser
                           title="Open in ServiceNow"
                           url={`${instanceUrl}${result.all_results_url}`}
-                          icon={{ source: "servicenow.ico" }}
+                          icon={{ source: "servicenow.svg" }}
                         />
                         <Action.CopyToClipboard
                           title="Copy URL"

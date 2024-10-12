@@ -3,11 +3,12 @@
   "name": "servicenow",
   "title": "ServiceNow",
   "description": "Search and explore content across your ServiceNow instances",
-  "icon": "servicenow.ico",
+  "icon": "servicenow.png",
   "author": "ralvarezalonso",
   "owner": "swissflowit",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [

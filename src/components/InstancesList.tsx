@@ -28,7 +28,10 @@ export default function InstancesList() {
   }, [instances, selectedInstance]);
 
   return (
-    <List searchBarPlaceholder="Filter by name, alias, username...">
+    <List
+      searchBarPlaceholder="Filter by name, alias, username..."
+      isLoading={!instances}
+    >
       {instances.map((instance) => {
         const {
           id: instanceId,
@@ -98,12 +101,14 @@ export default function InstancesList() {
                 ></Action>
                 <List.Dropdown.Section>
                   <Action.OpenInBrowser
+                    icon={{ source: "servicenow.svg" }}
                     title={"Open Instance"}
                     shortcut={{ modifiers: ["cmd"], key: "b" }}
                     url={`https://${instanceName}.service-now.com`}
                   />
                   <Action.OpenInBrowser
-                    title="Login in Instance with Profile"
+                    icon={{ source: "servicenow.svg" }}
+                    title="Login to ServiceNow Instance"
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
                   />
