@@ -1,44 +1,32 @@
-# Servicenow
+# ServiceNow Raycast Extension
 
-The fastest way to search and explore content across your ServiceNow instances:
+## Overview
 
-- Search for tickets, incidents, knowledge articles, or any other record
-- View recent search history for easy access to frequently accessed items
-- Manage and configure multiple ServiceNow instances profiles
-- Switch between different instances seamlessly
-- Remove items from search history or clear it entirely
+The **ServiceNow Raycast Extension** allows you to easily search and explore content across your ServiceNow instances. With this extension, you can perform quick searches, manage instance profiles, and open specific instances or ServiceNow records in your browser.
 
-## Recent Searches
+## Features
 
-Effortlessly recall and reuse your past searches:
+- **Search:** View past searches, perform new queries, and switch between ServiceNow instances.
+- **Manage Instance Profiles:** Configure and manage ServiceNow instance profiles for use in search queries.
+- **Quick Search:** Search your ServiceNow instance instantly from the command window by entering a query without extra steps.
+- **Open Instances:** Open all configured instances or the currently selected instance in the browser.
+- **Open Current URL:** Open the current ServiceNow URL in a specified instance.
 
-- Browse through your recent search history
-- Quickly re-run previous searches without retyping
-- Remove individual items from your search history when needed
-- Clear your entire search history with just one action
+## Setup Instructions
 
-## Instance Profile Management
+### 1. ServiceNow Instance Profiles
 
-Streamline your workflow by managing multiple ServiceNow instance profiles:
+Before using the extension, you'll need to configure your ServiceNow instance profiles. To do this:
 
-- Add new instance profiles easily using the "Manage Instance Profiles" command
-- Edit existing profile details at any time
-- Switch between instance profiles quickly using keyboard shortcuts
-- Configure each profile with its own alias, color, username, and password
+- Use the **Manage Instance Profiles** command to add your ServiceNow instance information, including the instance name, username, and password.
 
-## Advanced Search Features
+### 2. Enabling User Access to Search Terms
 
-Enhance your search experience with these powerful features:
+To allow non-admin users to view and delete their past search terms, you'll need to install an **Update Set** in your ServiceNow instance.
 
-- Filter search results by specific tables or view all results
-- Access detailed information about each result item
-- Copy URLs, titles, or numbers of search results for quick reference
-- Open search results directly in your web browser
+#### Steps to install:
 
-## Quick Actions
-
-Perform common actions efficiently:
-
-- Refresh search results instantly
-- Copy search queries to clipboard
-- Clear all items from search history
+1. Download the update set [Allow access to user's search terms.xml](<media/Allow access to user's search terms.xml>).
+2. Navigate to **System Update Sets > Retrieved Update Sets** in your ServiceNow instance.
+3. Click **Import Update Set from XML** and upload the file.
+4. Commit the update set to enable the functionality.
