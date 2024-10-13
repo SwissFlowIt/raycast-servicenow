@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import useInstances, { Instance } from "../hooks/useInstances";
+import useInstances from "../hooks/useInstances";
 import Instances from "./InstancesList";
+import { Instance } from "../types";
 
 export default function Actions({ mutate }: { mutate: () => void }) {
   const { instances } = useInstances();
-  const [selectedInstance, setSelectedInstance] =
-    useCachedState<Instance>("instance");
+  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
 
   return (
     <>
@@ -35,16 +35,13 @@ export default function Actions({ mutate }: { mutate: () => void }) {
             <Action
               key={instance.id}
               icon={{
-                source:
-                  selectedInstance?.id == instance.id
-                    ? Icon.CheckCircle
-                    : Icon.Circle,
+                source: selectedInstance?.id == instance.id ? Icon.CheckCircle : Icon.Circle,
                 tintColor: instance.color,
               }}
               title={instance.alias ? instance.alias : instance.name}
               onAction={() => {
                 setSelectedInstance(instance);
-                LocalStorage.setItem("selected-instance", instance.name);
+                LocalStorage.setItem("selected-instance", JSON.stringify(instance));
               }}
             />
           ))}
