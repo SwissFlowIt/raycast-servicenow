@@ -27,9 +27,9 @@ export default async (props: LaunchProps) => {
 
   if (activeTab && activeTab.url?.includes(".service-now.com")) {
     const urlPaths = activeTab.url.split("/");
-    const fullInterface = urlPaths[3]=="nav_to.do" || urlPaths[3]=="now";
+    const fullInterface = urlPaths[3] == "nav_to.do" || urlPaths[3] == "now";
     const path = decodeURIComponent(decodeURIComponent(urlPaths[urlPaths.length - 1]));
-    open(`https://${instance.name}.service-now.com/${fullInterface?`nav_to.do?uri=${path}`:path}`);
+    open(`https://${instance.name}.service-now.com/${fullInterface ? `nav_to.do?uri=${path}` : path}`);
   } else {
     showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
   }
