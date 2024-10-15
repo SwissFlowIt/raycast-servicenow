@@ -95,7 +95,14 @@
       "description": "Add a new instance profile for your searches",
       "mode": "view"
     }
-  ],
+  ,
+    {
+      "name": "explore-tables",
+      "title": "Explore Tables",
+      "description": "",
+      "mode": "view"
+    }
+      ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",

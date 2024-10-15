@@ -31,6 +31,8 @@ declare namespace Preferences {
   export type OpenCurrentUrlInSelectedInstance = ExtensionPreferences & {}
   /** Preferences accessible in the `add-instance-profile` command */
   export type AddInstanceProfile = ExtensionPreferences & {}
+  /** Preferences accessible in the `explore-tables` command */
+  export type ExploreTables = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -63,6 +65,8 @@ declare namespace Arguments {
   export type OpenCurrentUrlInSelectedInstance = {}
   /** Arguments passed to the `add-instance-profile` command */
   export type AddInstanceProfile = {}
+  /** Arguments passed to the `explore-tables` command */
+  export type ExploreTables = {}
 }
 
 
