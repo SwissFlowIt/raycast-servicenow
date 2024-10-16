@@ -241,13 +241,14 @@ export default function SearchList() {
                       <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           icon={Icon.XMarkCircle}
                           style={Action.Style.Destructive}
                           onAction={() => removeItemFromHistory(item)}
                         />
                         <Action
                           title="Clear All Items from History"
-                          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
                           icon={Icon.XMarkCircleFilled}
                           style={Action.Style.Destructive}
                           onAction={removeAllItemsFromHistory}
