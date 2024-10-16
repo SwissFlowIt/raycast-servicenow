@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage, Keyboard } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
@@ -244,13 +244,14 @@ export default function SearchList() {
                           icon={Icon.XMarkCircle}
                           style={Action.Style.Destructive}
                           onAction={() => removeItemFromHistory(item)}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                         />
                         <Action
                           title="Clear All Items from History"
-                          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                           icon={Icon.XMarkCircleFilled}
                           style={Action.Style.Destructive}
                           onAction={removeAllItemsFromHistory}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
                         />
                       </List.Dropdown.Section>
                     </ActionPanel>
