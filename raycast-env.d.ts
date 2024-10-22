@@ -35,6 +35,8 @@ declare namespace Preferences {
   export type ExploreTables = ExtensionPreferences & {}
   /** Preferences accessible in the `search-resources` command */
   export type SearchResources = ExtensionPreferences & {}
+  /** Preferences accessible in the `login-to-selected-instance` command */
+  export type LoginToSelectedInstance = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -74,6 +76,8 @@ declare namespace Arguments {
   /** Query */
   "query": string
 }
+  /** Arguments passed to the `login-to-selected-instance` command */
+  export type LoginToSelectedInstance = {}
 }
 
 
