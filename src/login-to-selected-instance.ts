@@ -9,5 +9,7 @@ export default async function main() {
   }
 
   const instanceProfile = JSON.parse(instance) as Instance;
-  open(`https://${instanceProfile.name}.service-now.com/login.do?user_name=${instanceProfile.username}&user_password=${instanceProfile.password}&sys_action=sysverb_login`)
+  open(
+    `https://${instanceProfile.name}.service-now.com/login.do?user_name=${instanceProfile.username}&user_password=${instanceProfile.password}&sys_action=sysverb_login`,
+  );
 }
