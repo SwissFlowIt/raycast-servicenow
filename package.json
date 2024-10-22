@@ -104,7 +104,7 @@
     {
       "name": "search-resources",
       "title": "Search Resources",
-      "description": "",
+      "description": "Search across various ServiceNow resources, including documentation, blogs, guides, learning materials, and more.",
       "mode": "no-view",
       "arguments": [
         {
@@ -114,15 +114,14 @@
           "required": true
         }
       ]
-    }
-  ,
+    },
     {
       "name": "login-to-selected-instance",
       "title": "Login to Selected Instance",
       "description": "Logs into the selected ServiceNow instance using the credentials stored in the associated instance profile, allowing quick and easy access without manual login steps.",
       "mode": "no-view"
     }
-      ],
+  ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
