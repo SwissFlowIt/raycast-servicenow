@@ -33,6 +33,8 @@ declare namespace Preferences {
   export type AddInstanceProfile = ExtensionPreferences & {}
   /** Preferences accessible in the `explore-tables` command */
   export type ExploreTables = ExtensionPreferences & {}
+  /** Preferences accessible in the `search-resources` command */
+  export type SearchResources = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -67,6 +69,11 @@ declare namespace Arguments {
   export type AddInstanceProfile = {}
   /** Arguments passed to the `explore-tables` command */
   export type ExploreTables = {}
+  /** Arguments passed to the `search-resources` command */
+  export type SearchResources = {
+  /** Query */
+  "query": string
+}
 }
 
 
