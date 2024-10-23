@@ -26,7 +26,7 @@ To allow non-admin users to view and delete their past search terms, you'll need
 
 #### Steps to install:
 
-1. Download the update set [allow*access_to* user_search_terms.xml](<media/allow_access_to_ user_search_terms.xml>).
+1. Download the update set [allow_access_to_user_search_terms.xml](media/allow_access_to_user_search_terms.xml).
 2. Navigate to **System Update Sets > Retrieved Update Sets** in your ServiceNow instance.
 3. Click **Import Update Set from XML** and upload the file.
 4. Commit the update set to enable the functionality.
