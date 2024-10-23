@@ -10,6 +10,7 @@ const tableIconColorMap = {
   cat_item: { icon: "Cart", color: "Green" },
   req_item: { icon: "Box", color: "Green" },
   request: { icon: "Envelope", color: "Green" },
+  documate: { icon: "Document", color: "SecondaryText" },
 };
 
 export function getTableIconAndColor(tableName: string) {
@@ -18,5 +19,5 @@ export function getTableIconAndColor(tableName: string) {
       return tableIconColorMap[key as keyof typeof tableIconColorMap];
     }
   }
-  return { icon: "Document", color: "SecondaryText" };
+  return { icon: "AppWindow", color: "SecondaryText" };
 }
