@@ -1,7 +1,7 @@
 const tableIconColorMap = {
   incident: { icon: "ExclamationMark", color: "Red" },
   group: { icon: "TwoPeople", color: "Blue" },
-  sys_user: { icon: "Person", color: "Blue" },
+  user: { icon: "Person", color: "Blue" },
   cmdb_ci: { icon: "HardDrive", color: "Orange" },
   pm_project: { icon: "Clipboard", color: "Purple" },
   change: { icon: "Cog", color: "Yellow" },
@@ -10,7 +10,7 @@ const tableIconColorMap = {
   cat_item: { icon: "Cart", color: "Green" },
   req_item: { icon: "Box", color: "Green" },
   request: { icon: "Envelope", color: "Green" },
-  documate: { icon: "Document", color: "SecondaryText" },
+  documate_page: { icon: "Document", color: "SecondaryText" },
 };
 
 export function getTableIconAndColor(tableName: string) {
@@ -19,5 +19,5 @@ export function getTableIconAndColor(tableName: string) {
       return tableIconColorMap[key as keyof typeof tableIconColorMap];
     }
   }
-  return { icon: "AppWindow", color: "SecondaryText" };
+  return { icon: "Info", color: "SecondaryText" };
 }

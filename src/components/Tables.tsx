@@ -32,7 +32,7 @@ export default function Tables() {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
+        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
       },
 
       mapResult(response: DBObjectsResponse) {

@@ -37,6 +37,8 @@ declare namespace Preferences {
   export type SearchResources = ExtensionPreferences & {}
   /** Preferences accessible in the `login-to-selected-instance` command */
   export type LoginToSelectedInstance = ExtensionPreferences & {}
+  /** Preferences accessible in the `explore-navigation-history` command */
+  export type ExploreNavigationHistory = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -78,6 +80,8 @@ declare namespace Arguments {
 }
   /** Arguments passed to the `login-to-selected-instance` command */
   export type LoginToSelectedInstance = {}
+  /** Arguments passed to the `explore-navigation-history` command */
+  export type ExploreNavigationHistory = {}
 }
 
 

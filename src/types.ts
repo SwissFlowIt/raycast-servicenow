@@ -114,3 +114,15 @@ export interface DBObject {
   label: string;
   super_class: string;
 }
+
+export interface NavigationHistoryResponse {
+  result: NavigationHistoryEntry[];
+}
+
+export interface NavigationHistoryEntry {
+  sys_id: string;
+  title: string;
+  description: string;
+  url: string;
+  sys_created_on: string;
+}

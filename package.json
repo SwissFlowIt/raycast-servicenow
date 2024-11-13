@@ -120,12 +120,19 @@
       "title": "Login to Selected Instance",
       "description": "Logs into the selected ServiceNow instance using the credentials stored in the associated instance profile, allowing quick and easy access without manual login steps.",
       "mode": "no-view"
+    },
+    {
+      "name": "explore-navigation-history",
+      "title": "Explore Navigation History",
+      "description": "Browse and explore your navigation history within an instance",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
+    "javascript-time-ago": "^2.5.11",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
