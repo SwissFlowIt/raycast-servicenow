@@ -106,7 +106,8 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             return (
               <List.Section
                 key={result.name + "_" + index}
-                title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural} (${result.record_count})`}
+                title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural}`}
+                subtitle={`${result.record_count} ${result.record_count == 1 ? "result" : "results"}`}
               >
                 {records.map((record: Record) => (
                   <SearchResultListItem
