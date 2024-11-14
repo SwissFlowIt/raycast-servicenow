@@ -132,27 +132,20 @@ export default function NavigationHistory() {
 
           const favoriteParams = new URLSearchParams(favoriteFullURL.search);
           const historyParams = new URLSearchParams(historyEntryFullURL.search);
-
           const favoritePath = favoriteFullURL.pathname;
           const historyEntryPath = historyEntryFullURL.pathname;
 
-          let favoriteTableName = "";
-          let historyTableName = "";
           let favoriteParam = "";
           let historyParam = "";
-          if (favoritePath.includes("_list.do?")) {
-            favoriteTableName = favoritePath.split("_list.do?")[0];
-            historyTableName = historyEntryPath.split("_list.do?")[0];
+          if (favoritePath.includes("_list.do")) {
             favoriteParam = favoriteParams.get("sysparm_query") || "";
             historyParam = historyParams.get("sysparm_query") || "";
           } else {
-            favoriteTableName = favoritePath.split(".do?")[0];
-            historyTableName = historyEntryPath.split(".do?")[0];
             favoriteParam = favoriteParams.get("sys_id") || "";
             historyParam = historyParams.get("sys_id") || "";
           }
 
-          return favoriteTableName == historyTableName && favoriteParam == historyParam;
+          return favoritePath == historyEntryPath && favoriteParam == historyParam;
         }),
       )
       .map((historyEntry) => historyEntry.sys_id);
