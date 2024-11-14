@@ -141,8 +141,8 @@ export default function NavigationHistory() {
             favoriteParam = favoriteParams.get("sysparm_query") || "";
             historyParam = historyParams.get("sysparm_query") || "";
           } else {
-            favoriteParam = favoriteParams.get("sys_id") || "";
-            historyParam = historyParams.get("sys_id") || "";
+            favoriteParam = favoriteParams.get("sys_id") || favoriteParams.get("sysparm_query") || "";
+            historyParam = historyParams.get("sys_id") || historyParams.get("sysparm_query") || "";
           }
 
           return favoritePath == historyEntryPath && favoriteParam == historyParam;

@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 
-import { NavigationMenuResponse, NavigationMenuEntry, Instance } from "../types";
+import { NavigationMenuResponse, NavigationMenuEntry, NavigationHistoryResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
@@ -44,6 +44,71 @@ export default function NavigationMenu() {
     },
   );
 
+  const { data: favorites, mutate: mutateFavorites } = useFetch(
+    () => {
+      return `${instanceUrl}/api/now/table/sys_ui_bookmark?sysparm_query=userDYNAMIC90d1921e5f510100a9ad2572f2b477fe&sysparm_fields=url`;
+    },
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+      },
+      execute: !!selectedInstance,
+      onError: (error) => {
+        setErrorFetching(true);
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
+      },
+
+      mapResult(response: NavigationHistoryResponse) {
+        setErrorFetching(false);
+
+        return { data: response.result, hasMore: response.result.length > 0 };
+      },
+      keepPreviousData: true,
+    },
+  );
+
+  const urlInFavorites = useCallback(
+    (url: string) => {
+      if (!favorites) return false;
+
+      let favoriteParam = "";
+      let urlParam = "";
+
+      const fullURL = new URL(url);
+      const urlParams = new URLSearchParams(fullURL.search);
+      const urlPath = fullURL.pathname;
+
+      return favorites.some((favorite) => {
+        let favoriteURL = favorite.url;
+        if (!favoriteURL.startsWith("/")) {
+          favoriteURL = "/" + favoriteURL;
+        }
+
+        const favoriteFullURL = new URL(`https://${instanceName}.service-now.com${favoriteURL}`);
+        const favoriteParams = new URLSearchParams(favoriteFullURL.search);
+        const favoritePath = favoriteFullURL.pathname;
+
+        if (favoritePath.includes("_list.do")) {
+          favoriteParam = favoriteParams.get("sysparm_query") || "";
+          urlParam = urlParams.get("sysparm_query") || "";
+        } else if (favoritePath.includes("$pa_dashboard.do")) {
+          favoriteParam = favoriteParams.get("sysparm_dashboard") || "";
+          urlParam = urlParams.get("sysparm_dashboard") || "";
+        } else if (favoritePath.includes("system_properties_ui.do")) {
+          favoriteParam = favoriteParams.get("sysparm_title") + "&" + favoriteParams.get("sysparm_category") || "";
+          urlParam = urlParams.get("sysparm_title") + "&" + urlParams.get("sysparm_category") || "";
+        } else {
+          favoriteParam = favoriteParams.get("sys_id") || favoriteParams.get("sysparm_query") || "";
+          urlParam = urlParams.get("sys_id") || urlParams.get("sysparm_query") || "";
+        }
+
+        return favoritePath == urlPath && favoriteParam == urlParam;
+      });
+    },
+    [favorites],
+  );
+
   const sections = useMemo(() => {
     const orderedData = orderBy(
       data,
@@ -71,13 +136,13 @@ export default function NavigationMenu() {
   const getUrl = (menu: NavigationMenuEntry) => {
     const type = menu.link_type;
     if (type == "LIST" || type == "") {
-      return `${menu.name}_list.do?sysparm_query=${menu.filter}^${menu.query}`;
+      return `${menu.name}_list.do?sysparm_query=${menu.filter || menu.query}`;
     }
     if (type == "DETAIL") {
       return `${menu.name}.do?sysparm_query=${menu.filter}`;
     }
     if (type == "DIRECT" || type == "MAP") {
-      return `${menu.query}`;
+      return `${menu.query.startsWith("/") ? menu.query.split("/")[1] : menu.query}`;
     }
     if (type == "NEW") {
       return `${menu.name}.do?sys_id=-1&sysparm_query=${menu.filter}`;
@@ -129,7 +194,12 @@ export default function NavigationMenu() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions
+                  mutate={() => {
+                    mutate();
+                    mutateFavorites();
+                  }}
+                />
               </ActionPanel>
             }
           />
@@ -155,14 +225,22 @@ export default function NavigationMenu() {
                   };
 
                   const url = `${instanceUrl}/${getUrl(menu)}`;
+                  const isFavorite = urlInFavorites(url);
 
-                  const accessories = separator
+                  const accessories: List.Item.Accessory[] = separator
                     ? [
                         {
                           tag: { value: separator },
                         },
                       ]
                     : [];
+
+                  if (isFavorite) {
+                    accessories.unshift({
+                      icon: { source: Icon.Star, tintColor: Color.Yellow },
+                      tooltip: "Favorite",
+                    });
+                  }
 
                   return (
                     <List.Item
@@ -189,7 +267,12 @@ export default function NavigationMenu() {
                               shortcut={Keyboard.Shortcut.Common.CopyPath}
                             />
                           </ActionPanel.Section>
-                          <Actions mutate={mutate} />
+                          <Actions
+                            mutate={() => {
+                              mutate();
+                              mutateFavorites();
+                            }}
+                          />
                         </ActionPanel>
                       }
                     />
