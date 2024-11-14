@@ -32,7 +32,7 @@ export default function NavigationMenu() {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
+        showToast(Toast.Style.Failure, "Could not fetch menu entries", error.message);
       },
 
       mapResult(response: NavigationMenuResponse) {

@@ -80,6 +80,84 @@ export default function NavigationHistory() {
     },
   );
 
+  const { data: favorites, mutate: mutateFavorites } = useFetch(
+    () => {
+      return `${instanceUrl}/api/now/table/sys_ui_bookmark?sysparm_query=userDYNAMIC90d1921e5f510100a9ad2572f2b477fe&sysparm_fields=url`;
+    },
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+      },
+      execute: !!selectedInstance,
+      onError: (error) => {
+        setErrorFetching(true);
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
+      },
+
+      mapResult(response: NavigationHistoryResponse) {
+        setErrorFetching(false);
+
+        return { data: response.result, hasMore: response.result.length > 0 };
+      },
+      keepPreviousData: true,
+    },
+  );
+
+  const favoriteHistoryEntries = useMemo(() => {
+    if (!favorites || !data) {
+      return [];
+    }
+
+    return data
+      .filter((historyEntry) =>
+        favorites.some((favorite) => {
+          let favoriteURL = favorite.url;
+          let historyEntryURL = historyEntry.url;
+
+          // These entries don't show in the history
+          if (favoriteURL.startsWith("$") || !favoriteURL.includes(".do")) {
+            return false;
+          }
+
+          if (!favoriteURL.startsWith("/")) {
+            favoriteURL = "/" + favoriteURL;
+          }
+          if (!historyEntryURL.startsWith("/")) {
+            historyEntryURL = "/" + historyEntryURL;
+          }
+
+          const favoriteFullURL = new URL(`https://${instanceName}.service-now.com${favoriteURL}`);
+          const historyEntryFullURL = new URL(`https://${instanceName}.service-now.com${historyEntryURL}`);
+
+          const favoriteParams = new URLSearchParams(favoriteFullURL.search);
+          const historyParams = new URLSearchParams(historyEntryFullURL.search);
+
+          const favoritePath = favoriteFullURL.pathname;
+          const historyEntryPath = historyEntryFullURL.pathname;
+
+          let favoriteTableName = "";
+          let historyTableName = "";
+          let favoriteParam = "";
+          let historyParam = "";
+          if (favoritePath.includes("_list.do?")) {
+            favoriteTableName = favoritePath.split("_list.do?")[0];
+            historyTableName = historyEntryPath.split("_list.do?")[0];
+            favoriteParam = favoriteParams.get("sysparm_query") || "";
+            historyParam = historyParams.get("sysparm_query") || "";
+          } else {
+            favoriteTableName = favoritePath.split(".do?")[0];
+            historyTableName = historyEntryPath.split(".do?")[0];
+            favoriteParam = favoriteParams.get("sys_id") || "";
+            historyParam = historyParams.get("sys_id") || "";
+          }
+
+          return favoriteTableName == historyTableName && favoriteParam == historyParam;
+        }),
+      )
+      .map((historyEntry) => historyEntry.sys_id);
+  }, [favorites, data]);
+
   const sections = useMemo(() => {
     return groupBy(data, (historyEntry) => getSectionTitle(historyEntry.sys_created_on));
   }, [data]);
@@ -132,7 +210,12 @@ export default function NavigationHistory() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions
+                  mutate={() => {
+                    mutate();
+                    mutateFavorites();
+                  }}
+                />
               </ActionPanel>
             }
           />
@@ -163,6 +246,13 @@ export default function NavigationHistory() {
                   },
                 ];
 
+                if (favoriteHistoryEntries.includes(historyEntry.sys_id)) {
+                  accessories.unshift({
+                    icon: { source: Icon.Star, tintColor: Color.Yellow },
+                    tooltip: "Favorite",
+                  });
+                }
+
                 return (
                   <List.Item
                     key={historyEntry.sys_id}
@@ -187,7 +277,12 @@ export default function NavigationHistory() {
                             shortcut={Keyboard.Shortcut.Common.CopyPath}
                           />
                         </ActionPanel.Section>
-                        <Actions mutate={mutate} />
+                        <Actions
+                          mutate={() => {
+                            mutate();
+                            mutateFavorites();
+                          }}
+                        />
                       </ActionPanel>
                     }
                   />

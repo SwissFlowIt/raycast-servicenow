@@ -33,7 +33,7 @@ export default function Favorites(props: { groupId?: string }) {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
+        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
       },
 
       mapResult(response: FavoritesResponse) {
