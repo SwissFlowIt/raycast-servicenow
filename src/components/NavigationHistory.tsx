@@ -2,19 +2,45 @@ import { useMemo, useState } from "react";
 
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { format } from "date-fns";
+import { format, differenceInMinutes } from "date-fns";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 
-import { NavigationHistoryResponse, NavigationHistoryEntry, Instance } from "../types";
+import { NavigationHistoryResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
+import { groupBy } from "lodash";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
+
+const getSectionTitle = (dateTime: string) => {
+  const creationDate = new Date(dateTime);
+  const diffInMinutes = differenceInMinutes(new Date(), creationDate);
+
+  if (diffInMinutes < 1) {
+    return "Just now";
+  } else if (diffInMinutes < 5) {
+    return "1 minute ago";
+  } else if (diffInMinutes < 10) {
+    return "5 minutes ago";
+  } else if (diffInMinutes < 20) {
+    return "10 minutes ago";
+  } else if (diffInMinutes < 30) {
+    return "20 minutes ago";
+  } else if (diffInMinutes < 40) {
+    return "30 minutes ago";
+  } else if (diffInMinutes < 50) {
+    return "40 minutes ago";
+  } else if (diffInMinutes < 60) {
+    return "50 minutes ago";
+  } else {
+    return timeAgo.format(creationDate);
+  }
+};
 
 export default function NavigationHistory() {
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
@@ -54,19 +80,7 @@ export default function NavigationHistory() {
   );
 
   const sections = useMemo(() => {
-    const groupedSections: { [key: string]: NavigationHistoryEntry[] } = {};
-
-    data?.forEach((historyEntry) => {
-      const creationDate = new Date(historyEntry.sys_created_on);
-      const relativeTime = timeAgo.format(creationDate);
-
-      if (!groupedSections[relativeTime]) {
-        groupedSections[relativeTime] = [];
-      }
-      groupedSections[relativeTime].push(historyEntry);
-    });
-
-    return groupedSections;
+    return groupBy(data, (historyEntry) => getSectionTitle(historyEntry.sys_created_on));
   }, [data]);
 
   const onInstanceChange = (newValue: string) => {
@@ -123,7 +137,11 @@ export default function NavigationHistory() {
           />
         ) : (
           Object.keys(sections).map((section) => (
-            <List.Section key={section} title={section} subtitle={`${sections[section].length} results`}>
+            <List.Section
+              key={section}
+              title={section}
+              subtitle={`${sections[section].length} ${sections[section].length == 1 ? "result" : "results"}`}
+            >
               {sections[section].map((historyEntry) => {
                 const url = `${instanceUrl}/${historyEntry.url}`;
                 const table = historyEntry.url.split(".do")[0];
@@ -135,7 +153,7 @@ export default function NavigationHistory() {
                 };
                 const accessories: List.Item.Accessory[] = [
                   {
-                    icon: Icon.Clock,
+                    icon: Icon.Calendar,
                     tooltip: format(historyEntry.sys_created_on, "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
@@ -150,7 +168,7 @@ export default function NavigationHistory() {
                     icon={icon}
                     title={historyEntry.title}
                     subtitle={historyEntry.description}
-                    keywords={[historyEntry.title, historyEntry.description]}
+                    keywords={[historyEntry.title, historyEntry.description, ...table.split("_")]}
                     accessories={accessories}
                     actions={
                       <ActionPanel>
