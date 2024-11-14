@@ -126,3 +126,21 @@ export interface NavigationHistoryEntry {
   url: string;
   sys_created_on: string;
 }
+
+export interface NavigationMenuResponse {
+  result: NavigationMenuEntry[];
+}
+
+export interface NavigationMenuEntry {
+  filter: string;
+  link_type: string;
+  sys_id: string;
+  assessment: string;
+  query: string;
+  name: string;
+  report: string;
+  title: string;
+  order: string;
+  "application.title": string;
+  "application.order": string;
+}
