@@ -9,7 +9,6 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy, orderBy } from "lodash";
-import { title } from "process";
 
 export default function NavigationMenu() {
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();

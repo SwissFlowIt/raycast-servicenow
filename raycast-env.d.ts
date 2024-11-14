@@ -39,6 +39,8 @@ declare namespace Preferences {
   export type LoginToSelectedInstance = ExtensionPreferences & {}
   /** Preferences accessible in the `explore-navigation-history` command */
   export type ExploreNavigationHistory = ExtensionPreferences & {}
+  /** Preferences accessible in the `explore-favorites` command */
+  export type ExploreFavorites = ExtensionPreferences & {}
   /** Preferences accessible in the `explore-navigation-menu` command */
   export type ExploreNavigationMenu = ExtensionPreferences & {}
 }
@@ -84,6 +86,8 @@ declare namespace Arguments {
   export type LoginToSelectedInstance = {}
   /** Arguments passed to the `explore-navigation-history` command */
   export type ExploreNavigationHistory = {}
+  /** Arguments passed to the `explore-favorites` command */
+  export type ExploreFavorites = {}
   /** Arguments passed to the `explore-navigation-menu` command */
   export type ExploreNavigationMenu = {}
 }

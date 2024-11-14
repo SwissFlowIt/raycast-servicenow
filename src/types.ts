@@ -144,3 +144,16 @@ export interface NavigationMenuEntry {
   "application.title": string;
   "application.order": string;
 }
+
+export interface FavoritesResponse {
+  result: Favorite[];
+}
+
+export interface Favorite {
+  sys_id: string;
+  title: string;
+  url: string;
+  order: string;
+  "group.sys_id": string;
+  "group.title": string;
+}

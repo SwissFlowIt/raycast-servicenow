@@ -97,7 +97,7 @@
     },
     {
       "name": "explore-tables",
-      "title": "Explore Tables",
+      "title": "Tables",
       "description": "Browse and explore the tables within an instance",
       "mode": "view"
     },
@@ -126,15 +126,20 @@
       "title": "Explore Navigation History",
       "description": "Browse and explore your navigation history within an instance",
       "mode": "view"
-    }
-  ,
+    },
+    {
+      "name": "explore-favorites",
+      "title": "Explore Favorites",
+      "description": "",
+      "mode": "view"
+    },
     {
       "name": "explore-navigation-menu",
       "title": "Explore Navigation Menu",
       "description": "",
       "mode": "view"
     }
-      ],
+  ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",

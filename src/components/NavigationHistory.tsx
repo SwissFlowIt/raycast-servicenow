@@ -23,8 +23,10 @@ const getSectionTitle = (dateTime: string) => {
 
   if (diffInMinutes < 1) {
     return "Just now";
-  } else if (diffInMinutes < 5) {
+  } else if (diffInMinutes < 3) {
     return "1 minute ago";
+  } else if (diffInMinutes < 5) {
+    return "3 minutes ago";
   } else if (diffInMinutes < 10) {
     return "5 minutes ago";
   } else if (diffInMinutes < 20) {
@@ -56,7 +58,6 @@ export default function NavigationHistory() {
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^titleLIKE${t}^ORdescriptionLIKE${t}^ORurlLIKE${t}`).join("");
-      //return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_display_value=true&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
       return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_query=${query}^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_created_on&sysparm_fields=title,description,url,sys_created_on,sys_id&sysparm_display_value=true&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
