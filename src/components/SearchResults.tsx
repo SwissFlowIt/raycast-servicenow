@@ -68,7 +68,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
     const aliasOrName = alias ? alias : instanceName;
 
     if (isLoading) {
-      setNavigationTitle(`${command} > ${aliasOrName} > Loading results...`);
+      setNavigationTitle(`${command} > ${aliasOrName} > Loading results for "${searchTerm}"...`);
       return;
     }
     const count = sumBy(data, (r) => r.record_count);

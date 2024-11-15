@@ -13,7 +13,6 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
-import useFavorites from "../hooks/useFavorites";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -48,7 +47,6 @@ const getSectionTitle = (dateTime: string) => {
 export default function NavigationHistory() {
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -81,6 +79,77 @@ export default function NavigationHistory() {
       keepPreviousData: true,
     },
   );
+
+  const { data: favorites, mutate: mutateFavorites } = useFetch(
+    () => {
+      return `${instanceUrl}/api/now/table/sys_ui_bookmark?sysparm_query=userDYNAMIC90d1921e5f510100a9ad2572f2b477fe&sysparm_fields=url`;
+    },
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+      },
+      execute: !!selectedInstance,
+      onError: (error) => {
+        setErrorFetching(true);
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
+      },
+
+      mapResult(response: NavigationHistoryResponse) {
+        setErrorFetching(false);
+
+        return { data: response.result, hasMore: response.result.length > 0 };
+      },
+      keepPreviousData: true,
+    },
+  );
+
+  const favoriteHistoryEntries = useMemo(() => {
+    if (!favorites || !data) {
+      return [];
+    }
+
+    return data
+      .filter((historyEntry) =>
+        favorites.some((favorite) => {
+          let favoriteURL = favorite.url;
+          let historyEntryURL = historyEntry.url;
+
+          // These entries don't show in the history
+          if (favoriteURL.startsWith("$") || !favoriteURL.includes(".do")) {
+            return false;
+          }
+
+          if (!favoriteURL.startsWith("/")) {
+            favoriteURL = "/" + favoriteURL;
+          }
+          if (!historyEntryURL.startsWith("/")) {
+            historyEntryURL = "/" + historyEntryURL;
+          }
+
+          const favoriteFullURL = new URL(`https://${instanceName}.service-now.com${favoriteURL}`);
+          const historyEntryFullURL = new URL(`https://${instanceName}.service-now.com${historyEntryURL}`);
+
+          const favoriteParams = new URLSearchParams(favoriteFullURL.search);
+          const historyParams = new URLSearchParams(historyEntryFullURL.search);
+          const favoritePath = favoriteFullURL.pathname;
+          const historyEntryPath = historyEntryFullURL.pathname;
+
+          let favoriteParam = "";
+          let historyParam = "";
+          if (favoritePath.includes("_list.do")) {
+            favoriteParam = favoriteParams.get("sysparm_query") || "";
+            historyParam = historyParams.get("sysparm_query") || "";
+          } else {
+            favoriteParam = favoriteParams.get("sys_id") || favoriteParams.get("sysparm_query") || "";
+            historyParam = historyParams.get("sys_id") || historyParams.get("sysparm_query") || "";
+          }
+
+          return favoritePath == historyEntryPath && favoriteParam == historyParam;
+        }),
+      )
+      .map((historyEntry) => historyEntry.sys_id);
+  }, [favorites, data]);
 
   const sections = useMemo(() => {
     return groupBy(data, (historyEntry) => getSectionTitle(historyEntry.sys_created_on));
@@ -137,7 +206,7 @@ export default function NavigationHistory() {
                 <Actions
                   mutate={() => {
                     mutate();
-                    revalidateFavorites();
+                    mutateFavorites();
                   }}
                 />
               </ActionPanel>
@@ -151,7 +220,7 @@ export default function NavigationHistory() {
               subtitle={`${sections[section].length} ${sections[section].length == 1 ? "result" : "results"}`}
             >
               {sections[section].map((historyEntry) => {
-                const url = `${instanceUrl}${historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`}`;
+                const url = `${instanceUrl}/${historyEntry.url}`;
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -170,7 +239,7 @@ export default function NavigationHistory() {
                   },
                 ];
 
-                if (isUrlInFavorites(url)) {
+                if (favoriteHistoryEntries.includes(historyEntry.sys_id)) {
                   accessories.unshift({
                     icon: { source: Icon.Star, tintColor: Color.Yellow },
                     tooltip: "Favorite",
@@ -204,7 +273,7 @@ export default function NavigationHistory() {
                         <Actions
                           mutate={() => {
                             mutate();
-                            revalidateFavorites();
+                            mutateFavorites();
                           }}
                         />
                       </ActionPanel>

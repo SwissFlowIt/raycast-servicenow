@@ -7,6 +7,7 @@ import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
 import { Data, Field, Instance, Record } from "../types";
+import useFavorites from "../hooks/useFavorites";
 
 export default function SearchResultListItem({
   result,
@@ -22,6 +23,7 @@ export default function SearchResultListItem({
   mutateSearchResults: () => Promise<void>;
 }) {
   const [selectedInstance] = useCachedState<Instance>("instance");
+  const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -100,6 +102,13 @@ export default function SearchResultListItem({
     result.record_url = "/" + result.record_url;
   }
 
+  if (isUrlInFavorites(`${instanceUrl}${result.record_url}`)) {
+    accessories.unshift({
+      icon: { source: Icon.Star, tintColor: Color.Yellow },
+      tooltip: "Favorite",
+    });
+  }
+
   return (
     <List.Item
       key={result.sys_id}
@@ -116,7 +125,12 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
-          <Actions mutate={mutateSearchResults} />
+          <Actions
+            mutate={() => {
+              revalidateFavorites();
+              mutateSearchResults();
+            }}
+          />
         </ActionPanel>
       }
       accessories={accessories}
