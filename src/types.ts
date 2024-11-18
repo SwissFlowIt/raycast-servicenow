@@ -127,33 +127,42 @@ export interface NavigationHistoryEntry {
   sys_created_on: string;
 }
 
-export interface NavigationMenuResponse {
-  result: NavigationMenuEntry[];
-}
-
-export interface NavigationMenuEntry {
-  filter: string;
-  link_type: string;
-  sys_id: string;
-  assessment: string;
-  query: string;
-  name: string;
-  report: string;
-  title: string;
-  order: string;
-  "application.title": string;
-  "application.order": string;
-}
-
 export interface FavoritesResponse {
-  result: Favorite[];
+  list: Favorite[];
 }
 
 export interface Favorite {
-  sys_id: string;
+  id: string;
   title: string;
-  url: string;
-  order: string;
-  "group.sys_id": string;
-  "group.title": string;
+  group: boolean;
+  groupId: string;
+  favorites?: Favorite[];
+  type?: string;
+  separator?: boolean;
+  url?: string;
+  query?: string;
+  table?: string;
+  group_title?: string;
+  section_title?: string;
+  keywords?: string[];
+}
+
+export interface NavigationMenuResponse {
+  result: NavigationMenu[];
+}
+
+export interface NavigationMenu {
+  title: string;
+  modules: Module[];
+  id: string;
+}
+
+export interface Module {
+  uri: string;
+  title: string;
+  favorited: boolean;
+  type: string;
+  tableName: string;
+  id: string;
+  modules?: Module[];
 }

@@ -3,12 +3,12 @@ import { useMemo, useState } from "react";
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 
-import { FavoritesResponse, Instance } from "../types";
+import { Favorite, FavoritesResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
-import { filter, groupBy, orderBy } from "lodash";
+import { filter } from "lodash";
 
 export default function Favorites(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -23,7 +23,7 @@ export default function Favorites(props: { groupId?: string }) {
 
   const { isLoading, data, mutate } = useFetch(
     () => {
-      return `${instanceUrl}/api/now/table/sys_ui_bookmark?sysparm_query=userDYNAMIC90d1921e5f510100a9ad2572f2b477fe&sysparm_fields=sys_id,group.title,title,url,order,group.sys_id`;
+      return `${instanceUrl}/api/now/ui/favorite`;
     },
     {
       headers: {
@@ -36,10 +36,10 @@ export default function Favorites(props: { groupId?: string }) {
         showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
       },
 
-      mapResult(response: FavoritesResponse) {
+      mapResult(response: { result: FavoritesResponse }) {
         setErrorFetching(false);
 
-        return { data: response.result, hasMore: response.result.length > 0 };
+        return { data: response.result.list };
       },
       keepPreviousData: true,
     },
@@ -47,35 +47,40 @@ export default function Favorites(props: { groupId?: string }) {
 
   const filterByGroup = useMemo(() => {
     if (!groupId) return data;
-    return filter(data, (favorite) => favorite["group.sys_id"] === groupId);
+    return filter(data, (favorite) => favorite.id === groupId);
   }, [data, groupId]);
+
+  const recursiveFilter = (favorites: Favorite[], terms: string[], keywords: string[]): Favorite[] => {
+    return favorites
+      .map((favorite) => {
+        const newKeywords = [...keywords, favorite.title.toLowerCase()];
+        const matches = terms.every((term) => newKeywords.some((string) => string.includes(term.toLowerCase())));
+
+        const filteredFavorites = favorite.favorites ? recursiveFilter(favorite.favorites, terms, newKeywords) : [];
+        if (matches || filteredFavorites.length > 0) {
+          return {
+            ...favorite,
+            favorites: filteredFavorites,
+          };
+        }
+      })
+      .filter((favorite) => favorite != undefined);
+  };
 
   const filteredData = useMemo(() => {
     if (searchTerm === "") return filterByGroup;
     const terms = searchTerm.split(" ");
-    return filter(filterByGroup, (favorite) =>
-      terms.every((term) =>
-        [favorite.title.toLowerCase(), favorite["group.title"].toLowerCase()].some((string) =>
-          string.includes(term.toLowerCase()),
-        ),
-      ),
-    );
+
+    return filterByGroup ? recursiveFilter(filterByGroup, terms, []) : [];
   }, [filterByGroup, searchTerm]);
 
-  const orderedData = useMemo(() => {
-    return orderBy(filteredData, ["group.title", (item) => Number(item["order"]), "title"], ["asc", "asc", "asc"]);
+  const groupedFavorites = useMemo(() => {
+    return filter(filteredData, (favorite) => favorite.group);
   }, [filteredData]);
 
-  const groupedFavorites = useMemo(() => {
-    return groupBy(
-      filter(orderedData, (favorite) => favorite["group.sys_id"] != ""),
-      (favorite) => favorite["group.sys_id"],
-    );
-  }, [orderedData]);
-
   const ungroupedFavorites = useMemo(() => {
-    return filter(orderedData, (favorite) => favorite["group.title"] == "");
-  }, [orderedData]);
+    return filter(filteredData, (favorite) => !favorite.group);
+  }, [filteredData]);
 
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
@@ -135,11 +140,11 @@ export default function Favorites(props: { groupId?: string }) {
                   title="Groups"
                   subtitle={`${Object.keys(groupedFavorites).length} ${Object.keys(groupedFavorites).length > 1 ? "results" : "result"}`}
                 >
-                  {Object.keys(groupedFavorites).map((groupId) => {
-                    const groupName = groupedFavorites[groupId][0]["group.title"];
+                  {groupedFavorites.map((group) => {
+                    const groupName = group.title;
                     return (
                       <List.Item
-                        key={groupId}
+                        key={group.id}
                         title={groupName}
                         icon={{ source: Icon.Folder, tintColor: Color.Green }}
                         actions={
@@ -148,7 +153,7 @@ export default function Favorites(props: { groupId?: string }) {
                               <Action.Push
                                 title="Browse"
                                 icon={Icon.ChevronRight}
-                                target={<Favorites groupId={groupId} />}
+                                target={<Favorites groupId={group.id} />}
                               />
                             </ActionPanel.Section>
                             <Actions mutate={mutate} />
@@ -159,49 +164,22 @@ export default function Favorites(props: { groupId?: string }) {
                   })}
                 </List.Section>
               ) : (
-                Object.keys(groupedFavorites).map((groupId) => {
-                  const groupName = groupedFavorites[groupId][0]["group.title"];
+                groupedFavorites.map((group) => {
+                  const groupName = group.title;
                   return (
                     <List.Section
-                      key={groupId}
+                      key={group.id}
                       title={groupName}
-                      subtitle={`${groupName.length} ${groupName.length > 1 ? "results" : "result"}`}
+                      subtitle={`${groupName.length} ${group.favorites!.length > 1 ? "results" : "result"}`}
                     >
-                      {groupedFavorites[groupId].map((favorite) => {
-                        const url = favorite.url.startsWith("/")
-                          ? `${instanceUrl}${favorite.url}`
-                          : `${instanceUrl}/${favorite.url}`;
-                        const table = favorite.url.split(".do")[0].replace("/", "");
-                        const { icon: iconName, color: colorName } = getTableIconAndColor(table);
-
-                        const icon: Action.Props["icon"] = {
-                          source: Icon[iconName as keyof typeof Icon],
-                          tintColor: Color[colorName as keyof typeof Color],
-                        };
-
+                      {group.favorites?.map((favorite) => {
                         return (
-                          <List.Item
-                            key={favorite.sys_id}
-                            title={favorite.title}
-                            keywords={favorite["group.title"].split(" ")}
-                            icon={icon}
-                            actions={
-                              <ActionPanel>
-                                <ActionPanel.Section title={favorite.title}>
-                                  <Action.OpenInBrowser
-                                    title="Open in Servicenow"
-                                    url={url}
-                                    icon={{ source: "servicenow.svg" }}
-                                  />
-                                  <Action.CopyToClipboard
-                                    title="Copy URL"
-                                    content={url}
-                                    shortcut={Keyboard.Shortcut.Common.CopyPath}
-                                  />
-                                </ActionPanel.Section>
-                                <Actions mutate={mutate} />
-                              </ActionPanel>
-                            }
+                          <FavoriteItem
+                            key={favorite.id}
+                            favorite={favorite}
+                            instanceUrl={instanceUrl}
+                            mutate={mutate}
+                            group={groupName}
                           />
                         );
                       })}
@@ -215,43 +193,9 @@ export default function Favorites(props: { groupId?: string }) {
                 title="Ungrouped"
                 subtitle={`${ungroupedFavorites.length} ${ungroupedFavorites.length > 1 ? "results" : "result"}`}
               >
-                {ungroupedFavorites.map((favorite) => {
-                  const url = favorite.url.startsWith("/")
-                    ? `${instanceUrl}${favorite.url}`
-                    : `${instanceUrl}/${favorite.url}`;
-                  const table = favorite.url.split(".do")[0].replace("/", "");
-                  const { icon: iconName, color: colorName } = getTableIconAndColor(table);
-
-                  const icon: Action.Props["icon"] = {
-                    source: Icon[iconName as keyof typeof Icon],
-                    tintColor: Color[colorName as keyof typeof Color],
-                  };
-
-                  return (
-                    <List.Item
-                      key={favorite.sys_id}
-                      title={favorite.title}
-                      icon={icon}
-                      actions={
-                        <ActionPanel>
-                          <ActionPanel.Section title={favorite.title}>
-                            <Action.OpenInBrowser
-                              title="Open in Servicenow"
-                              url={url}
-                              icon={{ source: "servicenow.svg" }}
-                            />
-                            <Action.CopyToClipboard
-                              title="Copy URL"
-                              content={url}
-                              shortcut={Keyboard.Shortcut.Common.CopyPath}
-                            />
-                          </ActionPanel.Section>
-                          <Actions mutate={mutate} />
-                        </ActionPanel>
-                      }
-                    />
-                  );
-                })}
+                {ungroupedFavorites.map((favorite) => (
+                  <FavoriteItem key={favorite.id} favorite={favorite} instanceUrl={instanceUrl} mutate={mutate} />
+                ))}
               </List.Section>
             )}
           </>
@@ -272,5 +216,65 @@ export default function Favorites(props: { groupId?: string }) {
         />
       )}
     </List>
+  );
+}
+
+function FavoriteItem(props: {
+  favorite: Favorite;
+  instanceUrl: string;
+  mutate: () => void;
+  group?: string;
+  section?: string;
+}) {
+  const { favorite: favorite, instanceUrl, mutate, group = "", section = "" } = props;
+
+  if (favorite.separator) {
+    return favorite.favorites!.map((f) => {
+      return (
+        <FavoriteItem
+          key={f.id}
+          favorite={f}
+          instanceUrl={instanceUrl}
+          mutate={mutate}
+          group={group}
+          section={favorite.title}
+        />
+      );
+    });
+  }
+
+  const url = favorite.url!.startsWith("/") ? `${instanceUrl}${favorite.url}` : `${instanceUrl}/${favorite.url}`;
+  const { icon: iconName, color: colorName } = getTableIconAndColor(favorite.table || "");
+
+  const icon: Action.Props["icon"] = {
+    source: Icon[iconName as keyof typeof Icon],
+    tintColor: Color[colorName as keyof typeof Color],
+  };
+
+  const accessories: List.Item.Accessory[] = section
+    ? [
+        {
+          tag: { value: section },
+        },
+      ]
+    : [];
+
+  return (
+    <List.Item
+      key={favorite.id}
+      title={favorite.title}
+      accessories={accessories}
+      keywords={[...group.split(" "), ...section.split(" ")]}
+      icon={icon}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title={favorite.title}>
+            <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
+          </ActionPanel.Section>
+          <Actions mutate={mutate} />
+        </ActionPanel>
+      }
+    />
   );
 }

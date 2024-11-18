@@ -1,14 +1,13 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 
-import { NavigationMenuResponse, NavigationMenuEntry, Instance } from "../types";
+import { NavigationMenuResponse, Instance, Module } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
-import { groupBy, orderBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 
 export default function NavigationMenu() {
@@ -16,7 +15,6 @@ export default function NavigationMenu() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  let separator = "";
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
@@ -24,7 +22,7 @@ export default function NavigationMenu() {
 
   const { isLoading, data, mutate } = useFetch(
     () => {
-      return `${instanceUrl}/api/now/table/sys_app_module?sysparm_query=active=true^application.active=true&sysparm_fields=sys_id,title,name,filter,query,link_type,assessment,report,order,application.title,application.order&sysparm_exclude_reference_link=true`;
+      return `${instanceUrl}/api/now/ui/navigator`;
     },
     {
       headers: {
@@ -40,58 +38,17 @@ export default function NavigationMenu() {
       mapResult(response: NavigationMenuResponse) {
         setErrorFetching(false);
 
-        return { data: response.result, hasMore: response.result.length > 0 };
+        return { data: response.result };
       },
       keepPreviousData: true,
     },
   );
-
-  const sections = useMemo(() => {
-    const orderedData = orderBy(
-      data,
-      [
-        (item) => item["application.order"] != "",
-        (item) => Number(item["application.order"]),
-        "application.title",
-        (item) => item.order != "",
-        (item) => Number(item.order),
-        "title",
-      ],
-      ["desc", "asc", "asc", "desc", "asc", "asc"],
-    );
-    return groupBy(orderedData, "application.title");
-  }, [data]);
 
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
       setSelectedInstance(aux);
       LocalStorage.setItem("selected-instance", JSON.stringify(aux));
-    }
-  };
-
-  const getUrl = (menu: NavigationMenuEntry) => {
-    const type = menu.link_type;
-    if (type == "LIST" || type == "") {
-      return `${menu.name}_list.do?sysparm_query=${menu.filter || menu.query}`;
-    }
-    if (type == "DETAIL") {
-      return `${menu.name}.do?sysparm_query=${menu.filter}`;
-    }
-    if (type == "DIRECT" || type == "MAP") {
-      return `${menu.query.startsWith("/") ? menu.query.split("/")[1] : menu.query}`;
-    }
-    if (type == "NEW") {
-      return `${menu.name}.do?sys_id=-1&sysparm_query=${menu.filter}`;
-    }
-    if (type == "SCRIPT") {
-      return `sys.scripts.do?action=run_module&sys_id=${menu.sys_id}`;
-    }
-    if (type == "REPORT") {
-      return `sys_report_template.do?jvar_report_id=${menu.report}`;
-    }
-    if (type == "ASSESSMENT") {
-      return `assessment_take2.do?sysparm_assessable_type=${menu.assessment}`;
     }
   };
 
@@ -141,75 +98,46 @@ export default function NavigationMenu() {
             }
           />
         ) : (
-          Object.keys(sections).map((section) => {
-            separator = "";
+          data?.map((group) => {
             return (
               <List.Section
-                key={section}
-                title={section}
-                subtitle={`${sections[section].length} ${sections[section].length == 1 ? "result" : "results"}`}
+                key={group.id}
+                title={group.title}
+                subtitle={`${group.modules.length} ${group.modules.length == 1 ? "result" : "results"}`}
               >
-                {sections[section].map((menu) => {
-                  if (menu.link_type == "SEPARATOR") {
-                    separator = menu.title;
-                    return;
-                  }
-
-                  const { icon: iconName, color: colorName } = getTableIconAndColor(menu.name);
-                  const icon: Action.Props["icon"] = {
-                    source: Icon[iconName as keyof typeof Icon],
-                    tintColor: Color[colorName as keyof typeof Color],
-                  };
-
-                  const accessories: List.Item.Accessory[] = separator
-                    ? [
-                        {
-                          tag: { value: separator },
-                        },
-                      ]
-                    : [];
-
-                  const url = `${instanceUrl}/${getUrl(menu)}`;
-                  if (isUrlInFavorites(url)) {
-                    accessories.unshift({
-                      icon: { source: Icon.Star, tintColor: Color.Yellow },
-                      tooltip: "Favorite",
+                {group.modules.map((module) => {
+                  if (module.type == "SEPARATOR" && module.modules) {
+                    return module.modules.map((m) => {
+                      const url = `${instanceUrl}${m.uri.startsWith("/") ? "" : "/"}${m.uri}`;
+                      return (
+                        <ModuleItem
+                          key={m.id}
+                          module={m}
+                          url={url}
+                          mutate={() => {
+                            mutate();
+                            revalidateFavorites();
+                          }}
+                          group={group.title}
+                          section={module.title}
+                          isFavorite={isUrlInFavorites(url)}
+                        />
+                      );
                     });
                   }
 
+                  const url = `${instanceUrl}${module.uri.startsWith("/") ? "" : "/"}${module.uri}`;
                   return (
-                    <List.Item
-                      key={menu.sys_id}
-                      icon={icon}
-                      title={menu.title}
-                      accessories={accessories}
-                      keywords={[
-                        ...menu.title.split(" "),
-                        ...menu["application.title"].split(" "),
-                        ...separator.split(" "),
-                      ]}
-                      actions={
-                        <ActionPanel>
-                          <ActionPanel.Section title={menu.title}>
-                            <Action.OpenInBrowser
-                              title="Open in Servicenow"
-                              url={url}
-                              icon={{ source: "servicenow.svg" }}
-                            />
-                            <Action.CopyToClipboard
-                              title="Copy URL"
-                              content={url}
-                              shortcut={Keyboard.Shortcut.Common.CopyPath}
-                            />
-                          </ActionPanel.Section>
-                          <Actions
-                            mutate={() => {
-                              mutate();
-                              revalidateFavorites();
-                            }}
-                          />
-                        </ActionPanel>
-                      }
+                    <ModuleItem
+                      key={module.id}
+                      module={module}
+                      url={url}
+                      mutate={() => {
+                        mutate();
+                        revalidateFavorites();
+                      }}
+                      group={group.title}
+                      isFavorite={isUrlInFavorites(url)}
                     />
                   );
                 })}
@@ -233,5 +161,53 @@ export default function NavigationMenu() {
         />
       )}
     </List>
+  );
+}
+
+function ModuleItem(props: {
+  module: Module;
+  url: string;
+  isFavorite: boolean;
+  mutate: () => void;
+  group: string;
+  section?: string;
+}) {
+  const { module, url, isFavorite, mutate, group, section = "" } = props;
+  const { icon: iconName, color: colorName } = getTableIconAndColor(module.tableName || "");
+  const icon: Action.Props["icon"] = {
+    source: Icon[iconName as keyof typeof Icon],
+    tintColor: Color[colorName as keyof typeof Color],
+  };
+
+  const accessories: List.Item.Accessory[] = section
+    ? [
+        {
+          tag: { value: section },
+        },
+      ]
+    : [];
+
+  if (isFavorite) {
+    accessories.unshift({
+      icon: { source: Icon.Star, tintColor: Color.Yellow },
+      tooltip: "Favorite",
+    });
+  }
+  return (
+    <List.Item
+      icon={icon}
+      title={module.title}
+      accessories={accessories}
+      keywords={[...group.split(" "), ...section.split(" "), ...module.title.split(" ")]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title={module.title}>
+            <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
+          </ActionPanel.Section>
+          <Actions mutate={mutate} />
+        </ActionPanel>
+      }
+    />
   );
 }
