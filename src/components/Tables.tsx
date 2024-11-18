@@ -102,7 +102,7 @@ export default function Tables() {
             if (table.super_class)
               accessories.push({
                 tag: { value: table.super_class },
-                tooltip: "Super Class",
+                tooltip: `Super Class: ${table.super_class}`,
               });
             return (
               <List.Item

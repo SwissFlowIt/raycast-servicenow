@@ -261,6 +261,7 @@ function FavoriteItem(props: {
     ? [
         {
           tag: { value: section },
+          tooltip: `Section: ${section}`,
         },
       ]
     : [];

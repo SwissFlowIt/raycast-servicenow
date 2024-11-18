@@ -56,6 +56,22 @@ export default function NavigationMenu(props: { groupId?: string }) {
     return filter(data, (menu) => menu.id === groupId);
   }, [data, groupId]);
 
+  const numberOfModulesPerGroup = useMemo(() => {
+    if (!data) return {};
+
+    const result: { [key: string]: number } = {};
+
+    const recursiveCount = (modules: Module[]): number => {
+      return modules.reduce((acc, module) => acc + (module.modules ? recursiveCount(module.modules) : 1), 0);
+    };
+
+    data.forEach((group) => {
+      result[group.id] = recursiveCount(group.modules!);
+    });
+
+    return result;
+  }, [data]);
+
   const recursiveFilter = (modules: Module[], terms: string[], keywords: string[]): Module[] => {
     return modules
       .map((module) => {
@@ -135,49 +151,62 @@ export default function NavigationMenu(props: { groupId?: string }) {
             }
           />
         ) : searchTerm == "" && groupId == "" ? (
-          filteredData?.map((group) => {
-            const accessories = isMenuInFavorites(group.id)
-              ? [
-                  {
-                    icon: { source: Icon.Star, tintColor: Color.Yellow },
-                    tooltip: "Favorite",
-                  },
-                ]
-              : [];
+          <List.Section
+            key={"groups-total"}
+            title={"Menus"}
+            subtitle={`${filteredData?.length} ${filteredData?.length == 1 ? "result" : "results"}`}
+          >
+            {filteredData?.map((group) => {
+              const numberOfModules = numberOfModulesPerGroup[group.id];
+              const accessories: List.Item.Accessory[] = [
+                {
+                  icon: Icon.BulletPoints,
+                  text: numberOfModules.toString(),
+                  tooltip: `Modules: ${numberOfModules}`,
+                },
+              ];
+              if (isMenuInFavorites(group.id)) {
+                accessories.unshift({
+                  icon: { source: Icon.Star, tintColor: Color.Yellow },
+                  tooltip: "Favorite",
+                });
+              }
 
-            return (
-              <List.Item
-                key={group.id}
-                title={group.title}
-                accessories={accessories}
-                icon={{ source: Icon.Folder, tintColor: Color.Green }}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title={group.title}>
-                      <Action.Push
-                        title="Browse"
-                        icon={Icon.ChevronRight}
-                        target={<NavigationMenu groupId={group.id} />}
+              return (
+                <List.Item
+                  key={group.id}
+                  title={group.title}
+                  accessories={accessories}
+                  icon={{ source: Icon.Folder, tintColor: Color.Green }}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section title={group.title}>
+                        <Action.Push
+                          title="Browse"
+                          icon={Icon.ChevronRight}
+                          target={<NavigationMenu groupId={group.id} />}
+                        />
+                      </ActionPanel.Section>
+                      <Actions
+                        mutate={() => {
+                          mutate();
+                          revalidateFavorites();
+                        }}
                       />
-                    </ActionPanel.Section>
-                    <Actions
-                      mutate={() => {
-                        mutate();
-                        revalidateFavorites();
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
         ) : (
           filteredData?.map((group) => {
+            const numberOfModules = numberOfModulesPerGroup[group.id];
             return (
               <List.Section
                 key={group.id}
                 title={group.title}
-                subtitle={`${group.modules?.length} ${group.modules?.length == 1 ? "result" : "results"}`}
+                subtitle={`${numberOfModules} ${numberOfModules == 1 ? "result" : "results"}`}
               >
                 {group.modules?.map((module) => {
                   if (module.type == "SEPARATOR" && module.modules) {
@@ -256,6 +285,7 @@ function ModuleItem(props: {
     ? [
         {
           tag: { value: section },
+          tooltip: `Section: ${section}`,
         },
       ]
     : [];

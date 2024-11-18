@@ -159,4 +159,5 @@ export interface Module {
   tableName?: string;
   id: string;
   modules?: Module[];
+  count?: number;
 }
