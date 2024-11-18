@@ -4,7 +4,7 @@ import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 import { Favorite, FavoritesResponse, Instance } from "../types";
-import { getParamFromURL } from "../utils/getParamFromURL";
+import { extractParamFromURL } from "../utils/extractParamFromURL";
 
 /**
  * Hook to fetch and manage a user's favorites in ServiceNow.
@@ -33,23 +33,28 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
       },
 
       mapResult(response: { result: FavoritesResponse }) {
+        if (response && response.result && Object.keys(response.result).length === 0) {
+          showToast(Toast.Style.Failure, "Could not fetch favorites");
+          return { data: [] };
+        }
         return { data: response.result.list };
       },
       keepPreviousData: true,
     },
   );
 
-  function favoritesParams(favorites: Favorite[]) {
-    const urlsParams: { table: string; filter: string }[] = [];
+  const favoritesData = useMemo(() => {
+    if (!favorites) return [];
+    const urlsParams: { path: string; param: string }[] = [];
 
     const recursiveExtract = (favorites: Favorite[]) => {
       favorites.forEach((favorite) => {
         let favoriteURL = favorite.url;
         if (favoriteURL) {
-          if (!favoriteURL?.startsWith("/")) {
+          if (!favoriteURL.startsWith("/")) {
             favoriteURL = "/" + favoriteURL;
           }
-          urlsParams.push(getParamFromURL(`${instanceUrl}${favoriteURL}`));
+          urlsParams.push(extractParamFromURL(`${instanceUrl}${favoriteURL}`));
         }
 
         if (favorite.favorites) {
@@ -60,32 +65,15 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
 
     recursiveExtract(favorites);
     return urlsParams;
-  }
-
-  const favoritesData = useMemo(() => {
-    if (!favorites) return [];
-    const result = favoritesParams(favorites);
-    return result;
   }, [favorites]);
-
-  /*   const favoritesData = useMemo(() => {
-    return favorites?.map((favorite) => {
-      let favoriteURL = favorite.url;
-      if (!favoriteURL?.startsWith("/")) {
-        favoriteURL = "/" + favoriteURL;
-      }
-
-      return getParamFromURL(`${instanceUrl}${favoriteURL}`);
-    });
-  }, [favorites]); */
 
   const isUrlInFavorites = useCallback(
     (url: string) => {
       if (!favoritesData) return false;
 
-      const menuURLData = getParamFromURL(url);
+      const menuURLData = extractParamFromURL(url);
       return favoritesData.some((favorite) => {
-        return favorite.table == menuURLData.table && favorite.filter == menuURLData.filter;
+        return favorite.path == menuURLData.path && favorite.param == menuURLData.param;
       });
     },
     [favoritesData],

@@ -37,8 +37,13 @@ export default function Favorites(props: { groupId?: string }) {
       },
 
       mapResult(response: { result: FavoritesResponse }) {
-        setErrorFetching(false);
+        if (response && response.result && Object.keys(response.result).length === 0) {
+          setErrorFetching(true);
+          showToast(Toast.Style.Failure, "Could not fetch favorites");
+          return { data: [] };
+        }
 
+        setErrorFetching(false);
         return { data: response.result.list };
       },
       keepPreviousData: true,
@@ -94,6 +99,7 @@ export default function Favorites(props: { groupId?: string }) {
     <List
       onSearchTextChange={setSearchTerm}
       isLoading={isLoading}
+      searchBarPlaceholder="Filter by favorite, group, section"
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}

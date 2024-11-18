@@ -14,19 +14,19 @@
     {
       "name": "search",
       "title": "Search",
-      "description": "View past searches, perform new queries, and switch between ServiceNow instances",
+      "description": "View past searches, perform new queries, and switch between ServiceNow instances.",
       "mode": "view"
     },
     {
       "name": "manage-instance-profiles",
       "title": "Manage Instance Profiles",
-      "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
+      "description": "Configure and manage your ServiceNow instance profiles for use in search queries.",
       "mode": "view"
     },
     {
       "name": "quickly-search",
       "title": "Quickly Search",
-      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps.",
       "mode": "view",
       "arguments": [
         {
@@ -46,7 +46,7 @@
     {
       "name": "quickly-search-selected-instance",
       "title": "Quickly Search in Selected Instance",
-      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps.",
       "mode": "view",
       "arguments": [
         {
@@ -60,19 +60,19 @@
     {
       "name": "open-all-instances",
       "title": "Open All Instances",
-      "description": "Open all configured ServiceNow instances in the browser",
+      "description": "Open all configured ServiceNow instances in the browser.",
       "mode": "no-view"
     },
     {
       "name": "open-selected-instance",
       "title": "Open Selected Instance",
-      "description": "Open the currently selected ServiceNow instance in the browser",
+      "description": "Open the currently selected ServiceNow instance in the browser.",
       "mode": "no-view"
     },
     {
       "name": "open-current-url",
       "title": "Open Current URL",
-      "description": "Open the current ServiceNow URL in the specified instance",
+      "description": "Open the current ServiceNow URL in the specified instance.",
       "mode": "no-view",
       "arguments": [
         {
@@ -86,19 +86,19 @@
     {
       "name": "open-current-url-in-selected-instance",
       "title": "Open Current URL in Selected Instance",
-      "description": "Open the current ServiceNow URL in the selected instance",
+      "description": "Open the current ServiceNow URL in the selected instance.",
       "mode": "no-view"
     },
     {
       "name": "add-instance-profile",
       "title": "Add Instance Profile",
-      "description": "Add a new instance profile for your searches",
+      "description": "Add a new instance profile for your searches.",
       "mode": "view"
     },
     {
       "name": "explore-tables",
       "title": "Tables",
-      "description": "Browse and explore the tables within an instance",
+      "description": "Browse and explore the tables within an instance.",
       "mode": "view"
     },
     {
@@ -124,19 +124,19 @@
     {
       "name": "explore-navigation-history",
       "title": "Explore Navigation History",
-      "description": "Browse and explore your navigation history within an instance",
+      "description": "Browse and explore your navigation history within an instance.",
       "mode": "view"
     },
     {
       "name": "explore-favorites",
       "title": "Explore Favorites",
-      "description": "",
+      "description": "View your favorite items within a ServiceNow instance, such as frequently used modules or records.",
       "mode": "view"
     },
     {
       "name": "explore-navigation-menu",
       "title": "Explore Navigation Menu",
-      "description": "",
+      "description": "Browse the navigation menu of the selected ServiceNow instance to quickly access different modules and applications.",
       "mode": "view"
     }
   ],

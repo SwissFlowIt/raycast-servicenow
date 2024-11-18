@@ -36,8 +36,12 @@ export default function NavigationMenu() {
       },
 
       mapResult(response: NavigationMenuResponse) {
+        if (response && response.result && response.result.length === 0) {
+          setErrorFetching(true);
+          showToast(Toast.Style.Failure, "Could not fetch favorites");
+          return { data: [] };
+        }
         setErrorFetching(false);
-
         return { data: response.result };
       },
       keepPreviousData: true,
@@ -55,6 +59,7 @@ export default function NavigationMenu() {
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder="Filter by module, menu, section..."
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
@@ -125,7 +130,6 @@ export default function NavigationMenu() {
                       );
                     });
                   }
-
                   const url = `${instanceUrl}${module.uri.startsWith("/") ? "" : "/"}${module.uri}`;
                   return (
                     <ModuleItem
@@ -202,7 +206,11 @@ function ModuleItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section title={module.title}>
-            <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+            <Action.OpenInBrowser
+              title="Open in Servicenow"
+              url={decodeURIComponent(url)}
+              icon={{ source: "servicenow.svg" }}
+            />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
           <Actions mutate={mutate} />
