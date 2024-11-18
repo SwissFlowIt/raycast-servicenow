@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
@@ -9,12 +9,15 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useFavorites from "../hooks/useFavorites";
+import { filter } from "lodash";
 
-export default function NavigationMenu() {
+export default function NavigationMenu(props: { groupId?: string }) {
+  const { groupId = "" } = props;
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
+  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
@@ -28,7 +31,7 @@ export default function NavigationMenu() {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
-      execute: !!selectedInstance,
+      execute: selectedInstance && !groupId,
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
@@ -48,6 +51,34 @@ export default function NavigationMenu() {
     },
   );
 
+  const filterByGroup = useMemo(() => {
+    if (!groupId) return data;
+    return filter(data, (menu) => menu.id === groupId);
+  }, [data, groupId]);
+
+  const recursiveFilter = (modules: Module[], terms: string[], keywords: string[]): Module[] => {
+    return modules
+      .map((module) => {
+        const newKeywords = module.title ? [...keywords, module.title.toLowerCase()] : keywords;
+        const matches = terms.every((term) => newKeywords.some((string) => string.includes(term.toLowerCase())));
+
+        const filteredModules = module.modules ? recursiveFilter(module.modules, terms, newKeywords) : [];
+        if (matches || filteredModules.length > 0) {
+          return {
+            ...module,
+            modules: filteredModules,
+          };
+        }
+      })
+      .filter((favorite) => favorite != undefined);
+  };
+
+  const filteredData = useMemo(() => {
+    if (searchTerm === "") return filterByGroup;
+    const terms = searchTerm.split(" ");
+    return filterByGroup ? recursiveFilter(filterByGroup, terms, []) : [];
+  }, [filterByGroup, searchTerm]);
+
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
     if (aux) {
@@ -58,8 +89,9 @@ export default function NavigationMenu() {
 
   return (
     <List
+      onSearchTextChange={setSearchTerm}
       isLoading={isLoading}
-      searchBarPlaceholder="Filter by module, menu, section..."
+      searchBarPlaceholder="Filter by menu, section, module..."
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
@@ -102,18 +134,55 @@ export default function NavigationMenu() {
               </ActionPanel>
             }
           />
+        ) : searchTerm == "" && groupId == "" ? (
+          filteredData?.map((group) => {
+            const accessories = isMenuInFavorites(group.id)
+              ? [
+                  {
+                    icon: { source: Icon.Star, tintColor: Color.Yellow },
+                    tooltip: "Favorite",
+                  },
+                ]
+              : [];
+
+            return (
+              <List.Item
+                key={group.id}
+                title={group.title}
+                accessories={accessories}
+                icon={{ source: Icon.Folder, tintColor: Color.Green }}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title={group.title}>
+                      <Action.Push
+                        title="Browse"
+                        icon={Icon.ChevronRight}
+                        target={<NavigationMenu groupId={group.id} />}
+                      />
+                    </ActionPanel.Section>
+                    <Actions
+                      mutate={() => {
+                        mutate();
+                        revalidateFavorites();
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
         ) : (
-          data?.map((group) => {
+          filteredData?.map((group) => {
             return (
               <List.Section
                 key={group.id}
                 title={group.title}
-                subtitle={`${group.modules.length} ${group.modules.length == 1 ? "result" : "results"}`}
+                subtitle={`${group.modules?.length} ${group.modules?.length == 1 ? "result" : "results"}`}
               >
-                {group.modules.map((module) => {
+                {group.modules?.map((module) => {
                   if (module.type == "SEPARATOR" && module.modules) {
                     return module.modules.map((m) => {
-                      const url = `${instanceUrl}${m.uri.startsWith("/") ? "" : "/"}${m.uri}`;
+                      const url = `${instanceUrl}${m.uri?.startsWith("/") ? "" : "/"}${m.uri}`;
                       return (
                         <ModuleItem
                           key={m.id}
@@ -130,7 +199,7 @@ export default function NavigationMenu() {
                       );
                     });
                   }
-                  const url = `${instanceUrl}${module.uri.startsWith("/") ? "" : "/"}${module.uri}`;
+                  const url = `${instanceUrl}${module.uri?.startsWith("/") ? "" : "/"}${module.uri}`;
                   return (
                     <ModuleItem
                       key={module.id}

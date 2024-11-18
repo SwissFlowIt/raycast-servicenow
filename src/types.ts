@@ -137,6 +137,7 @@ export interface Favorite {
   group: boolean;
   groupId: string;
   favorites?: Favorite[];
+  applicationId?: string;
   type?: string;
   separator?: boolean;
   url?: string;
@@ -148,21 +149,14 @@ export interface Favorite {
 }
 
 export interface NavigationMenuResponse {
-  result: NavigationMenu[];
-}
-
-export interface NavigationMenu {
-  title: string;
-  modules: Module[];
-  id: string;
+  result: Module[];
 }
 
 export interface Module {
-  uri: string;
+  uri?: string;
   title: string;
-  favorited: boolean;
-  type: string;
-  tableName: string;
+  type?: string;
+  tableName?: string;
   id: string;
   modules?: Module[];
 }

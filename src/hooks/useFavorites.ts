@@ -43,6 +43,11 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     },
   );
 
+  const favoritesGroups = useMemo(() => {
+    if (!favorites) return [];
+    return favorites.filter((favorite) => favorite.group).map((favorite) => favorite.applicationId);
+  }, [favorites]);
+
   const favoritesData = useMemo(() => {
     if (!favorites) return [];
     const urlsParams: { path: string; param: string }[] = [];
@@ -67,6 +72,15 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     return urlsParams;
   }, [favorites]);
 
+  const isMenuInFavorites = useCallback(
+    (groupId: string) => {
+      if (!favoritesGroups) return false;
+
+      return favoritesGroups.includes(groupId);
+    },
+    [favoritesData],
+  );
+
   const isUrlInFavorites = useCallback(
     (url: string) => {
       if (!favoritesData) return false;
@@ -79,7 +93,7 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     [favoritesData],
   );
 
-  return { isUrlInFavorites, revalidateFavorites };
+  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites };
 };
 
 export default useFavorites;
