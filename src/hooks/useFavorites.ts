@@ -3,6 +3,8 @@ import { useCallback, useMemo } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+import fetch from "node-fetch";
+
 import { Favorite, FavoritesResponse, Instance } from "../types";
 import { extractParamFromURL } from "../utils/extractParamFromURL";
 
@@ -44,13 +46,15 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
   );
 
   const favoritesGroups = useMemo(() => {
-    if (!favorites) return [];
-    return favorites.filter((favorite) => favorite.group).map((favorite) => favorite.applicationId);
+    if (!favorites) return {};
+    return Object.fromEntries(
+      favorites.filter((favorite) => favorite.group).map((favorite) => [favorite.applicationId, favorite.id]),
+    );
   }, [favorites]);
 
   const favoritesData = useMemo(() => {
     if (!favorites) return [];
-    const urlsParams: { path: string; param: string }[] = [];
+    const urlsParams: { id: string; path: string; param: string }[] = [];
 
     const recursiveExtract = (favorites: Favorite[]) => {
       favorites.forEach((favorite) => {
@@ -59,7 +63,7 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
           if (!favoriteURL.startsWith("/")) {
             favoriteURL = "/" + favoriteURL;
           }
-          urlsParams.push(extractParamFromURL(`${instanceUrl}${favoriteURL}`));
+          urlsParams.push({ ...extractParamFromURL(`${instanceUrl}${favoriteURL}`), id: favorite.id });
         }
 
         if (favorite.favorites) {
@@ -72,28 +76,64 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     return urlsParams;
   }, [favorites]);
 
-  const isMenuInFavorites = useCallback(
-    (groupId: string) => {
-      if (!favoritesGroups) return false;
-
-      return favoritesGroups.includes(groupId);
-    },
-    [favoritesData],
-  );
+  const isMenuInFavorites = (groupId: string) => {
+    return favoritesGroups[groupId];
+  };
 
   const isUrlInFavorites = useCallback(
     (url: string) => {
-      if (!favoritesData) return false;
+      if (!favoritesData) return "";
 
       const menuURLData = extractParamFromURL(url);
-      return favoritesData.some((favorite) => {
+      const favorite = favoritesData.find((favorite) => {
         return favorite.path == menuURLData.path && favorite.param == menuURLData.param;
       });
+      return favorite?.id || "";
     },
     [favoritesData],
   );
 
-  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites };
+  const removeFromFavorites = async (id: string, title: string, isGroup: boolean, mutate?: () => void) => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Removing "${title}" from favorites`,
+      });
+
+      const path = isGroup ? `/api/now/table/sys_ui_bookmark_group/${id}` : `/api/now/table/sys_ui_bookmark/${id}`;
+
+      const response = await fetch(`${instanceUrl}${path}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        },
+      });
+
+      if (response.ok) {
+        mutate ? mutate() : revalidateFavorites();
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `"${title}" removed from favorites`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed removing favorite",
+          message: response.statusText,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed removing favorite",
+        message: error instanceof Error ? error.message : "",
+      });
+    }
+  };
+
+  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, removeFromFavorites };
 };
 
 export default useFavorites;

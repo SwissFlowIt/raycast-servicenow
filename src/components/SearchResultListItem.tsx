@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { keys } from "lodash";
 
@@ -23,7 +23,7 @@ export default function SearchResultListItem({
   mutateSearchResults: () => Promise<void>;
 }) {
   const [selectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
+  const { isUrlInFavorites, revalidateFavorites, removeFromFavorites } = useFavorites(selectedInstance);
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -102,7 +102,8 @@ export default function SearchResultListItem({
     result.record_url = "/" + result.record_url;
   }
 
-  if (isUrlInFavorites(`${instanceUrl}${result.record_url}`)) {
+  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+  if (favoriteId) {
     accessories.unshift({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
       tooltip: "Favorite",
@@ -125,6 +126,15 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
+          {favoriteId && (
+            <Action
+              title="Remove Favorite"
+              icon={Icon.StarDisabled}
+              style={Action.Style.Destructive}
+              onAction={() => removeFromFavorites(favoriteId, name, false)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
+          )}
           <Actions
             mutate={() => {
               revalidateFavorites();

@@ -10,12 +10,14 @@ import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useFavorites from "../hooks/useFavorites";
 import { filter } from "lodash";
+import { getIconForModules } from "../utils/getIconForModules";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
+  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, removeFromFavorites } =
+    useFavorites(selectedInstance);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -160,12 +162,13 @@ export default function NavigationMenu(props: { groupId?: string }) {
               const numberOfModules = numberOfModulesPerGroup[group.id];
               const accessories: List.Item.Accessory[] = [
                 {
-                  icon: Icon.BulletPoints,
+                  icon: getIconForModules(numberOfModules),
                   text: numberOfModules.toString(),
                   tooltip: `Modules: ${numberOfModules}`,
                 },
               ];
-              if (isMenuInFavorites(group.id)) {
+              const favoriteId = isMenuInFavorites(group.id);
+              if (favoriteId) {
                 accessories.unshift({
                   icon: { source: Icon.Star, tintColor: Color.Yellow },
                   tooltip: "Favorite",
@@ -187,6 +190,15 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           target={<NavigationMenu groupId={group.id} />}
                         />
                       </ActionPanel.Section>
+                      {favoriteId && (
+                        <Action
+                          title="Remove Favorite"
+                          icon={Icon.StarDisabled}
+                          style={Action.Style.Destructive}
+                          onAction={() => removeFromFavorites(favoriteId, group.title, true)}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                        />
+                      )}
                       <Actions
                         mutate={() => {
                           mutate();
@@ -223,7 +235,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           }}
                           group={group.title}
                           section={module.title}
-                          isFavorite={isUrlInFavorites(url)}
+                          favoriteId={isUrlInFavorites(url)}
+                          removeFromFavorites={removeFromFavorites}
                         />
                       );
                     });
@@ -239,7 +252,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
                         revalidateFavorites();
                       }}
                       group={group.title}
-                      isFavorite={isUrlInFavorites(url)}
+                      favoriteId={isUrlInFavorites(url)}
+                      removeFromFavorites={removeFromFavorites}
                     />
                   );
                 })}
@@ -269,12 +283,13 @@ export default function NavigationMenu(props: { groupId?: string }) {
 function ModuleItem(props: {
   module: Module;
   url: string;
-  isFavorite: boolean;
+  favoriteId: string;
   mutate: () => void;
+  removeFromFavorites: (id: string, title: string, isGroup: boolean) => void;
   group: string;
   section?: string;
 }) {
-  const { module, url, isFavorite, mutate, group, section = "" } = props;
+  const { module, url, favoriteId, mutate, removeFromFavorites, group, section = "" } = props;
   const { icon: iconName, color: colorName } = getTableIconAndColor(module.tableName || "");
   const icon: Action.Props["icon"] = {
     source: Icon[iconName as keyof typeof Icon],
@@ -290,7 +305,7 @@ function ModuleItem(props: {
       ]
     : [];
 
-  if (isFavorite) {
+  if (favoriteId) {
     accessories.unshift({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
       tooltip: "Favorite",
@@ -312,6 +327,15 @@ function ModuleItem(props: {
             />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
+          {favoriteId && (
+            <Action
+              title="Remove Favorite"
+              icon={Icon.StarDisabled}
+              style={Action.Style.Destructive}
+              onAction={() => removeFromFavorites(favoriteId, module.title, false)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
+          )}
           <Actions mutate={mutate} />
         </ActionPanel>
       }

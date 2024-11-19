@@ -9,11 +9,14 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { filter } from "lodash";
+import { getIconForModules } from "../utils/getIconForModules";
+import useFavorites from "../hooks/useFavorites";
 
-export default function Favorites(props: { groupId?: string }) {
-  const { groupId = "" } = props;
+export default function Favorites(props: { groupId?: string; mutate?: () => void }) {
+  const { groupId = "", mutate: mutateParent } = props;
   const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const { removeFromFavorites } = useFavorites(selectedInstance);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -54,6 +57,27 @@ export default function Favorites(props: { groupId?: string }) {
     if (!groupId) return data;
     return filter(data, (favorite) => favorite.id === groupId);
   }, [data, groupId]);
+
+  const numberOfFavoritesPerGroup = useMemo(() => {
+    if (!data) return {};
+
+    const result: { [key: string]: number } = {};
+
+    const recursiveCount = (favorites: Favorite[]): number => {
+      return favorites.reduce(
+        (acc, favorite) =>
+          acc + (favorite.favorites ? recursiveCount(favorite.favorites) : !favorite.separator ? 1 : 0),
+        0,
+      );
+    };
+
+    data.forEach((favorite) => {
+      if (!favorite.group) return;
+      result[favorite.id] = recursiveCount(favorite.favorites!);
+    });
+
+    return result;
+  }, [data]);
 
   const recursiveFilter = (favorites: Favorite[], terms: string[], keywords: string[]): Favorite[] => {
     return favorites
@@ -148,10 +172,21 @@ export default function Favorites(props: { groupId?: string }) {
                 >
                   {groupedFavorites.map((group) => {
                     const groupName = group.title;
+                    const numberOfFavorites = numberOfFavoritesPerGroup[group.id];
+                    const accessories: List.Item.Accessory[] = numberOfFavorites
+                      ? [
+                          {
+                            icon: getIconForModules(numberOfFavorites),
+                            text: numberOfFavorites.toString(),
+                            tooltip: `Favorites: ${numberOfFavorites}`,
+                          },
+                        ]
+                      : [];
                     return (
                       <List.Item
                         key={group.id}
                         title={groupName}
+                        accessories={accessories}
                         icon={{ source: Icon.Folder, tintColor: Color.Green }}
                         actions={
                           <ActionPanel>
@@ -159,7 +194,14 @@ export default function Favorites(props: { groupId?: string }) {
                               <Action.Push
                                 title="Browse"
                                 icon={Icon.ChevronRight}
-                                target={<Favorites groupId={group.id} />}
+                                target={<Favorites groupId={group.id} mutate={mutate} />}
+                              />
+                              <Action
+                                title="Delete"
+                                icon={Icon.Trash}
+                                style={Action.Style.Destructive}
+                                onAction={() => removeFromFavorites(group.id, groupName, true, mutate)}
+                                shortcut={Keyboard.Shortcut.Common.Remove}
                               />
                             </ActionPanel.Section>
                             <Actions mutate={mutate} />
@@ -172,11 +214,13 @@ export default function Favorites(props: { groupId?: string }) {
               ) : (
                 groupedFavorites.map((group) => {
                   const groupName = group.title;
+                  const numberOfFavorites = numberOfFavoritesPerGroup[group.id];
+
                   return (
                     <List.Section
                       key={group.id}
                       title={groupName}
-                      subtitle={`${groupName.length} ${group.favorites!.length > 1 ? "results" : "result"}`}
+                      subtitle={`${numberOfFavorites} ${numberOfFavorites > 1 ? "results" : "result"}`}
                     >
                       {group.favorites?.map((favorite) => {
                         return (
@@ -184,8 +228,12 @@ export default function Favorites(props: { groupId?: string }) {
                             key={favorite.id}
                             favorite={favorite}
                             instanceUrl={instanceUrl}
-                            mutate={mutate}
+                            mutate={() => {
+                              mutate();
+                              mutateParent?.();
+                            }}
                             group={groupName}
+                            removeFromFavorites={removeFromFavorites}
                           />
                         );
                       })}
@@ -200,7 +248,13 @@ export default function Favorites(props: { groupId?: string }) {
                 subtitle={`${ungroupedFavorites.length} ${ungroupedFavorites.length > 1 ? "results" : "result"}`}
               >
                 {ungroupedFavorites.map((favorite) => (
-                  <FavoriteItem key={favorite.id} favorite={favorite} instanceUrl={instanceUrl} mutate={mutate} />
+                  <FavoriteItem
+                    key={favorite.id}
+                    favorite={favorite}
+                    instanceUrl={instanceUrl}
+                    mutate={mutate}
+                    removeFromFavorites={removeFromFavorites}
+                  />
                 ))}
               </List.Section>
             )}
@@ -231,11 +285,12 @@ function FavoriteItem(props: {
   mutate: () => void;
   group?: string;
   section?: string;
+  removeFromFavorites: (id: string, title: string, isGroup: boolean, mutate?: () => void) => void;
 }) {
-  const { favorite: favorite, instanceUrl, mutate, group = "", section = "" } = props;
+  const { favorite: favorite, instanceUrl, mutate, removeFromFavorites, group = "", section = "" } = props;
 
   if (favorite.separator) {
-    return favorite.favorites!.map((f) => {
+    return favorite.favorites?.map((f) => {
       return (
         <FavoriteItem
           key={f.id}
@@ -244,6 +299,7 @@ function FavoriteItem(props: {
           mutate={mutate}
           group={group}
           section={favorite.title}
+          removeFromFavorites={props.removeFromFavorites}
         />
       );
     });
@@ -278,6 +334,13 @@ function FavoriteItem(props: {
           <ActionPanel.Section title={favorite.title}>
             <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
+            <Action
+              title="Delete"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={() => removeFromFavorites(favorite.id, favorite.title, false, mutate)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
           </ActionPanel.Section>
           <Actions mutate={mutate} />
         </ActionPanel>
