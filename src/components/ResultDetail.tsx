@@ -1,15 +1,18 @@
-import { ActionPanel, Color, Detail, environment, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, environment, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
 import ResultActions from "./ResultActions";
 
 import { Field, Record, Data } from "../types";
 import useInstances from "../hooks/useInstances";
+import useFavorites from "../hooks/useFavorites";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
 
   const { selectedInstance } = useInstances();
+  const { isUrlInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+
   const { alias = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
@@ -20,12 +23,15 @@ export default function ResultDetail({ result, fields }: { result: Record; field
   markdown += `# ${result.metadata.title}\n\n`;
   markdown += `${result.metadata.description || ""}`;
 
+  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+
   return (
     <Detail
       navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
+          {favoriteId && <Detail.Metadata.Label title="" icon={{ source: Icon.Star, tintColor: Color.Yellow }} />}
           {fields.map((field: Field) => {
             if (field.name != "sys_id") {
               const fieldData = result.data[field.name as keyof Data];
@@ -110,6 +116,23 @@ export default function ResultDetail({ result, fields }: { result: Record; field
       actions={
         <ActionPanel>
           <ResultActions result={result} />
+          {!favoriteId && (
+            <Action
+              title="Add Favorite"
+              icon={Icon.Star}
+              onAction={() => addUrlToFavorites(result.metadata.title, result.record_url)}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
+          )}
+          {favoriteId && (
+            <Action
+              title="Remove Favorite"
+              icon={Icon.StarDisabled}
+              style={Action.Style.Destructive}
+              onAction={() => removeFromFavorites(favoriteId, result.metadata.title, false)}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
+          )}
         </ActionPanel>
       }
     />

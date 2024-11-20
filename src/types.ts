@@ -135,7 +135,8 @@ export interface Favorite {
   id: string;
   title: string;
   group: boolean;
-  groupId: string;
+  groupId?: string;
+  module?: string;
   favorites?: Favorite[];
   applicationId?: string;
   type?: string;

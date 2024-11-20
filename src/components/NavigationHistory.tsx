@@ -54,7 +54,7 @@ export default function NavigationHistory() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites();
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -141,7 +141,7 @@ export default function NavigationHistory() {
             actions={
               <ActionPanel>
                 <Actions
-                  mutate={() => {
+                  revalidate={() => {
                     mutate();
                     revalidateFavorites();
                   }}
@@ -176,7 +176,8 @@ export default function NavigationHistory() {
                   },
                 ];
 
-                if (isUrlInFavorites(url)) {
+                const favoriteId = isUrlInFavorites(url);
+                if (favoriteId) {
                   accessories.unshift({
                     icon: { source: Icon.Star, tintColor: Color.Yellow },
                     tooltip: "Favorite",
@@ -207,8 +208,25 @@ export default function NavigationHistory() {
                             shortcut={Keyboard.Shortcut.Common.CopyPath}
                           />
                         </ActionPanel.Section>
+                        {!favoriteId && (
+                          <Action
+                            title="Add Favorite"
+                            icon={Icon.Star}
+                            onAction={() => addUrlToFavorites(historyEntry.title, historyEntry.url)}
+                            shortcut={{ modifiers: ["cmd"], key: "f" }}
+                          />
+                        )}
+                        {favoriteId && (
+                          <Action
+                            title="Remove Favorite"
+                            icon={Icon.StarDisabled}
+                            style={Action.Style.Destructive}
+                            onAction={() => removeFromFavorites(favoriteId, historyEntry.title, false)}
+                            shortcut={{ modifiers: ["cmd"], key: "f" }}
+                          />
+                        )}
                         <Actions
-                          mutate={() => {
+                          revalidate={() => {
                             mutate();
                             revalidateFavorites();
                           }}

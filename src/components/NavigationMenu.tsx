@@ -22,8 +22,14 @@ export default function NavigationMenu(props: { groupId?: string }) {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, addToFavorites, removeFromFavorites } =
-    useFavorites();
+  const {
+    isUrlInFavorites,
+    isMenuInFavorites,
+    revalidateFavorites,
+    addApplicationToFavorites,
+    addModuleToFavorites,
+    removeFromFavorites,
+  } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -150,7 +156,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
             actions={
               <ActionPanel>
                 <Actions
-                  mutate={() => {
+                  revalidate={() => {
                     mutate();
                     revalidateFavorites();
                   }}
@@ -200,8 +206,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
                         <Action
                           title="Add Favorite"
                           icon={Icon.Star}
-                          onAction={() => addToFavorites(group.id, group.title, group.uri || "", true)}
-                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={() => addApplicationToFavorites(group.id, group.title, group.modules || [])}
+                          shortcut={{ modifiers: ["cmd"], key: "f" }}
                         />
                       )}
                       {favoriteId && (
@@ -210,11 +216,11 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           icon={Icon.StarDisabled}
                           style={Action.Style.Destructive}
                           onAction={() => removeFromFavorites(favoriteId, group.title, true)}
-                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          shortcut={{ modifiers: ["cmd"], key: "f" }}
                         />
                       )}
                       <Actions
-                        mutate={() => {
+                        revalidate={() => {
                           mutate();
                           revalidateFavorites();
                         }}
@@ -250,7 +256,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           group={group.title}
                           section={module.title}
                           favoriteId={isUrlInFavorites(url)}
-                          addToFavorites={addToFavorites}
+                          addToFavorites={addModuleToFavorites}
                           removeFromFavorites={removeFromFavorites}
                         />
                       );
@@ -268,7 +274,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       }}
                       group={group.title}
                       favoriteId={isUrlInFavorites(url)}
-                      addToFavorites={addToFavorites}
+                      addToFavorites={addModuleToFavorites}
                       removeFromFavorites={removeFromFavorites}
                     />
                   );
@@ -301,7 +307,7 @@ function ModuleItem(props: {
   url: string;
   favoriteId: string;
   mutate: () => void;
-  addToFavorites: (id: string, title: string, url: string, isGroup: boolean) => void;
+  addToFavorites: (id: string, title: string, url: string) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean) => void;
   group: string;
   section?: string;
@@ -348,8 +354,8 @@ function ModuleItem(props: {
             <Action
               title="Add Favorite"
               icon={Icon.Star}
-              onAction={() => addToFavorites(module.id, module.title, module.uri || "", false)}
-              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() => addToFavorites(module.id, module.title, module.uri || "")}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
           )}
           {favoriteId && (
@@ -358,10 +364,10 @@ function ModuleItem(props: {
               icon={Icon.StarDisabled}
               style={Action.Style.Destructive}
               onAction={() => removeFromFavorites(favoriteId, module.title, false)}
-              shortcut={Keyboard.Shortcut.Common.Remove}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
           )}
-          <Actions mutate={mutate} />
+          <Actions revalidate={mutate} />
         </ActionPanel>
       }
     />

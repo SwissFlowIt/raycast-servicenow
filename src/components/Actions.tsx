@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycas
 import useInstances from "../hooks/useInstances";
 import Instances from "./InstancesList";
 
-export default function Actions({ mutate }: { mutate: () => void }) {
+export default function Actions({ revalidate }: { revalidate: () => void }) {
   const { instances, selectedInstance, setSelectedInstance } = useInstances();
 
   return (
@@ -12,7 +12,7 @@ export default function Actions({ mutate }: { mutate: () => void }) {
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"
-          onAction={mutate}
+          onAction={revalidate}
           shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </List.Dropdown.Section>

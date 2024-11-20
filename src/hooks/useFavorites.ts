@@ -3,16 +3,34 @@ import { useCallback, useMemo } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { Favorite, FavoritesResponse } from "../types";
+import fetch from "node-fetch";
+import crypto from "crypto";
+
+import { Favorite, FavoritesResponse, Module } from "../types";
 import { extractParamFromURL } from "../utils/extractParamFromURL";
 import useInstances from "./useInstances";
+
+interface FavoriteBody {
+  sys_id: string;
+  title: string;
+  user: string;
+  url?: string;
+  icon?: string;
+  module?: string;
+  application?: string;
+  group?: string;
+}
 
 const useFavorites = () => {
   const { selectedInstance, userId } = useInstances();
   const { name: instanceName = "", username = "", password = "" } = selectedInstance || {};
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { data: favorites, revalidate: revalidateFavorites } = useFetch(
+  const {
+    data: favorites,
+    revalidate: revalidateFavorites,
+    mutate,
+  } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/favorite`;
     },
@@ -40,7 +58,7 @@ const useFavorites = () => {
   const favoritesGroups = useMemo(() => {
     if (!favorites) return {};
     return Object.fromEntries(
-      favorites.filter((favorite) => favorite.group).map((favorite) => [favorite.applicationId, favorite.id]),
+      favorites?.filter((favorite) => favorite.group).map((favorite) => [favorite.applicationId, favorite.id]),
     );
   }, [favorites]);
 
@@ -85,91 +103,245 @@ const useFavorites = () => {
     [favoritesData],
   );
 
-  const addToFavorites = async (id: string, text: string, url: string, isGroup: boolean, mutate?: () => void) => {
+  const _updateFavorites = async (
+    request: { endpoint: string; method: string; body?: string },
+    text: { before: string; success: string; failure: string },
+    updateData: (data: Favorite[]) => Favorite[],
+    successCallBack?: () => void,
+  ) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Adding "${text}" to favorites`,
-      });
-
-      const [path, body] = isGroup
-        ? [`/api/now/table/sys_ui_bookmark_group`, { application: id }]
-        : [`/api/now/table/sys_ui_bookmark`, { module: id }];
-
-      const response = await fetch(`${instanceUrl}${path}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-          "Content-Type": "application/json",
+      const response = await mutate(
+        fetch(`${instanceUrl}${request.endpoint}`, {
+          method: request.method,
+          headers: {
+            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            "Content-Type": "application/json",
+          },
+          body: request.body,
+        }),
+        {
+          optimisticUpdate(data) {
+            return updateData(data || []);
+          },
         },
-        body: JSON.stringify({ ...body, title: text, user: userId, icon: "star", url }),
-      });
+      );
 
       if (response.ok) {
-        mutate ? mutate() : revalidateFavorites();
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: `${text} added to favorites`,
-        });
+        successCallBack?.();
+        toast.style = Toast.Style.Success;
+        toast.title = text.success;
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed adding favorite",
-          message: response.statusText,
-        });
+        toast.style = Toast.Style.Failure;
+        toast.title = text.failure;
+        toast.message = response.statusText;
       }
     } catch (error) {
       console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed adding favorite",
-        message: error instanceof Error ? error.message : "",
-      });
+
+      toast.style = Toast.Style.Failure;
+      toast.title = text.failure;
+      toast.message = error instanceof Error ? error.message : "";
     }
   };
 
-  const removeFromFavorites = async (id: string, title: string, isGroup: boolean, mutate?: () => void) => {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Removing "${title}" from favorites`,
-      });
+  const addApplicationToFavorites = (application: string, title: string, modules: Module[]) => {
+    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
+    const body: FavoriteBody = { sys_id: newFavoriteId, application, title, user: userId || "" };
 
-      const path = isGroup ? `/api/now/table/sys_ui_bookmark_group/${id}` : `/api/now/table/sys_ui_bookmark/${id}`;
-
-      const response = await fetch(`${instanceUrl}${path}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+    const applicationRequest = {
+      id: "application",
+      headers: [
+        {
+          name: "Content-Type",
+          value: "application/json",
         },
-      });
+      ],
+      exclude_response_headers: true,
+      url: "/api/now/table/sys_ui_bookmark_group",
+      method: "POST",
+      body: Buffer.from(JSON.stringify(body)).toString("base64"),
+    };
 
-      if (response.ok) {
-        mutate ? mutate() : revalidateFavorites();
+    const moduleRequests: Array<{
+      id: string;
+      headers: { name: string; value: string }[];
+      exclude_response_headers: boolean;
+      url: string;
+      method: string;
+      body: string;
+    }> = [];
+    modules.forEach((module, index) => {
+      const favoriteModules = module.type === "SEPARATOR" && module.modules ? module.modules : [module];
+      favoriteModules.forEach((subModule, subIndex) => {
+        const newFavoriteModuleId = crypto.randomBytes(16).toString("hex").substring(0, 32);
 
-        await showToast({
-          style: Toast.Style.Success,
-          title: `${title} removed from favorites`,
+        const subFavoriteBody: FavoriteBody = {
+          sys_id: newFavoriteModuleId,
+          module: subModule.id,
+          group: newFavoriteId,
+          title: subModule.title,
+          url: subModule.uri,
+          user: userId || "",
+          icon: "star",
+        };
+        moduleRequests.push({
+          id: `module_${index}_${subIndex}`,
+          headers: [
+            {
+              name: "Content-Type",
+              value: "application/json",
+            },
+          ],
+          exclude_response_headers: true,
+          url: "/api/now/table/sys_ui_bookmark",
+          method: "POST",
+          body: Buffer.from(JSON.stringify(subFavoriteBody)).toString("base64"),
         });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed removing favorite",
-          message: response.statusText,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed removing favorite",
-        message: error instanceof Error ? error.message : "",
       });
-    }
+    });
+
+    const request = {
+      endpoint: "/api/now/v1/batch",
+      method: "POST",
+      body: JSON.stringify({
+        batch_request_id: "add-application-menu",
+        rest_requests: [applicationRequest, ...moduleRequests],
+      }),
+    };
+
+    const newFavorite = {
+      id: newFavoriteId,
+      applicationId: body.application,
+      title: title,
+      group: true,
+      favorites: modules.map((module) => {
+        return {
+          id: crypto.randomBytes(16).toString("hex").substring(0, 32),
+          module: module.id,
+          title: module.title,
+          group: false,
+          url: module.uri,
+          groupId: newFavoriteId,
+        };
+      }),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return [...data, newFavorite];
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Adding "${title}" to favorites`,
+        success: `${title} added to favorites`,
+        failure: "Failed adding favorite",
+      },
+      updateData,
+    );
   };
 
-  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, addToFavorites, removeFromFavorites };
+  const addModuleToFavorites = (module: string, title: string, url: string) => {
+    const endpoint = "/api/now/table/sys_ui_bookmark";
+    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
+    const body: FavoriteBody = { sys_id: newFavoriteId, module, title, url, user: userId || "", icon: "star" };
+
+    const newFavorite = {
+      id: newFavoriteId,
+      module: body.module,
+      title: title,
+      group: false,
+      url: body.url,
+    };
+
+    const request = {
+      endpoint,
+      method: "POST",
+      body: JSON.stringify(body),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return [...data, newFavorite];
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Adding "${title}" to favorites`,
+        success: `${title} added to favorites`,
+        failure: "Failed adding favorite",
+      },
+      updateData,
+    );
+  };
+
+  const addUrlToFavorites = (title: string, url: string) => {
+    const endpoint = "/api/now/table/sys_ui_bookmark";
+    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
+    const body: FavoriteBody = { sys_id: newFavoriteId, title, url, user: userId || "", icon: "star" };
+
+    const newFavorite = {
+      id: newFavoriteId,
+      title: title,
+      group: false,
+      url: body.url,
+    };
+
+    const request = {
+      endpoint,
+      method: "POST",
+      body: JSON.stringify(body),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return [...data, newFavorite];
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Adding "${title}" to favorites`,
+        success: `${title} added to favorites`,
+        failure: "Failed adding favorite",
+      },
+      updateData,
+    );
+  };
+
+  const removeFromFavorites = async (id: string, title: string, isGroup: boolean, revalidate?: () => void) => {
+    const endpoint = isGroup ? `/api/now/table/sys_ui_bookmark_group/${id}` : `/api/now/table/sys_ui_bookmark/${id}`;
+
+    const request = {
+      endpoint,
+      method: "DELETE",
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return data.filter((favorite) => favorite.id !== id);
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Removing "${title}" from favorites`,
+        success: `${title} removed from favorites`,
+        failure: "Failed removing favorite",
+      },
+      updateData,
+      revalidate,
+    );
+  };
+
+  return {
+    isUrlInFavorites,
+    isMenuInFavorites,
+    revalidateFavorites,
+    addApplicationToFavorites,
+    addModuleToFavorites,
+    addUrlToFavorites,
+    removeFromFavorites,
+  };
 };
 
 export default useFavorites;

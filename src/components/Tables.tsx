@@ -98,7 +98,7 @@ export default function Tables() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={mutate} />
               </ActionPanel>
             }
           />
@@ -142,7 +142,7 @@ export default function Tables() {
                       content={`${instanceUrl}/${table.name}_list.do`}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
-                    <Actions mutate={mutate} />
+                    <Actions revalidate={mutate} />
                   </ActionPanel>
                 }
               />

@@ -205,7 +205,7 @@ export default function SearchList() {
                       mutateInstances();
                     }}
                   />
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={mutate} />
                 </ActionPanel>
               }
             />
@@ -218,7 +218,7 @@ export default function SearchList() {
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={mutate} />
                 </ActionPanel>
               }
             />
@@ -243,7 +243,7 @@ export default function SearchList() {
                         title={`Search for "${item.search_term}"`}
                         icon={Icon.MagnifyingGlass}
                       />
-                      <Actions mutate={mutate} />
+                      <Actions revalidate={mutate} />
                       <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
@@ -277,7 +277,7 @@ export default function SearchList() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={mutate} />
                 </ActionPanel>
               }
             />

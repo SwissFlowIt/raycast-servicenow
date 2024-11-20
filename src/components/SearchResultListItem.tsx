@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { keys } from "lodash";
 
 import ResultDetail from "./ResultDetail";
@@ -23,7 +23,7 @@ export default function SearchResultListItem({
   mutateSearchResults: () => Promise<void>;
 }) {
   const { selectedInstance } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites, removeFromFavorites } = useFavorites();
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -126,17 +126,25 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
+          {!favoriteId && (
+            <Action
+              title="Add Favorite"
+              icon={Icon.Star}
+              onAction={() => addUrlToFavorites(name, result.record_url)}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
+          )}
           {favoriteId && (
             <Action
               title="Remove Favorite"
               icon={Icon.StarDisabled}
               style={Action.Style.Destructive}
               onAction={() => removeFromFavorites(favoriteId, name, false)}
-              shortcut={Keyboard.Shortcut.Common.Remove}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
           )}
           <Actions
-            mutate={() => {
+            revalidate={() => {
               revalidateFavorites();
               mutateSearchResults();
             }}

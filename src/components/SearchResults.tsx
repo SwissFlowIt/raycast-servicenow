@@ -67,12 +67,12 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
     const aliasOrName = alias ? alias : instanceName;
 
     if (isLoading) {
-      setNavigationTitle(`${command} > ${aliasOrName} > Loading results for "${searchTerm}"...`);
+      setNavigationTitle(`${command} > ${aliasOrName} > Loading results for ${searchTerm}...`);
       return;
     }
     const count = sumBy(data, (r) => r.record_count);
-    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for "${searchTerm}"`);
-    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`);
+    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
+    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
   }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
 
   return (
@@ -90,7 +90,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={mutate} />
               </ActionPanel>
             }
           />
@@ -137,7 +137,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         />
                         <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
                       </List.Dropdown.Section>
-                      <Actions mutate={mutate} />
+                      <Actions revalidate={mutate} />
                     </ActionPanel>
                   }
                 />
@@ -149,7 +149,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             title="No Results"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={mutate} />
               </ActionPanel>
             }
           />
