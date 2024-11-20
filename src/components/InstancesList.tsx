@@ -1,16 +1,13 @@
 import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 
 import InstanceForm from "./InstanceForm";
 
 import useInstances from "../hooks/useInstances";
 import { useEffect } from "react";
-import { Instance } from "../types";
 
 export default function InstancesList() {
-  const { instances, addInstance, editInstance, deleteInstance } = useInstances();
-
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const { instances, addInstance, editInstance, deleteInstance, selectedInstance, setSelectedInstance } =
+    useInstances();
 
   useEffect(() => {
     if (!selectedInstance && instances.length > 0) {

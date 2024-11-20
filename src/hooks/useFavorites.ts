@@ -3,21 +3,13 @@ import { useCallback, useMemo } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import fetch from "node-fetch";
-
-import { Favorite, FavoritesResponse, Instance } from "../types";
+import { Favorite, FavoritesResponse } from "../types";
 import { extractParamFromURL } from "../utils/extractParamFromURL";
+import useInstances from "./useInstances";
 
-/**
- * Hook to fetch and manage a user's favorites in ServiceNow.
- *
- * @param {Instance | undefined} instanceProfile The instance profile to fetch favorites for.
- * @returns {Object} An object containing the following properties:
- *   - isUrlInFavorites: A function that takes a URL and returns whether it is in the user's favorites.
- *   - revalidateFavorites: A function to revalidate the favorites.
- */
-const useFavorites = (instanceProfile: Instance | undefined) => {
-  const { name: instanceName = "", username = "", password = "" } = instanceProfile || {};
+const useFavorites = () => {
+  const { selectedInstance, userId } = useInstances();
+  const { name: instanceName = "", username = "", password = "" } = selectedInstance || {};
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
   const { data: favorites, revalidate: revalidateFavorites } = useFetch(
@@ -28,7 +20,7 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
-      execute: !!instanceProfile,
+      execute: !!selectedInstance,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
@@ -93,6 +85,50 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     [favoritesData],
   );
 
+  const addToFavorites = async (id: string, text: string, url: string, isGroup: boolean, mutate?: () => void) => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Adding "${text}" to favorites`,
+      });
+
+      const [path, body] = isGroup
+        ? [`/api/now/table/sys_ui_bookmark_group`, { application: id }]
+        : [`/api/now/table/sys_ui_bookmark`, { module: id }];
+
+      const response = await fetch(`${instanceUrl}${path}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...body, title: text, user: userId, icon: "star", url }),
+      });
+
+      if (response.ok) {
+        mutate ? mutate() : revalidateFavorites();
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${text} added to favorites`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed adding favorite",
+          message: response.statusText,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed adding favorite",
+        message: error instanceof Error ? error.message : "",
+      });
+    }
+  };
+
   const removeFromFavorites = async (id: string, title: string, isGroup: boolean, mutate?: () => void) => {
     try {
       await showToast({
@@ -114,7 +150,7 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
 
         await showToast({
           style: Toast.Style.Success,
-          title: `"${title}" removed from favorites`,
+          title: `${title} removed from favorites`,
         });
       } else {
         await showToast({
@@ -133,7 +169,7 @@ const useFavorites = (instanceProfile: Instance | undefined) => {
     }
   };
 
-  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, removeFromFavorites };
+  return { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, addToFavorites, removeFromFavorites };
 };
 
 export default useFavorites;

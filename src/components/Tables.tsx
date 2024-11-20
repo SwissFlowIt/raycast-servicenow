@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
@@ -9,8 +9,14 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 
 export default function Tables() {
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 

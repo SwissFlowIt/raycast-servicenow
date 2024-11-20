@@ -5,7 +5,7 @@ import en from "javascript-time-ago/locale/en";
 import { format, differenceInMinutes } from "date-fns";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { NavigationHistoryResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
@@ -46,9 +46,15 @@ const getSectionTitle = (dateTime: string) => {
 };
 
 export default function NavigationHistory() {
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites(selectedInstance);
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
+  const { isUrlInFavorites, revalidateFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 

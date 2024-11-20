@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage, Keyboard } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
 
@@ -12,12 +12,18 @@ import useInstances from "../hooks/useInstances";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
 
 export default function SearchList() {
-  const { instances, addInstance, mutate: mutateInstances, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    addInstance,
+    mutate: mutateInstances,
+    isLoading: isLoadingInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const {
     id: instanceId = "",
     alias = "",

@@ -10,10 +10,10 @@ import SearchResultListItem from "./SearchResultListItem";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
-import { GlobalSearchResponse, Instance, Record, SearchResult } from "../types";
+import { GlobalSearchResponse, Record, SearchResult } from "../types";
 
 export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
-  const { addInstance, mutate: mutateInstances } = useInstances();
+  const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const { commandName } = environment;
   const command = commandName == "search" ? "Search" : "Quickly Search";
 
@@ -21,7 +21,6 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance] = useCachedState<Instance>("instance");
   const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;

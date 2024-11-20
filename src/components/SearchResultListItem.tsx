@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { keys } from "lodash";
 
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
-import { Data, Field, Instance, Record } from "../types";
+import { Data, Field, Record } from "../types";
 import useFavorites from "../hooks/useFavorites";
+import useInstances from "../hooks/useInstances";
 
 export default function SearchResultListItem({
   result,
@@ -22,8 +22,8 @@ export default function SearchResultListItem({
   fields: Field[];
   mutateSearchResults: () => Promise<void>;
 }) {
-  const [selectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, revalidateFavorites, removeFromFavorites } = useFavorites(selectedInstance);
+  const { selectedInstance } = useInstances();
+  const { isUrlInFavorites, revalidateFavorites, removeFromFavorites } = useFavorites();
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 

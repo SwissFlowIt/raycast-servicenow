@@ -1,16 +1,16 @@
 import { ActionPanel, Color, Detail, environment, Icon } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { format } from "date-fns";
 
 import ResultActions from "./ResultActions";
 
-import { Field, Record, Data, Instance } from "../types";
+import { Field, Record, Data } from "../types";
+import useInstances from "../hooks/useInstances";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
 
-  const [instance] = useCachedState<Instance>("instance");
-  const { alias = "", name: instanceName = "" } = instance || {};
+  const { selectedInstance } = useInstances();
+  const { alias = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 

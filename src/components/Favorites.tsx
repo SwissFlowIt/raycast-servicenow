@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { Favorite, FavoritesResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
@@ -14,9 +14,15 @@ import useFavorites from "../hooks/useFavorites";
 
 export default function Favorites(props: { groupId?: string; mutate?: () => void }) {
   const { groupId = "", mutate: mutateParent } = props;
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { removeFromFavorites } = useFavorites(selectedInstance);
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
+  const { removeFromFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 

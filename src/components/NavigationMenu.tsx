@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { NavigationMenuResponse, Instance, Module } from "../types";
 import useInstances from "../hooks/useInstances";
@@ -14,10 +14,16 @@ import { getIconForModules } from "../utils/getIconForModules";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
-  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, removeFromFavorites } =
-    useFavorites(selectedInstance);
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
+  const { isUrlInFavorites, isMenuInFavorites, revalidateFavorites, addToFavorites, removeFromFavorites } =
+    useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -190,6 +196,14 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           target={<NavigationMenu groupId={group.id} />}
                         />
                       </ActionPanel.Section>
+                      {!favoriteId && (
+                        <Action
+                          title="Add Favorite"
+                          icon={Icon.Star}
+                          onAction={() => addToFavorites(group.id, group.title, group.uri || "", true)}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                        />
+                      )}
                       {favoriteId && (
                         <Action
                           title="Remove Favorite"
@@ -236,6 +250,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           group={group.title}
                           section={module.title}
                           favoriteId={isUrlInFavorites(url)}
+                          addToFavorites={addToFavorites}
                           removeFromFavorites={removeFromFavorites}
                         />
                       );
@@ -253,6 +268,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       }}
                       group={group.title}
                       favoriteId={isUrlInFavorites(url)}
+                      addToFavorites={addToFavorites}
                       removeFromFavorites={removeFromFavorites}
                     />
                   );
@@ -285,11 +301,12 @@ function ModuleItem(props: {
   url: string;
   favoriteId: string;
   mutate: () => void;
+  addToFavorites: (id: string, title: string, url: string, isGroup: boolean) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean) => void;
   group: string;
   section?: string;
 }) {
-  const { module, url, favoriteId, mutate, removeFromFavorites, group, section = "" } = props;
+  const { module, url, favoriteId, mutate, addToFavorites, removeFromFavorites, group, section = "" } = props;
   const { icon: iconName, color: colorName } = getTableIconAndColor(module.tableName || "");
   const icon: Action.Props["icon"] = {
     source: Icon[iconName as keyof typeof Icon],
@@ -327,6 +344,14 @@ function ModuleItem(props: {
             />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
+          {!favoriteId && (
+            <Action
+              title="Add Favorite"
+              icon={Icon.Star}
+              onAction={() => addToFavorites(module.id, module.title, module.uri || "", false)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
+          )}
           {favoriteId && (
             <Action
               title="Remove Favorite"
