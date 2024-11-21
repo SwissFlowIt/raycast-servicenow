@@ -8,7 +8,7 @@ import { Instance } from "./types";
 
 export default function Search(props: LaunchProps) {
   const { instanceName, query } = props.arguments;
-  const { instances, setSelectedInstanceProfile } = useInstances();
+  const { instances, setSelectedInstance } = useInstances();
 
   if (instances.length === 0) {
     showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
@@ -30,7 +30,7 @@ export default function Search(props: LaunchProps) {
     return;
   }
 
-  setSelectedInstanceProfile(instance);
+  setSelectedInstance(instance);
   LocalStorage.setItem("selected-instance", JSON.stringify(instance));
 
   return <SearchResults searchTerm={query} />;

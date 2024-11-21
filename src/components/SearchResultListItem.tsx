@@ -131,7 +131,7 @@ export default function SearchResultListItem({
               title="Add Favorite"
               icon={Icon.Star}
               onAction={() => addUrlToFavorites(name, result.record_url)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
           {favoriteId && (
@@ -140,7 +140,7 @@ export default function SearchResultListItem({
               icon={Icon.StarDisabled}
               style={Action.Style.Destructive}
               onAction={() => removeFromFavorites(favoriteId, name, false)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
           <Actions

@@ -163,7 +163,7 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={mutate} />
               </ActionPanel>
             }
           />
@@ -210,7 +210,7 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
                                 shortcut={Keyboard.Shortcut.Common.Remove}
                               />
                             </ActionPanel.Section>
-                            <Actions mutate={mutate} />
+                            <Actions revalidate={mutate} />
                           </ActionPanel>
                         }
                       />
@@ -348,7 +348,7 @@ function FavoriteItem(props: {
               shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
-          <Actions mutate={mutate} />
+          <Actions revalidate={mutate} />
         </ActionPanel>
       }
     />

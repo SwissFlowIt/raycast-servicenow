@@ -121,7 +121,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
               title="Add Favorite"
               icon={Icon.Star}
               onAction={() => addUrlToFavorites(result.metadata.title, result.record_url)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
           {favoriteId && (
@@ -130,7 +130,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
               icon={Icon.StarDisabled}
               style={Action.Style.Destructive}
               onAction={() => removeFromFavorites(favoriteId, result.metadata.title, false)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
         </ActionPanel>

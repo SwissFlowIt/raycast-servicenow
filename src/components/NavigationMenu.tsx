@@ -207,7 +207,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           title="Add Favorite"
                           icon={Icon.Star}
                           onAction={() => addApplicationToFavorites(group.id, group.title, group.modules || [])}
-                          shortcut={{ modifiers: ["cmd"], key: "f" }}
+                          shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                         />
                       )}
                       {favoriteId && (
@@ -216,7 +216,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           icon={Icon.StarDisabled}
                           style={Action.Style.Destructive}
                           onAction={() => removeFromFavorites(favoriteId, group.title, true)}
-                          shortcut={{ modifiers: ["cmd"], key: "f" }}
+                          shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                         />
                       )}
                       <Actions
@@ -355,7 +355,7 @@ function ModuleItem(props: {
               title="Add Favorite"
               icon={Icon.Star}
               onAction={() => addToFavorites(module.id, module.title, module.uri || "")}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
           {favoriteId && (
@@ -364,7 +364,7 @@ function ModuleItem(props: {
               icon={Icon.StarDisabled}
               style={Action.Style.Destructive}
               onAction={() => removeFromFavorites(favoriteId, module.title, false)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
           <Actions revalidate={mutate} />
