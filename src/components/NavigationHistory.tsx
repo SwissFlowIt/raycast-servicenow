@@ -14,6 +14,7 @@ import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
+import FavoriteForm from "./FavoriteForm";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -217,13 +218,21 @@ export default function NavigationHistory() {
                           />
                         )}
                         {favoriteId && (
-                          <Action
-                            title="Remove Favorite"
-                            icon={Icon.StarDisabled}
-                            style={Action.Style.Destructive}
-                            onAction={() => removeFromFavorites(favoriteId, historyEntry.title, false)}
-                            shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
-                          />
+                          <>
+                            <Action.Push
+                              title="Edit Favorite"
+                              icon={Icon.Pencil}
+                              target={<FavoriteForm favoriteId={favoriteId} />}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
+                            />
+                            <Action
+                              title="Remove Favorite"
+                              icon={Icon.StarDisabled}
+                              style={Action.Style.Destructive}
+                              onAction={() => removeFromFavorites(favoriteId, historyEntry.title, false)}
+                              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+                            />
+                          </>
                         )}
                         <Actions
                           revalidate={() => {

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, environment, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, environment, Icon, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
 import ResultActions from "./ResultActions";
@@ -6,6 +6,7 @@ import ResultActions from "./ResultActions";
 import { Field, Record, Data } from "../types";
 import useInstances from "../hooks/useInstances";
 import useFavorites from "../hooks/useFavorites";
+import FavoriteForm from "./FavoriteForm";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
@@ -125,13 +126,21 @@ export default function ResultDetail({ result, fields }: { result: Record; field
             />
           )}
           {favoriteId && (
-            <Action
-              title="Remove Favorite"
-              icon={Icon.StarDisabled}
-              style={Action.Style.Destructive}
-              onAction={() => removeFromFavorites(favoriteId, result.metadata.title, false)}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
-            />
+            <>
+              <Action.Push
+                title="Edit Favorite"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favoriteId={favoriteId} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Remove Favorite"
+                icon={Icon.StarDisabled}
+                style={Action.Style.Destructive}
+                onAction={() => removeFromFavorites(favoriteId, result.metadata.title, false)}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+              />
+            </>
           )}
         </ActionPanel>
       }

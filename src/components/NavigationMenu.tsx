@@ -11,6 +11,7 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useFavorites from "../hooks/useFavorites";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
+import FavoriteForm from "./FavoriteForm";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -319,14 +320,18 @@ function ModuleItem(props: {
     tintColor: Color[colorName as keyof typeof Color],
   };
 
-  const accessories: List.Item.Accessory[] = section
-    ? [
-        {
-          tag: { value: section },
-          tooltip: `Section: ${section}`,
-        },
-      ]
-    : [];
+  const accessories: List.Item.Accessory[] = [
+    {
+      icon: Icon.Link,
+      tooltip: decodeURIComponent(module.uri || ""),
+    },
+  ];
+
+  if (section)
+    accessories.unshift({
+      tag: { value: section },
+      tooltip: `Section: ${section}`,
+    });
 
   if (favoriteId) {
     accessories.unshift({
@@ -359,13 +364,21 @@ function ModuleItem(props: {
             />
           )}
           {favoriteId && (
-            <Action
-              title="Remove Favorite"
-              icon={Icon.StarDisabled}
-              style={Action.Style.Destructive}
-              onAction={() => removeFromFavorites(favoriteId, module.title, false)}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
-            />
+            <>
+              <Action.Push
+                title="Edit Favorite"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favoriteId={favoriteId} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Remove Favorite"
+                icon={Icon.StarDisabled}
+                style={Action.Style.Destructive}
+                onAction={() => removeFromFavorites(favoriteId, module.title, false)}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+              />
+            </>
           )}
           <Actions revalidate={revalidate} />
         </ActionPanel>

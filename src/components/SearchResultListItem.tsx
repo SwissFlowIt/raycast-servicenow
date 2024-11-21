@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { keys } from "lodash";
 
 import ResultDetail from "./ResultDetail";
@@ -8,6 +8,7 @@ import Actions from "./Actions";
 import { Data, Field, Record } from "../types";
 import useFavorites from "../hooks/useFavorites";
 import useInstances from "../hooks/useInstances";
+import FavoriteForm from "./FavoriteForm";
 
 export default function SearchResultListItem({
   result,
@@ -135,13 +136,21 @@ export default function SearchResultListItem({
             />
           )}
           {favoriteId && (
-            <Action
-              title="Remove Favorite"
-              icon={Icon.StarDisabled}
-              style={Action.Style.Destructive}
-              onAction={() => removeFromFavorites(favoriteId, name, false)}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
-            />
+            <>
+              <Action.Push
+                title="Edit Favorite"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favoriteId={favoriteId} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Remove Favorite"
+                icon={Icon.StarDisabled}
+                style={Action.Style.Destructive}
+                onAction={() => removeFromFavorites(favoriteId, name, false)}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+              />
+            </>
           )}
           <Actions
             revalidate={() => {

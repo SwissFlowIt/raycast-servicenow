@@ -274,16 +274,25 @@ const useFavorites = () => {
     );
   };
 
-  const addUrlToFavorites = (title: string, url: string) => {
+  const addUrlToFavorites = (title: string, url: string, groupId?: string, revalidate?: () => void) => {
     const endpoint = "/api/now/table/sys_ui_bookmark";
     const newFavoriteId = crypto.randomUUID().replace(/-/g, "");
-    const body: FavoriteRecord = { sys_id: newFavoriteId, title, url, user: userId || "", icon: "star" };
+    const body: FavoriteRecord = {
+      sys_id: newFavoriteId,
+      title,
+      url,
+      user: userId || "",
+      icon: "star",
+      group: groupId,
+    };
 
     const newFavorite = {
       id: newFavoriteId,
       title: title,
       group: false,
       url: body.url,
+      groupId: groupId,
+      favorites: [],
     };
 
     const request = {
@@ -304,6 +313,40 @@ const useFavorites = () => {
         failure: "Failed adding favorite",
       },
       updateData,
+      revalidate,
+    );
+  };
+
+  const addFavoritesGroup = (title: string, revalidate?: () => void) => {
+    const endpoint = `/api/now/table/sys_ui_bookmark_group`;
+    const newFavoriteId = crypto.randomUUID().replace(/-/g, "");
+    const body: FavoriteRecord = { sys_id: newFavoriteId, title, user: userId || "" };
+
+    const newFavoriteGroup = {
+      id: newFavoriteId,
+      title: title,
+      group: true,
+    };
+
+    const request = {
+      endpoint,
+      method: "POST",
+      body: JSON.stringify(body),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return [...data, newFavoriteGroup];
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Adding "${title}" to favorites`,
+        success: `${title} added to favorites`,
+        failure: "Failed adding favorite group",
+      },
+      updateData,
+      revalidate,
     );
   };
 
@@ -407,6 +450,7 @@ const useFavorites = () => {
     removeFromFavorites,
     updateFavorite,
     updateFavoritesGroup,
+    addFavoritesGroup,
   };
 };
 
