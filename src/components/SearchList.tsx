@@ -56,88 +56,114 @@ export default function SearchList() {
     },
   );
 
-  async function removeAllItemsFromHistory() {
+  const _updateHistory = async (
+    request: { endpoint: string; method: string; body?: string },
+    text: { before: string; success: string; failure: string },
+    updateData: (data: HistoryResult[]) => HistoryResult[],
+    successCallBack?: () => void,
+  ) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Removing all items from history",
-      });
-
-      const promises = data?.map((item: HistoryResult) =>
-        fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
-          method: "DELETE",
+      const response = await mutate(
+        fetch(`${instanceUrl}${request.endpoint}`, {
+          method: request.method,
           headers: {
             Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            "Content-Type": "application/json",
           },
+          body: request.body,
         }),
-      );
-
-      if (promises) {
-        const responses = await Promise.all(promises);
-        const success = responses.every((res) => res.ok);
-
-        if (success) {
-          await mutate(Promise.resolve([]));
-          await showToast({
-            style: Toast.Style.Success,
-            title: `All terms removed from history`,
-          });
-        } else {
-          const failedResponses = responses.filter((res) => !res.ok);
-          const messages = failedResponses.map((res) => res.statusText);
-          await mutate(Promise.resolve([]));
-          showToast(Toast.Style.Failure, "Could not remove all items from history", messages.join("\n"));
-        }
-      }
-    } catch (error) {
-      console.error(error);
-
-      await mutate(Promise.resolve([]));
-      showToast(
-        Toast.Style.Failure,
-        "Could not remove all items from history",
-        error instanceof Error ? error.message : "",
-      );
-    }
-  }
-
-  async function removeItemFromHistory(item: HistoryResult) {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Removing "${item.search_term}" from history`,
-      });
-
-      const response = await fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        {
+          optimisticUpdate(data) {
+            return updateData(data || []);
+          },
         },
-      });
+      );
 
       if (response.ok) {
-        await mutate();
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: `Term "${item.search_term}" removed from history`,
-        });
+        successCallBack?.();
+        toast.style = Toast.Style.Success;
+        toast.title = text.success;
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed removing term from history",
-          message: response.statusText,
-        });
+        toast.style = Toast.Style.Failure;
+        toast.title = text.failure;
+        toast.message = response.statusText;
       }
     } catch (error) {
       console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed removing term from history",
-        message: error instanceof Error ? error.message : "",
-      });
+
+      toast.style = Toast.Style.Failure;
+      toast.title = text.failure;
+      toast.message = error instanceof Error ? error.message : "";
     }
-  }
+  };
+
+  const removeAllItemsFromHistory = async () => {
+    const rest_requests: Array<{
+      id: string;
+      headers: { name: string; value: string }[];
+      exclude_response_headers: boolean;
+      url: string;
+      method: string;
+    }> = [];
+    data?.forEach((item: HistoryResult, index) => {
+      rest_requests.push({
+        id: `history_record_${index}`,
+        headers: [],
+        exclude_response_headers: true,
+        url: `/api/now/table/ts_query/${item.sys_id}`,
+        method: "DELETE",
+      });
+    });
+
+    console.log(rest_requests);
+
+    const request = {
+      endpoint: "/api/now/v1/batch",
+      method: "POST",
+      body: JSON.stringify({
+        batch_request_id: "clear-history",
+        rest_requests,
+      }),
+    };
+
+    const updateData = () => {
+      return [];
+    };
+
+    _updateHistory(
+      request,
+      {
+        before: `Removing all items from history`,
+        success: `All terms removed from history`,
+        failure: "Failed removing all items from history",
+      },
+      updateData,
+    );
+  };
+
+  const removeItemFromHistory = async (id: string, title: string) => {
+    const endpoint = `/api/now/table/ts_query/${id}`;
+
+    const request = {
+      endpoint,
+      method: "DELETE",
+    };
+
+    const updateData = (data: HistoryResult[]) => {
+      return data.filter((favorite) => favorite.sys_id !== id);
+    };
+
+    _updateHistory(
+      request,
+      {
+        before: `Removing "${title}" from favorites`,
+        success: `${title} removed from favorites`,
+        failure: "Failed removing favorite",
+      },
+      updateData,
+    );
+  };
 
   useEffect(() => {
     if (!data) return;
@@ -249,7 +275,7 @@ export default function SearchList() {
                           title="Remove from History"
                           icon={Icon.XMarkCircle}
                           style={Action.Style.Destructive}
-                          onAction={() => removeItemFromHistory(item)}
+                          onAction={() => removeItemFromHistory(item.sys_id, item.search_term)}
                           shortcut={Keyboard.Shortcut.Common.Remove}
                         />
                         <Action
