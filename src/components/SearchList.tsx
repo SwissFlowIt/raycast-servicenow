@@ -116,8 +116,6 @@ export default function SearchList() {
       });
     });
 
-    console.log(rest_requests);
-
     const request = {
       endpoint: "/api/now/v1/batch",
       method: "POST",
