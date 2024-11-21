@@ -149,6 +149,17 @@ export interface Favorite {
   keywords?: string[];
 }
 
+export interface FavoriteRecord {
+  sys_id: string;
+  title: string;
+  user: string;
+  url?: string;
+  icon?: string;
+  module?: string;
+  application?: string;
+  group?: string;
+}
+
 export interface NavigationMenuResponse {
   result: Module[];
 }

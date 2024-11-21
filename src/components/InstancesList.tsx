@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage, Alert } from "@raycast/api";
 
 import InstanceForm from "./InstanceForm";
 
@@ -6,7 +6,7 @@ import useInstances from "../hooks/useInstances";
 import { useEffect } from "react";
 
 export default function InstancesList() {
-  const { instances, addInstance, editInstance, deleteInstance, selectedInstance, setSelectedInstance } =
+  const { instances, addInstance, editInstance, deleteInstance, selectedInstance, setSelectedInstance, mutate } =
     useInstances();
 
   useEffect(() => {
@@ -35,36 +35,40 @@ export default function InstancesList() {
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
                     icon={Icon.Plus}
-                    title="Add Instance Profile"
+                    title="Add"
                     target={<InstanceForm onSubmit={addInstance} />}
                     shortcut={Keyboard.Shortcut.Common.New}
                   />
                   <Action.Push
                     icon={Icon.Pencil}
-                    title="Edit Instance Profile"
+                    title="Edit"
                     target={<InstanceForm onSubmit={editInstance} instance={instance} />}
                     shortcut={Keyboard.Shortcut.Common.Edit}
+                    onPop={mutate}
                   />
                   <Action
-                    title="Delete Instance Profile"
+                    title="Delete"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={async () => {
-                      if (
-                        await confirmAlert({
-                          title: "Remove Instance",
-                          message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
-                        })
-                      ) {
-                        await deleteInstance(instanceId);
-                      }
-                    }}
+                    onAction={() =>
+                      confirmAlert({
+                        title: "Delete Instance Profile",
+                        message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                          onAction: () => {
+                            deleteInstance(instanceId);
+                          },
+                        },
+                      })
+                    }
                   />
                 </List.Dropdown.Section>
                 <Action
                   icon={Icon.Checkmark}
-                  title="Select Instance Profile"
+                  title="Select"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   onAction={() => {
                     setSelectedInstance(instance);

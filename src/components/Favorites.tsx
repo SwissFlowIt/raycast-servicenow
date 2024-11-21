@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 
-import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
 
-import { Favorite, FavoritesResponse, Instance } from "../types";
+import { Favorite, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
@@ -11,6 +10,7 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import useFavorites from "../hooks/useFavorites";
+import FavoriteForm from "./FavoriteForm";
 
 export default function Favorites(props: { groupId?: string; revalidate?: () => void }) {
   const { groupId = "", revalidate: revalidateParent } = props;
@@ -22,42 +22,15 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { removeFromFavorites } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
+  const {
+    favorites: data,
+    isLoading,
+    revalidateFavorites: revalidate,
+    removeFromFavorites,
+    errorFetching,
+  } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
-
-  const instanceUrl = `https://${instanceName}.service-now.com`;
-
-  const { isLoading, data, revalidate } = useFetch(
-    () => {
-      return `${instanceUrl}/api/now/ui/favorite`;
-    },
-    {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: selectedInstance && !groupId,
-      onError: (error) => {
-        setErrorFetching(true);
-        console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
-      },
-
-      mapResult(response: { result: FavoritesResponse }) {
-        if (response && response.result && Object.keys(response.result).length === 0) {
-          setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch favorites");
-          return { data: [] };
-        }
-
-        setErrorFetching(false);
-        return { data: response.result.list };
-      },
-      keepPreviousData: true,
-    },
-  );
+  const { id: instanceId = "" } = selectedInstance || {};
 
   const filterByGroup = useMemo(() => {
     if (!groupId) return data;
@@ -202,14 +175,32 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                                 icon={Icon.ChevronRight}
                                 target={<Favorites groupId={group.id} revalidate={revalidate} />}
                               />
-                              <Action
-                                title="Delete"
-                                icon={Icon.Trash}
-                                style={Action.Style.Destructive}
-                                onAction={() => removeFromFavorites(group.id, groupName, true, revalidate)}
-                                shortcut={Keyboard.Shortcut.Common.Remove}
-                              />
                             </ActionPanel.Section>
+                            <Action.Push
+                              title="Edit"
+                              icon={Icon.Pencil}
+                              target={<FavoriteForm favorite={group} revalidate={revalidate} />}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
+                            />
+                            <Action
+                              title="Delete"
+                              icon={Icon.Trash}
+                              style={Action.Style.Destructive}
+                              onAction={() =>
+                                confirmAlert({
+                                  title: "Delete Favorites Group",
+                                  message: `Are you sure you want to delete "${group.title}"?`,
+                                  primaryAction: {
+                                    style: Alert.ActionStyle.Destructive,
+                                    title: "Delete",
+                                    onAction: () => {
+                                      removeFromFavorites(group.id, groupName, true, revalidate);
+                                    },
+                                  },
+                                })
+                              }
+                              shortcut={Keyboard.Shortcut.Common.Remove}
+                            />
                             <Actions revalidate={revalidate} />
                           </ActionPanel>
                         }
@@ -233,7 +224,6 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                           <FavoriteItem
                             key={favorite.id}
                             favorite={favorite}
-                            instanceUrl={instanceUrl}
                             revalidate={() => {
                               revalidate();
                               revalidateParent?.();
@@ -257,7 +247,6 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                   <FavoriteItem
                     key={favorite.id}
                     favorite={favorite}
-                    instanceUrl={instanceUrl}
                     revalidate={revalidate}
                     removeFromFavorites={removeFromFavorites}
                   />
@@ -287,13 +276,15 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
 
 function FavoriteItem(props: {
   favorite: Favorite;
-  instanceUrl: string;
   revalidate: () => void;
   group?: string;
   section?: string;
   removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => void;
 }) {
-  const { favorite: favorite, instanceUrl, revalidate, removeFromFavorites, group = "", section = "" } = props;
+  const { favorite: favorite, revalidate, removeFromFavorites, group = "", section = "" } = props;
+  const { selectedInstance } = useInstances();
+  const { name: instanceName = "" } = selectedInstance || {};
+  const instanceUrl = `https://${instanceName}.service-now.com`;
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {
@@ -301,11 +292,10 @@ function FavoriteItem(props: {
         <FavoriteItem
           key={f.id}
           favorite={f}
-          instanceUrl={instanceUrl}
           revalidate={revalidate}
           group={group}
           section={favorite.title}
-          removeFromFavorites={props.removeFromFavorites}
+          removeFromFavorites={removeFromFavorites}
         />
       );
     });
@@ -340,14 +330,29 @@ function FavoriteItem(props: {
           <ActionPanel.Section title={favorite.title}>
             <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
-            <Action
-              title="Delete"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={() => removeFromFavorites(favorite.id, favorite.title, false, revalidate)}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-            />
           </ActionPanel.Section>
+          <Action.Push
+            title="Edit"
+            icon={Icon.Pencil}
+            target={<FavoriteForm favorite={favorite} revalidate={revalidate} />}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+          <Action
+            title="Delete"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={async () => {
+              if (
+                await confirmAlert({
+                  title: "Delete Favorite",
+                  message: `Are you sure you want to delete "${favorite.title}"?`,
+                })
+              ) {
+                removeFromFavorites(favorite.id, favorite.title, false, revalidate);
+              }
+            }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
           <Actions revalidate={revalidate} />
         </ActionPanel>
       }

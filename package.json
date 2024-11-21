@@ -129,8 +129,8 @@
     },
     {
       "name": "explore-favorites",
-      "title": "Explore Favorites",
-      "description": "View your favorite items within a ServiceNow instance, such as frequently used modules or records.",
+      "title": "Manage Favorites",
+      "description": "View and manage your favorite items within a ServiceNow instance, such as frequently used modules or records.",
       "mode": "view"
     },
     {

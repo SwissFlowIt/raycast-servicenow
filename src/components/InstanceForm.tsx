@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { ActionPanel, Action, Form, Icon, useNavigation, Color } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, useNavigation, Color, Keyboard, confirmAlert, Alert } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import crypto from "crypto";
 import { Instance } from "../types";
+import useInstances from "../hooks/useInstances";
 
 type InstanceFormValues = Omit<Instance, "id">;
 
@@ -13,6 +14,7 @@ type SetInstanceFormProps = {
 
 export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProps) {
   const { pop } = useNavigation();
+  const { deleteInstance } = useInstances();
 
   const { itemProps, handleSubmit } = useForm<InstanceFormValues>({
     async onSubmit(values) {
@@ -49,7 +51,31 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       isLoading={false}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
+          <ActionPanel.Section
+            title={`${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}`}
+          >
+            <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
+            <Action
+              title="Delete"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() =>
+                confirmAlert({
+                  title: "Delete Instance Profile",
+                  message: `Are you sure you want to delete "${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}"?`,
+                  primaryAction: {
+                    style: Alert.ActionStyle.Destructive,
+                    title: "Delete",
+                    onAction: () => {
+                      deleteInstance(instance?.id || "");
+                      pop();
+                    },
+                  },
+                })
+              }
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

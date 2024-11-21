@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -6,29 +6,21 @@ import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import crypto from "crypto";
 
-import { Favorite, FavoritesResponse, Module } from "../types";
+import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
 import { extractParamFromURL } from "../utils/extractParamFromURL";
 import useInstances from "./useInstances";
 
-interface FavoriteBody {
-  sys_id: string;
-  title: string;
-  user: string;
-  url?: string;
-  icon?: string;
-  module?: string;
-  application?: string;
-  group?: string;
-}
-
 const useFavorites = () => {
   const { selectedInstance, userId } = useInstances();
+  const [errorFetching, setErrorFetching] = useState<boolean>(false);
+
   const { name: instanceName = "", username = "", password = "" } = selectedInstance || {};
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
   const {
     data: favorites,
     revalidate: revalidateFavorites,
+    isLoading,
     mutate,
   } = useFetch(
     () => {
@@ -40,15 +32,19 @@ const useFavorites = () => {
       },
       execute: !!selectedInstance,
       onError: (error) => {
+        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
       },
 
       mapResult(response: { result: FavoritesResponse }) {
         if (response && response.result && Object.keys(response.result).length === 0) {
+          setErrorFetching(true);
           showToast(Toast.Style.Failure, "Could not fetch favorites");
           return { data: [] };
         }
+
+        setErrorFetching(false);
         return { data: response.result.list };
       },
       keepPreviousData: true,
@@ -56,10 +52,12 @@ const useFavorites = () => {
   );
 
   const favoritesGroups = useMemo(() => {
-    if (!favorites) return {};
-    return Object.fromEntries(
-      favorites?.filter((favorite) => favorite.group).map((favorite) => [favorite.applicationId, favorite.id]),
-    );
+    if (!favorites) return [];
+    return favorites
+      .filter((favorite) => favorite.group)
+      .map((favorite) => {
+        return { applicationId: favorite.applicationId, id: favorite.id, title: favorite.title };
+      });
   }, [favorites]);
 
   const favoritesData = useMemo(() => {
@@ -87,7 +85,7 @@ const useFavorites = () => {
   }, [favorites]);
 
   const isMenuInFavorites = (groupId: string) => {
-    return favoritesGroups[groupId];
+    return favoritesGroups.find((favorite) => favorite.applicationId === groupId)?.id || "";
   };
 
   const isUrlInFavorites = useCallback(
@@ -146,8 +144,8 @@ const useFavorites = () => {
   };
 
   const addApplicationToFavorites = (application: string, title: string, modules: Module[]) => {
-    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
-    const body: FavoriteBody = { sys_id: newFavoriteId, application, title, user: userId || "" };
+    const newFavoriteId = crypto.randomUUID().replace(/-/g, "");
+    const body: FavoriteRecord = { sys_id: newFavoriteId, application, title, user: userId || "" };
 
     const applicationRequest = {
       id: "application",
@@ -174,9 +172,9 @@ const useFavorites = () => {
     modules.forEach((module, index) => {
       const favoriteModules = module.type === "SEPARATOR" && module.modules ? module.modules : [module];
       favoriteModules.forEach((subModule, subIndex) => {
-        const newFavoriteModuleId = crypto.randomBytes(16).toString("hex").substring(0, 32);
+        const newFavoriteModuleId = crypto.randomUUID().replace(/-/g, "");
 
-        const subFavoriteBody: FavoriteBody = {
+        const subFavoriteBody: FavoriteRecord = {
           sys_id: newFavoriteModuleId,
           module: subModule.id,
           group: newFavoriteId,
@@ -217,7 +215,7 @@ const useFavorites = () => {
       group: true,
       favorites: modules.map((module) => {
         return {
-          id: crypto.randomBytes(16).toString("hex").substring(0, 32),
+          id: crypto.randomUUID().replace(/-/g, ""),
           module: module.id,
           title: module.title,
           group: false,
@@ -236,7 +234,7 @@ const useFavorites = () => {
       {
         before: `Adding "${title}" to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite",
+        failure: "Failed adding favorite group",
       },
       updateData,
     );
@@ -244,8 +242,8 @@ const useFavorites = () => {
 
   const addModuleToFavorites = (module: string, title: string, url: string) => {
     const endpoint = "/api/now/table/sys_ui_bookmark";
-    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
-    const body: FavoriteBody = { sys_id: newFavoriteId, module, title, url, user: userId || "", icon: "star" };
+    const newFavoriteId = crypto.randomUUID().replace(/-/g, "");
+    const body: FavoriteRecord = { sys_id: newFavoriteId, module, title, url, user: userId || "", icon: "star" };
 
     const newFavorite = {
       id: newFavoriteId,
@@ -278,8 +276,8 @@ const useFavorites = () => {
 
   const addUrlToFavorites = (title: string, url: string) => {
     const endpoint = "/api/now/table/sys_ui_bookmark";
-    const newFavoriteId = crypto.randomBytes(16).toString("hex").substring(0, 32);
-    const body: FavoriteBody = { sys_id: newFavoriteId, title, url, user: userId || "", icon: "star" };
+    const newFavoriteId = crypto.randomUUID().replace(/-/g, "");
+    const body: FavoriteRecord = { sys_id: newFavoriteId, title, url, user: userId || "", icon: "star" };
 
     const newFavorite = {
       id: newFavoriteId,
@@ -309,6 +307,68 @@ const useFavorites = () => {
     );
   };
 
+  const updateFavoritesGroup = (favoriteRecord: FavoriteRecord, revalidate?: () => void) => {
+    const title = favoriteRecord.title;
+    const endpoint = `/api/now/table/sys_ui_bookmark_group/${favoriteRecord.sys_id}`;
+
+    const request = {
+      endpoint,
+      method: "PATCH",
+      body: JSON.stringify(favoriteRecord),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return data.map((favorite) => {
+        if (favorite.id === favoriteRecord.sys_id) {
+          return { ...favorite, title: favoriteRecord.title };
+        }
+        return favorite;
+      });
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Updating "${title}"`,
+        success: `Favorites group updated`,
+        failure: "Failed updating favorites group",
+      },
+      updateData,
+      revalidate,
+    );
+  };
+
+  const updateFavorite = (favoriteRecord: FavoriteRecord, revalidate?: () => void) => {
+    const title = favoriteRecord.title;
+    const endpoint = `/api/now/table/sys_ui_bookmark/${favoriteRecord.sys_id}`;
+
+    const request = {
+      endpoint,
+      method: "PATCH",
+      body: JSON.stringify(favoriteRecord),
+    };
+
+    const updateData = (data: Favorite[]) => {
+      return data.map((favorite) => {
+        if (favorite.id === favoriteRecord.sys_id) {
+          return { ...favorite, title: favoriteRecord.title, url: favoriteRecord.url };
+        }
+        return favorite;
+      });
+    };
+
+    _updateFavorites(
+      request,
+      {
+        before: `Updating "${title}"`,
+        success: `Favorite updated`,
+        failure: "Failed updating favorite",
+      },
+      updateData,
+      revalidate,
+    );
+  };
+
   const removeFromFavorites = async (id: string, title: string, isGroup: boolean, revalidate?: () => void) => {
     const endpoint = isGroup ? `/api/now/table/sys_ui_bookmark_group/${id}` : `/api/now/table/sys_ui_bookmark/${id}`;
 
@@ -334,6 +394,10 @@ const useFavorites = () => {
   };
 
   return {
+    favorites,
+    favoritesGroups,
+    isLoading,
+    errorFetching,
     isUrlInFavorites,
     isMenuInFavorites,
     revalidateFavorites,
@@ -341,6 +405,8 @@ const useFavorites = () => {
     addModuleToFavorites,
     addUrlToFavorites,
     removeFromFavorites,
+    updateFavorite,
+    updateFavoritesGroup,
   };
 };
 
