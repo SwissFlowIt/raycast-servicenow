@@ -30,7 +30,7 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
     errorFetching,
   } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const { id: instanceId = "" } = selectedInstance || {};
+  const { id: instanceId = "", full } = selectedInstance || {};
 
   const filterByGroup = useMemo(() => {
     if (!groupId) return data;
@@ -176,45 +176,49 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                                 target={<Favorites groupId={group.id} revalidate={revalidate} />}
                               />
                             </ActionPanel.Section>
-                            <Action.Push
-                              title="Edit"
-                              icon={Icon.Pencil}
-                              target={<FavoriteForm favorite={group} revalidate={revalidate} />}
-                              shortcut={Keyboard.Shortcut.Common.Edit}
-                            />
-                            <Action
-                              title="Delete"
-                              icon={Icon.Trash}
-                              style={Action.Style.Destructive}
-                              onAction={() =>
-                                confirmAlert({
-                                  title: "Delete Favorites Group",
-                                  message: `Are you sure you want to delete "${group.title}"?`,
-                                  primaryAction: {
-                                    style: Alert.ActionStyle.Destructive,
-                                    title: "Delete",
-                                    onAction: () => {
-                                      removeFromFavorites(group.id, groupName, true, revalidate);
-                                    },
-                                  },
-                                })
-                              }
-                              shortcut={Keyboard.Shortcut.Common.Remove}
-                            />
-                            <ActionPanel.Section title="Add">
-                              <Action.Push
-                                title="Favorites Group"
-                                icon={Icon.Folder}
-                                target={<FavoriteForm add="group" revalidate={revalidate} />}
-                                shortcut={Keyboard.Shortcut.Common.Edit}
-                              />
-                              <Action.Push
-                                title="Favorite"
-                                icon={Icon.Star}
-                                target={<FavoriteForm add="favorite" groupId={group.id} revalidate={revalidate} />}
-                                shortcut={Keyboard.Shortcut.Common.Edit}
-                              />
-                            </ActionPanel.Section>
+                            {full == "true" && (
+                              <>
+                                <Action.Push
+                                  title="Edit"
+                                  icon={Icon.Pencil}
+                                  target={<FavoriteForm favorite={group} revalidate={revalidate} />}
+                                  shortcut={Keyboard.Shortcut.Common.Edit}
+                                />
+                                <Action
+                                  title="Delete"
+                                  icon={Icon.Trash}
+                                  style={Action.Style.Destructive}
+                                  onAction={() =>
+                                    confirmAlert({
+                                      title: "Delete Favorites Group",
+                                      message: `Are you sure you want to delete "${group.title}"?`,
+                                      primaryAction: {
+                                        style: Alert.ActionStyle.Destructive,
+                                        title: "Delete",
+                                        onAction: () => {
+                                          removeFromFavorites(group.id, groupName, true, revalidate);
+                                        },
+                                      },
+                                    })
+                                  }
+                                  shortcut={Keyboard.Shortcut.Common.Remove}
+                                />
+                                <ActionPanel.Section title="Add">
+                                  <Action.Push
+                                    title="Favorites Group"
+                                    icon={Icon.Folder}
+                                    target={<FavoriteForm add="group" revalidate={revalidate} />}
+                                    shortcut={Keyboard.Shortcut.Common.Edit}
+                                  />
+                                  <Action.Push
+                                    title="Favorite"
+                                    icon={Icon.Star}
+                                    target={<FavoriteForm add="favorite" groupId={group.id} revalidate={revalidate} />}
+                                    shortcut={Keyboard.Shortcut.Common.Edit}
+                                  />
+                                </ActionPanel.Section>
+                              </>
+                            )}
                             <Actions revalidate={revalidate} />
                           </ActionPanel>
                         }
@@ -249,21 +253,23 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                       })}
                     </List.Section>
                   ) : (
-                    <List.EmptyView
-                      key={"no-favorites"}
-                      title={`No Favorites found in ${group.title}`}
-                      description="Add a Favorite"
-                      actions={
-                        <ActionPanel>
-                          <Action.Push
-                            title="Add a Favorite"
-                            icon={Icon.Star}
-                            target={<FavoriteForm add="favorite" groupId={group.id} revalidate={revalidate} />}
-                            shortcut={Keyboard.Shortcut.Common.Edit}
-                          />
-                        </ActionPanel>
-                      }
-                    />
+                    full == "true" && (
+                      <List.EmptyView
+                        key={"no-favorites"}
+                        title={`No Favorites found in ${group.title}`}
+                        description="Add a Favorite"
+                        actions={
+                          <ActionPanel>
+                            <Action.Push
+                              title="Add a Favorite"
+                              icon={Icon.Star}
+                              target={<FavoriteForm add="favorite" groupId={group.id} revalidate={revalidate} />}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
+                            />
+                          </ActionPanel>
+                        }
+                      />
+                    )
                   );
                 })
               ))}

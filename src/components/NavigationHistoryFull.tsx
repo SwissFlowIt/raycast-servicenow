@@ -5,16 +5,17 @@ import { format } from "date-fns";
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { NavigationHistoryResponse, Instance } from "../types";
+import { FullNavigationHistoryResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
+import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
 
-export default function NavigationHistory() {
+export default function NavigationHistoryFull() {
   const {
     instances,
     isLoading: isLoadingInstances,
@@ -23,7 +24,7 @@ export default function NavigationHistory() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites();
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -31,27 +32,34 @@ export default function NavigationHistory() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
-    headers: {
-      Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+  const { isLoading, data, revalidate, pagination } = useFetch(
+    (options) => {
+      const terms = searchTerm.split(" ");
+      const query = terms.map((t) => `^titleLIKE${t}^ORdescriptionLIKE${t}^ORurlLIKE${t}`).join("");
+      return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_query=${query}^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_created_on&sysparm_fields=title,description,url,sys_created_on,sys_id&sysparm_display_value=true&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
-    execute: !!selectedInstance,
-    onError: (error) => {
-      setErrorFetching(true);
-      console.error(error);
-      showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
-    },
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+      },
+      execute: !!selectedInstance,
+      onError: (error) => {
+        setErrorFetching(true);
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
+      },
 
-    mapResult(response: NavigationHistoryResponse) {
-      setErrorFetching(false);
+      mapResult(response: FullNavigationHistoryResponse) {
+        setErrorFetching(false);
 
-      return { data: response.result.list };
+        return { data: response.result, hasMore: response.result.length > 0 };
+      },
+      keepPreviousData: true,
     },
-    keepPreviousData: true,
-  });
+  );
 
   const sections = useMemo(() => {
-    return groupBy(data, (historyEntry) => getSectionTitle(historyEntry.createdString || ""));
+    return groupBy(data, (historyEntry) => getSectionTitle(historyEntry.sys_created_on || ""));
   }, [data]);
 
   const onInstanceChange = (newValue: string) => {
@@ -130,7 +138,7 @@ export default function NavigationHistory() {
                 const accessories: List.Item.Accessory[] = [
                   {
                     icon: Icon.Calendar,
-                    tooltip: format(historyEntry.createdString || "", "EEEE d MMMM yyyy 'at' HH:mm"),
+                    tooltip: format(historyEntry.sys_created_on || "", "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
                     icon: Icon.Link,
@@ -148,7 +156,7 @@ export default function NavigationHistory() {
 
                 return (
                   <List.Item
-                    key={historyEntry.id}
+                    key={historyEntry.sys_id}
                     icon={icon}
                     title={historyEntry.title}
                     subtitle={historyEntry.description}
@@ -170,6 +178,31 @@ export default function NavigationHistory() {
                             shortcut={Keyboard.Shortcut.Common.CopyPath}
                           />
                         </ActionPanel.Section>
+                        {!favoriteId && (
+                          <Action
+                            title="Add Favorite"
+                            icon={Icon.Star}
+                            onAction={() => addUrlToFavorites(historyEntry.title, historyEntry.url)}
+                            shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+                          />
+                        )}
+                        {favoriteId && (
+                          <>
+                            <Action.Push
+                              title="Edit Favorite"
+                              icon={Icon.Pencil}
+                              target={<FavoriteForm favoriteId={favoriteId} />}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
+                            />
+                            <Action
+                              title="Remove Favorite"
+                              icon={Icon.StarDisabled}
+                              style={Action.Style.Destructive}
+                              onAction={() => removeFromFavorites(favoriteId, historyEntry.title, false)}
+                              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+                            />
+                          </>
+                        )}
                         <Actions
                           revalidate={() => {
                             revalidate();

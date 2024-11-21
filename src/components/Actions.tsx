@@ -3,19 +3,21 @@ import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycas
 import useInstances from "../hooks/useInstances";
 import Instances from "./InstancesList";
 
-export default function Actions({ revalidate }: { revalidate: () => void }) {
+export default function Actions({ cantRefresh, revalidate }: { cantRefresh?: boolean; revalidate: () => void }) {
   const { instances, selectedInstance, setSelectedInstance } = useInstances();
 
   return (
     <>
-      <List.Dropdown.Section title="List">
-        <Action
-          icon={Icon.ArrowClockwise}
-          title="Refresh"
-          onAction={revalidate}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-        />
-      </List.Dropdown.Section>
+      {!cantRefresh && (
+        <List.Dropdown.Section title="List">
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Refresh"
+            onAction={revalidate}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+        </List.Dropdown.Section>
+      )}
       <List.Dropdown.Section title="Instance Profiles">
         <Action.Push
           icon={Icon.Gear}

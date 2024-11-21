@@ -30,6 +30,7 @@ export default function SearchList() {
     name: instanceName = "",
     username = "",
     password = "",
+    full,
   } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
@@ -40,7 +41,7 @@ export default function SearchList() {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
-      execute: !!selectedInstance,
+      execute: selectedInstance && full == "true",
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
@@ -165,10 +166,14 @@ export default function SearchList() {
 
   useEffect(() => {
     if (!data) return;
+    if (full != "true") {
+      setFilteredTerms([]);
+      return;
+    }
     if (searchTerm) {
       setFilteredTerms(filter(data, (r) => r.search_term.includes(searchTerm)));
     } else setFilteredTerms(data);
-  }, [data, searchTerm]);
+  }, [data, searchTerm, full]);
 
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
@@ -225,7 +230,7 @@ export default function SearchList() {
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={() => {
-                      revalidate();
+                      if (full == "true") revalidate();
                       mutateInstances();
                     }}
                   />
@@ -246,7 +251,7 @@ export default function SearchList() {
                 </ActionPanel>
               }
             />
-          ) : data?.length && data.length > 0 ? (
+          ) : full == "true" && data?.length && data.length > 0 ? (
             <List.Section title="History">
               {filteredTerms?.map((item: HistoryResult) => (
                 <List.Item
@@ -301,7 +306,7 @@ export default function SearchList() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Actions revalidate={revalidate} />
+                  <Actions revalidate={revalidate} cantRefresh />
                 </ActionPanel>
               }
             />

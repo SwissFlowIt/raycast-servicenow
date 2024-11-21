@@ -34,7 +34,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", username = "", password = "", full } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
@@ -56,7 +56,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
       mapResult(response: NavigationMenuResponse) {
         if (response && response.result && response.result.length === 0) {
           setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch favorites");
+          showToast(Toast.Style.Failure, "Could not fetch menu entries");
           return { data: [] };
         }
         setErrorFetching(false);
@@ -203,7 +203,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           target={<NavigationMenu groupId={group.id} />}
                         />
                       </ActionPanel.Section>
-                      {!favoriteId && (
+                      {!favoriteId && full == "true" && (
                         <Action
                           title="Add Favorite"
                           icon={Icon.Star}
@@ -211,7 +211,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                         />
                       )}
-                      {favoriteId && (
+                      {favoriteId && full == "true" && (
                         <Action
                           title="Remove Favorite"
                           icon={Icon.StarDisabled}
@@ -259,6 +259,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           favoriteId={isUrlInFavorites(url)}
                           addToFavorites={addModuleToFavorites}
                           removeFromFavorites={removeFromFavorites}
+                          full={full == "true"}
                         />
                       );
                     });
@@ -277,6 +278,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       favoriteId={isUrlInFavorites(url)}
                       addToFavorites={addModuleToFavorites}
                       removeFromFavorites={removeFromFavorites}
+                      full={full == "true"}
                     />
                   );
                 })}
@@ -312,8 +314,9 @@ function ModuleItem(props: {
   removeFromFavorites: (id: string, title: string, isGroup: boolean) => void;
   group: string;
   section?: string;
+  full: boolean;
 }) {
-  const { module, url, favoriteId, revalidate, addToFavorites, removeFromFavorites, group, section = "" } = props;
+  const { module, url, favoriteId, revalidate, addToFavorites, removeFromFavorites, group, section = "", full } = props;
   const { icon: iconName, color: colorName } = getTableIconAndColor(module.tableName || "");
   const icon: Action.Props["icon"] = {
     source: Icon[iconName as keyof typeof Icon],
@@ -355,7 +358,7 @@ function ModuleItem(props: {
             />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
-          {!favoriteId && (
+          {!favoriteId && full && (
             <Action
               title="Add Favorite"
               icon={Icon.Star}
@@ -363,7 +366,7 @@ function ModuleItem(props: {
               shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
-          {favoriteId && (
+          {favoriteId && full && (
             <>
               <Action.Push
                 title="Edit Favorite"

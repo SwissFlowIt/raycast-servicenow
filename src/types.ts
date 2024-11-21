@@ -103,6 +103,7 @@ export interface Instance {
   color: string;
   username: string;
   password: string;
+  full: string;
 }
 
 export interface DBObjectsResponse {
@@ -115,16 +116,22 @@ export interface DBObject {
   super_class: string;
 }
 
-export interface NavigationHistoryResponse {
+export interface FullNavigationHistoryResponse {
   result: NavigationHistoryEntry[];
 }
 
+export interface NavigationHistoryResponse {
+  result: { list: NavigationHistoryEntry[] };
+}
+
 export interface NavigationHistoryEntry {
-  sys_id: string;
+  sys_id?: string;
+  id: string;
   title: string;
-  description: string;
+  description?: string;
   url: string;
-  sys_created_on: string;
+  sys_created_on?: string;
+  createdString?: string;
 }
 
 export interface FavoritesResponse {

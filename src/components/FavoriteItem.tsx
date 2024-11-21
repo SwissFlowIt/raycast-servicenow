@@ -14,7 +14,7 @@ export default function FavoriteItem(props: {
 }) {
   const { favorite: favorite, revalidate, removeFromFavorites, group = "", section = "" } = props;
   const { selectedInstance } = useInstances();
-  const { name: instanceName = "" } = selectedInstance || {};
+  const { name: instanceName = "", full } = selectedInstance || {};
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
   if (favorite.separator) {
@@ -66,45 +66,49 @@ export default function FavoriteItem(props: {
             <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
-          <Action.Push
-            title="Edit"
-            icon={Icon.Pencil}
-            target={<FavoriteForm favorite={favorite} revalidate={revalidate} />}
-            shortcut={Keyboard.Shortcut.Common.Edit}
-          />
-          <Action
-            title="Delete"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={() =>
-              confirmAlert({
-                title: "Delete Favorite",
-                message: `Are you sure you want to delete "${favorite.title}"?`,
-                primaryAction: {
-                  style: Alert.ActionStyle.Destructive,
-                  title: "Delete",
-                  onAction: () => {
-                    removeFromFavorites(favorite.id, favorite.title, false, revalidate);
-                  },
-                },
-              })
-            }
-            shortcut={Keyboard.Shortcut.Common.Remove}
-          />
-          <ActionPanel.Section title="Add">
-            <Action.Push
-              title="Favorites Group"
-              icon={Icon.Folder}
-              target={<FavoriteForm add="group" revalidate={revalidate} />}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-            />
-            <Action.Push
-              title="Favorite"
-              icon={Icon.Star}
-              target={<FavoriteForm add="favorite" groupId={favorite.groupId} revalidate={revalidate} />}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-            />
-          </ActionPanel.Section>
+          {full == "true" && (
+            <>
+              <Action.Push
+                title="Edit"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favorite={favorite} revalidate={revalidate} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Delete"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() =>
+                  confirmAlert({
+                    title: "Delete Favorite",
+                    message: `Are you sure you want to delete "${favorite.title}"?`,
+                    primaryAction: {
+                      style: Alert.ActionStyle.Destructive,
+                      title: "Delete",
+                      onAction: () => {
+                        removeFromFavorites(favorite.id, favorite.title, false, revalidate);
+                      },
+                    },
+                  })
+                }
+                shortcut={Keyboard.Shortcut.Common.Remove}
+              />
+              <ActionPanel.Section title="Add">
+                <Action.Push
+                  title="Favorites Group"
+                  icon={Icon.Folder}
+                  target={<FavoriteForm add="group" revalidate={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action.Push
+                  title="Favorite"
+                  icon={Icon.Star}
+                  target={<FavoriteForm add="favorite" groupId={favorite.groupId} revalidate={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+              </ActionPanel.Section>
+            </>
+          )}
           <Actions revalidate={revalidate} />
         </ActionPanel>
       }
