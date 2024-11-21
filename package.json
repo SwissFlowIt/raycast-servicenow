@@ -97,7 +97,7 @@
     },
     {
       "name": "explore-tables",
-      "title": "Tables",
+      "title": "Explore Tables",
       "description": "Browse and explore the tables within an instance.",
       "mode": "view"
     },

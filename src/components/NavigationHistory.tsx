@@ -213,7 +213,7 @@ export default function NavigationHistory() {
                             title="Add Favorite"
                             icon={Icon.Star}
                             onAction={() => addUrlToFavorites(historyEntry.title, historyEntry.url)}
-                            shortcut={{ modifiers: ["cmd"], key: "f" }}
+                            shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                           />
                         )}
                         {favoriteId && (
@@ -222,7 +222,7 @@ export default function NavigationHistory() {
                             icon={Icon.StarDisabled}
                             style={Action.Style.Destructive}
                             onAction={() => removeFromFavorites(favoriteId, historyEntry.title, false)}
-                            shortcut={{ modifiers: ["cmd"], key: "f" }}
+                            shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                           />
                         )}
                         <Actions
