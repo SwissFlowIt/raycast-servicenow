@@ -14,13 +14,13 @@ export default function SearchResultListItem({
   icon,
   label,
   fields,
-  mutateSearchResults,
+  revalidateSearchResults,
 }: {
   result: Record;
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
-  mutateSearchResults: () => Promise<void>;
+  revalidateSearchResults: () => void;
 }) {
   const { selectedInstance } = useInstances();
   const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
@@ -146,7 +146,7 @@ export default function SearchResultListItem({
           <Actions
             revalidate={() => {
               revalidateFavorites();
-              mutateSearchResults();
+              revalidateSearchResults();
             }}
           />
         </ActionPanel>

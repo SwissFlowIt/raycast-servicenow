@@ -24,7 +24,7 @@ export default function Tables() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate, pagination } = useFetch(
+  const { isLoading, data, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
@@ -98,7 +98,7 @@ export default function Tables() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions revalidate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
@@ -142,7 +142,7 @@ export default function Tables() {
                       content={`${instanceUrl}/${table.name}_list.do`}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
-                    <Actions revalidate={mutate} />
+                    <Actions revalidate={revalidate} />
                   </ActionPanel>
                 }
               />

@@ -12,8 +12,8 @@ import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import useFavorites from "../hooks/useFavorites";
 
-export default function Favorites(props: { groupId?: string; mutate?: () => void }) {
-  const { groupId = "", mutate: mutateParent } = props;
+export default function Favorites(props: { groupId?: string; revalidate?: () => void }) {
+  const { groupId = "", revalidate: revalidateParent } = props;
   const {
     instances,
     isLoading: isLoadingInstances,
@@ -30,7 +30,7 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, revalidate } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/favorite`;
     },
@@ -163,7 +163,7 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions revalidate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
@@ -200,17 +200,17 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
                               <Action.Push
                                 title="Browse"
                                 icon={Icon.ChevronRight}
-                                target={<Favorites groupId={group.id} mutate={mutate} />}
+                                target={<Favorites groupId={group.id} revalidate={revalidate} />}
                               />
                               <Action
                                 title="Delete"
                                 icon={Icon.Trash}
                                 style={Action.Style.Destructive}
-                                onAction={() => removeFromFavorites(group.id, groupName, true, mutate)}
+                                onAction={() => removeFromFavorites(group.id, groupName, true, revalidate)}
                                 shortcut={Keyboard.Shortcut.Common.Remove}
                               />
                             </ActionPanel.Section>
-                            <Actions revalidate={mutate} />
+                            <Actions revalidate={revalidate} />
                           </ActionPanel>
                         }
                       />
@@ -234,9 +234,9 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
                             key={favorite.id}
                             favorite={favorite}
                             instanceUrl={instanceUrl}
-                            mutate={() => {
-                              mutate();
-                              mutateParent?.();
+                            revalidate={() => {
+                              revalidate();
+                              revalidateParent?.();
                             }}
                             group={groupName}
                             removeFromFavorites={removeFromFavorites}
@@ -258,7 +258,7 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
                     key={favorite.id}
                     favorite={favorite}
                     instanceUrl={instanceUrl}
-                    mutate={mutate}
+                    revalidate={revalidate}
                     removeFromFavorites={removeFromFavorites}
                   />
                 ))}
@@ -288,12 +288,12 @@ export default function Favorites(props: { groupId?: string; mutate?: () => void
 function FavoriteItem(props: {
   favorite: Favorite;
   instanceUrl: string;
-  mutate: () => void;
+  revalidate: () => void;
   group?: string;
   section?: string;
-  removeFromFavorites: (id: string, title: string, isGroup: boolean, mutate?: () => void) => void;
+  removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => void;
 }) {
-  const { favorite: favorite, instanceUrl, mutate, removeFromFavorites, group = "", section = "" } = props;
+  const { favorite: favorite, instanceUrl, revalidate, removeFromFavorites, group = "", section = "" } = props;
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {
@@ -302,7 +302,7 @@ function FavoriteItem(props: {
           key={f.id}
           favorite={f}
           instanceUrl={instanceUrl}
-          mutate={mutate}
+          revalidate={revalidate}
           group={group}
           section={favorite.title}
           removeFromFavorites={props.removeFromFavorites}
@@ -344,11 +344,11 @@ function FavoriteItem(props: {
               title="Delete"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              onAction={() => removeFromFavorites(favorite.id, favorite.title, false, mutate)}
+              onAction={() => removeFromFavorites(favorite.id, favorite.title, false, revalidate)}
               shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
-          <Actions revalidate={mutate} />
+          <Actions revalidate={revalidate} />
         </ActionPanel>
       }
     />

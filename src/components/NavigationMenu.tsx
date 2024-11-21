@@ -37,7 +37,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, revalidate } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/navigator`;
     },
@@ -157,7 +157,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
               <ActionPanel>
                 <Actions
                   revalidate={() => {
-                    mutate();
+                    revalidate();
                     revalidateFavorites();
                   }}
                 />
@@ -221,7 +221,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       )}
                       <Actions
                         revalidate={() => {
-                          mutate();
+                          revalidate();
                           revalidateFavorites();
                         }}
                       />
@@ -249,8 +249,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
                           key={m.id}
                           module={m}
                           url={url}
-                          mutate={() => {
-                            mutate();
+                          revalidate={() => {
+                            revalidate();
                             revalidateFavorites();
                           }}
                           group={group.title}
@@ -268,8 +268,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       key={module.id}
                       module={module}
                       url={url}
-                      mutate={() => {
-                        mutate();
+                      revalidate={() => {
+                        revalidate();
                         revalidateFavorites();
                       }}
                       group={group.title}
@@ -306,13 +306,13 @@ function ModuleItem(props: {
   module: Module;
   url: string;
   favoriteId: string;
-  mutate: () => void;
+  revalidate: () => void;
   addToFavorites: (id: string, title: string, url: string) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean) => void;
   group: string;
   section?: string;
 }) {
-  const { module, url, favoriteId, mutate, addToFavorites, removeFromFavorites, group, section = "" } = props;
+  const { module, url, favoriteId, revalidate, addToFavorites, removeFromFavorites, group, section = "" } = props;
   const { icon: iconName, color: colorName } = getTableIconAndColor(module.tableName || "");
   const icon: Action.Props["icon"] = {
     source: Icon[iconName as keyof typeof Icon],
@@ -367,7 +367,7 @@ function ModuleItem(props: {
               shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
             />
           )}
-          <Actions revalidate={mutate} />
+          <Actions revalidate={revalidate} />
         </ActionPanel>
       }
     />

@@ -62,7 +62,7 @@ export default function NavigationHistory() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate, pagination } = useFetch(
+  const { isLoading, data, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^titleLIKE${t}^ORdescriptionLIKE${t}^ORurlLIKE${t}`).join("");
@@ -142,7 +142,7 @@ export default function NavigationHistory() {
               <ActionPanel>
                 <Actions
                   revalidate={() => {
-                    mutate();
+                    revalidate();
                     revalidateFavorites();
                   }}
                 />
@@ -227,7 +227,7 @@ export default function NavigationHistory() {
                         )}
                         <Actions
                           revalidate={() => {
-                            mutate();
+                            revalidate();
                             revalidateFavorites();
                           }}
                         />

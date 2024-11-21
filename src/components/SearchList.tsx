@@ -34,7 +34,7 @@ export default function SearchList() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, mutate, revalidate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
@@ -225,11 +225,11 @@ export default function SearchList() {
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={() => {
-                      mutate();
+                      revalidate();
                       mutateInstances();
                     }}
                   />
-                  <Actions revalidate={mutate} />
+                  <Actions revalidate={revalidate} />
                 </ActionPanel>
               }
             />
@@ -242,7 +242,7 @@ export default function SearchList() {
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
-                  <Actions revalidate={mutate} />
+                  <Actions revalidate={revalidate} />
                 </ActionPanel>
               }
             />
@@ -260,14 +260,14 @@ export default function SearchList() {
                     <ActionPanel>
                       <Action.Push
                         onPop={() => {
-                          mutate();
+                          revalidate();
                           mutateInstances();
                         }}
                         target={selectedInstance && <SearchResults searchTerm={item.search_term} />}
                         title={`Search for "${item.search_term}"`}
                         icon={Icon.MagnifyingGlass}
                       />
-                      <Actions revalidate={mutate} />
+                      <Actions revalidate={revalidate} />
                       <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
@@ -301,7 +301,7 @@ export default function SearchList() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Actions revalidate={mutate} />
+                  <Actions revalidate={revalidate} />
                 </ActionPanel>
               }
             />

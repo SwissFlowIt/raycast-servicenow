@@ -25,7 +25,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, revalidate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
@@ -90,7 +90,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions revalidate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
@@ -115,7 +115,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                     icon={icon}
                     label={result.label}
                     fields={result.fields}
-                    mutateSearchResults={mutate}
+                    revalidateSearchResults={revalidate}
                   />
                 ))}
                 <List.Item
@@ -137,7 +137,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         />
                         <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
                       </List.Dropdown.Section>
-                      <Actions revalidate={mutate} />
+                      <Actions revalidate={revalidate} />
                     </ActionPanel>
                   }
                 />
@@ -149,7 +149,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             title="No Results"
             actions={
               <ActionPanel>
-                <Actions revalidate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
