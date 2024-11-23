@@ -4,6 +4,7 @@ import { Favorite } from "../types";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import FavoriteForm from "./FavoriteForm";
 import Actions from "./Actions";
+import { extractParamFromURL } from "../utils/extractParamFromURL";
 
 export default function FavoriteItem(props: {
   favorite: Favorite;
@@ -33,7 +34,8 @@ export default function FavoriteItem(props: {
   }
 
   const url = favorite.url!.startsWith("/") ? `${instanceUrl}${favorite.url}` : `${instanceUrl}/${favorite.url}`;
-  const { icon: iconName, color: colorName } = getTableIconAndColor(favorite.table || "");
+  const table = favorite.table ? favorite.table : extractParamFromURL(url).path;
+  const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
   const icon: Action.Props["icon"] = {
     source: Icon[iconName as keyof typeof Icon],

@@ -146,19 +146,19 @@ export default function NavigationHistory() {
                   });
                 }
 
+                const description = historyEntry.description?.replace(/\\'/g, "'");
+
                 return (
                   <List.Item
                     key={historyEntry.id}
                     icon={icon}
                     title={historyEntry.title}
-                    subtitle={historyEntry.description}
-                    keywords={[historyEntry.title, historyEntry.description || "", ...table.split("_")]}
+                    subtitle={description}
+                    keywords={[historyEntry.title, description || "", ...table.split("_")]}
                     accessories={accessories}
                     actions={
                       <ActionPanel>
-                        <ActionPanel.Section
-                          title={historyEntry.title + (historyEntry.description ? ": " + historyEntry.description : "")}
-                        >
+                        <ActionPanel.Section title={historyEntry.title + (description ? ": " + description : "")}>
                           <Action.OpenInBrowser
                             title="Open in Servicenow"
                             url={url}
