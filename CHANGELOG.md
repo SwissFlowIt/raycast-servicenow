@@ -1,6 +1,6 @@
 # Search Documate Changelog
 
-## [New Commands] - 2024-10-23
+## [New Commands] - {PR_MERGE_DATE}
 
 - Added the **Manage Favorites** command to manage your favorite items and groups.
 - Introduced the **Explore Navigation Menu** command to browse the navigation menu's applications and modules.
