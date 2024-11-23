@@ -1,9 +1,10 @@
 {
-    "debug.javascript.resourceRequestOptions": {},
     "cSpell.words": [
         "documate",
+        "favorited",
         "globalsearch",
         "raycast",
-        "sysparm"
-    ]
+        "sysparm",
+        "timeago"
+    ],
 }
