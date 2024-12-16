@@ -36,7 +36,7 @@ export default function NavigationHistoryFull() {
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^titleLIKE${t}^ORdescriptionLIKE${t}^ORurlLIKE${t}`).join("");
-      return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_query=${query}^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_created_on&sysparm_fields=title,description,url,sys_created_on,sys_id&sysparm_display_value=true&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
+      return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_query=${query}^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_created_on&sysparm_fields=title,description,url,sys_created_on,sys_id&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
       headers: {
@@ -127,7 +127,8 @@ export default function NavigationHistoryFull() {
               subtitle={`${sections[section].length} ${sections[section].length == 1 ? "result" : "results"}`}
             >
               {sections[section].map((historyEntry) => {
-                const url = `${instanceUrl}${historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`}`;
+                const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
+                const url = `${instanceUrl}${path}`;
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -138,11 +139,14 @@ export default function NavigationHistoryFull() {
                 const accessories: List.Item.Accessory[] = [
                   {
                     icon: Icon.Calendar,
-                    tooltip: format(historyEntry.sys_created_on || "", "EEEE d MMMM yyyy 'at' HH:mm"),
+                    tooltip: format(
+                      new Date(historyEntry.sys_created_on + " UTC") || "",
+                      "EEEE d MMMM yyyy 'at' HH:mm",
+                    ),
                   },
                   {
                     icon: Icon.Link,
-                    tooltip: historyEntry.url[0] == "/" ? `${historyEntry.url}` : `/${historyEntry.url}`,
+                    tooltip: decodeURIComponent(path),
                   },
                 ];
 
