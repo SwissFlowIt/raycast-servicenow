@@ -11,8 +11,10 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
 import { GlobalSearchResponse, Record, SearchResult } from "../types";
+import useFavorites from "../hooks/useFavorites";
 
-export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
+export default function ({ searchTerm }: { searchTerm: string }) {
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const { commandName } = environment;
   const command = commandName == "search" ? "Search" : "Quickly Search";
@@ -73,7 +75,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
     const count = sumBy(data, (r) => r.record_count);
     if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
     else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
-  }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
+  }, [command, selectedInstance, errorFetching, isLoading, data, searchTerm, alias, instanceName]);
 
   return (
     <List
@@ -116,6 +118,10 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                     label={result.label}
                     fields={result.fields}
                     revalidateSearchResults={revalidate}
+                    favoriteId={isUrlInFavorites(`${instanceUrl}${record.record_url}`)}
+                    addUrlToFavorites={addUrlToFavorites}
+                    removeFromFavorites={removeFromFavorites}
+                    revalidateFavorites={revalidateFavorites}
                   />
                 ))}
                 <List.Item

@@ -15,16 +15,23 @@ export default function SearchResultListItem({
   icon,
   label,
   fields,
+  favoriteId,
   revalidateSearchResults,
+  addUrlToFavorites,
+  removeFromFavorites,
+  revalidateFavorites,
 }: {
   result: Record;
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
+  favoriteId: string;
   revalidateSearchResults: () => void;
+  addUrlToFavorites: (title: string, url: string, groupId?: string, revalidate?: () => void) => void;
+  removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => Promise<void>;
+  revalidateFavorites: () => void;
 }) {
   const { selectedInstance } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -103,7 +110,6 @@ export default function SearchResultListItem({
     result.record_url = "/" + result.record_url;
   }
 
-  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
   if (favoriteId) {
     accessories.unshift({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
