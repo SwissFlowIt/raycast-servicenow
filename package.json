@@ -138,6 +138,20 @@
       "title": "Explore Navigation Menu",
       "description": "Browse the list of application menus and their modules.",
       "mode": "view"
+    },
+    {
+      "name": "search-sysid",
+      "title": "Search sys_id",
+      "description": "Search for a sys_id in the current instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "sys_id",
+          "placeholder": "sys_id",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
