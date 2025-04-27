@@ -2,7 +2,7 @@
 
 ## [Open Mode Preference & Performance Improvements] - 2025-04-27
 
-- Added a new Open Mode preference to control how ServiceNow content is opened when using the extension:
+- Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
 - Replaced browser-based commands with AppleScripts for better performance and smoother operation.
 - Fixed an issue with displaying favorites, improving overall system stability and responsiveness.
 
