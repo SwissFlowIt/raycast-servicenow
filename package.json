@@ -145,8 +145,8 @@
       "name": "openMode",
       "type": "dropdown",
       "required": true,
-      "title": "Open record using",
-      "description": "Select how you prefer to open ServiceNow records (direct link, nav_to/Polaris, or SOW view).",
+      "title": "Open content using",
+      "description": "Select how you prefer to open ServiceNow pages and content (direct link, nav_to/Polaris, or SOW view).",
       "default": "direct",
       "data": [
         {
