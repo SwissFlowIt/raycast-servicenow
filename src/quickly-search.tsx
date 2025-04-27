@@ -18,7 +18,8 @@ export default function Search(props: LaunchProps) {
 
   const instance = instances.find(
     (i: Instance) =>
-      i.name.toLowerCase() === instanceName.toLowerCase() || i.alias?.toLowerCase() === instanceName.toLowerCase(),
+      i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
+      i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
   );
   if (!instance) {
     showToast(
