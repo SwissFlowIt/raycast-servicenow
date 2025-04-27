@@ -7,7 +7,10 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** Open record using - Select how you prefer to open ServiceNow records (direct link, nav_to/Polaris, or SOW view). */
+  "openMode": "direct" | "navigate" | "sow"
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences

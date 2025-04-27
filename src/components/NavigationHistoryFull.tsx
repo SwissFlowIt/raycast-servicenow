@@ -14,6 +14,7 @@ import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function NavigationHistoryFull() {
   const {
@@ -128,7 +129,7 @@ export default function NavigationHistoryFull() {
             >
               {sections[section].map((historyEntry) => {
                 const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
-                const url = `${instanceUrl}${path}`;
+                const url = buildServiceNowUrl(instanceName, path);
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 

@@ -12,6 +12,7 @@ import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
 import { GlobalSearchResponse, Record, SearchResult } from "../types";
 import useFavorites from "../hooks/useFavorites";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function ({ searchTerm }: { searchTerm: string }) {
   const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
@@ -104,6 +105,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
               source: Icon[iconName as keyof typeof Icon],
               tintColor: Color[colorName as keyof typeof Color],
             };
+            const allResultsUrl = buildServiceNowUrl(instanceName, result.all_results_url);
             return (
               <List.Section
                 key={result.name + "_" + index}
@@ -138,10 +140,10 @@ export default function ({ searchTerm }: { searchTerm: string }) {
                       >
                         <Action.OpenInBrowser
                           title="Open in Servicenow"
-                          url={`${instanceUrl}${result.all_results_url}`}
+                          url={allResultsUrl}
                           icon={{ source: "servicenow.svg" }}
                         />
-                        <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
+                        <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
                       </List.Dropdown.Section>
                       <Actions revalidate={revalidate} />
                     </ActionPanel>

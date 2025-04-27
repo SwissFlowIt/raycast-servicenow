@@ -140,6 +140,30 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "openMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Open record using",
+      "description": "Select how you prefer to open ServiceNow records (direct link, nav_to/Polaris, or SOW view).",
+      "default": "direct",
+      "data": [
+        {
+          "title": "Direct",
+          "value": "direct"
+        },
+        {
+          "title": "Navigate",
+          "value": "navigate"
+        },
+        {
+          "title": "Service Operations Workspace",
+          "value": "sow"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.96.0",
     "@raycast/utils": "^1.19.1",
