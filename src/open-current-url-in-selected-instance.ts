@@ -1,8 +1,15 @@
-import { BrowserExtension, LocalStorage, showToast, Toast, open } from "@raycast/api";
+import { LocalStorage, showToast, Toast, open } from "@raycast/api";
 import { Instance } from "./types";
+import { getURL } from "./utils/browserScripts";
 
 export default async () => {
-  const tabs = await BrowserExtension.getTabs();
+  const url = await getURL();
+
+  if (!url) {
+    showToast(Toast.Style.Failure, "No URL found", "Please open a tab in a supported browser");
+    return;
+  }
+
   const instance = await LocalStorage.getItem<string>("selected-instance");
 
   if (!instance) {
@@ -11,10 +18,11 @@ export default async () => {
   }
 
   const instanceProfile = JSON.parse(instance) as Instance;
-  const activeTab = tabs.find((tab) => tab.active);
-  if (activeTab && activeTab.url?.includes(".service-now.com")) {
-    const path = activeTab.url.split("/")[3];
-    open(`https://${instanceProfile.name}.service-now.com/${path}`);
+
+  if (url.includes(".service-now.com")) {
+    const urlObject = new URL(url);
+    const urlPath = urlObject.pathname;
+    open(`https://${instanceProfile.name}.service-now.com${urlPath}`);
   } else {
     showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
   }
