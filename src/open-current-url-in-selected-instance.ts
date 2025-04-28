@@ -10,14 +10,14 @@ export default async () => {
     return;
   }
 
-  const instance = await LocalStorage.getItem<string>("selected-instance");
+  const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
 
-  if (!instance) {
+  if (!selectedInstance) {
     showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
     return;
   }
 
-  const instanceProfile = JSON.parse(instance) as Instance;
+  const instance = JSON.parse(selectedInstance) as Instance;
 
   if (url.includes(".service-now.com")) {
     const urlObject = new URL(url);
