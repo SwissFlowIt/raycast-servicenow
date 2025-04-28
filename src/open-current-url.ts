@@ -36,8 +36,7 @@ export default async (props: LaunchProps) => {
 
   if (url.includes(".service-now.com")) {
     const urlObject = new URL(url);
-    const urlPath = urlObject.pathname;
-    open(`https://${instance.name}.service-now.com${urlPath}`);
+    open(`https://${instance.name}.service-now.com${urlObject.pathname + urlObject.search}`);
   } else {
     showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
   }
