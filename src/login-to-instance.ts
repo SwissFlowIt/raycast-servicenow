@@ -1,6 +1,5 @@
-import { LaunchProps, LocalStorage, showToast, Toast, open } from "@raycast/api";
+import { LaunchProps, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { Instance } from "./types";
-import { getURL } from "./utils/browserScripts";
 
 export default async (props: LaunchProps) => {
   const { instanceName } = props.arguments;
@@ -34,16 +33,7 @@ export default async (props: LaunchProps) => {
     return;
   }
 
-  const url = await getURL();
-  if (!url) {
-    showToast(Toast.Style.Failure, "No URL found", "Please open a tab in a supported browser");
-    return;
-  }
-
-  if (url.includes(".service-now.com")) {
-    const urlObject = new URL(url);
-    open(`https://${instance.name}.service-now.com${urlObject.pathname + urlObject.search}`);
-  } else {
-    showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
-  }
+  open(
+    `https://${instance.name}.service-now.com/login.do?user_name=${instance.username}&user_password=${instance.password}&sys_action=sysverb_login`,
+  );
 };

@@ -24,36 +24,22 @@
       "mode": "view"
     },
     {
-      "name": "quickly-search",
+      "name": "quick-search",
       "title": "Quick Search",
-      "description": "Enter an instance profile and a search term to get immediate results, without browsing search history.",
+      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance name or alias is provided, it will use the selected instance profile.",
       "mode": "view",
       "arguments": [
         {
-          "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "name": "query",
+          "placeholder": "Query",
           "type": "text",
           "required": true
         },
         {
-          "name": "query",
-          "placeholder": "Query",
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
           "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "quickly-search-selected-instance",
-      "title": "Quick Search in Selected Instance",
-      "description": "Enter a search term to get immediate results from the currently selected instance, without browsing search history.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -64,10 +50,18 @@
       "mode": "no-view"
     },
     {
-      "name": "open-selected-instance",
-      "title": "Open Selected Instance",
-      "description": "Open the currently selected ServiceNow instance in the browser.",
-      "mode": "no-view"
+      "name": "open-instance",
+      "title": "Open Instance",
+      "description": "Open a ServiceNow instance in the browser. If an instance name or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "open-current-page-instance",
@@ -110,10 +104,18 @@
       ]
     },
     {
-      "name": "login-to-selected-instance",
-      "title": "Login to Selected Instance",
+      "name": "login-to-instance",
+      "title": "Login to Instance",
       "description": "Log in to the selected instance using the credentials from the selected profile.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "explore-navigation-history",
@@ -136,7 +138,7 @@
     {
       "name": "search-sysid",
       "title": "Search sys_id",
-      "description": "Search for a sys_id in the current instance. Admins only",
+      "description": "Search for a sys_id. Admins only",
       "mode": "no-view",
       "arguments": [
         {
@@ -144,6 +146,12 @@
           "placeholder": "sys_id",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
         }
       ]
     }

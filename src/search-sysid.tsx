@@ -3,14 +3,35 @@ import { Instance } from "./types";
 import { findSysID } from "./utils/snSnippets";
 
 export default async (props: LaunchProps) => {
-  const { sys_id } = props.arguments;
-  const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-  if (!selectedInstance) {
+  const { sys_id, instanceName } = props.arguments;
+  const item = await LocalStorage.getItem<string>("saved-instances");
+
+  if (!item) {
     showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
     return;
   }
 
-  const instance = JSON.parse(selectedInstance) as Instance;
+  let instance;
+  if (instanceName) {
+    const instanceProfiles = JSON.parse(item) as Instance[];
+    instance = instanceProfiles.find(
+      (i: Instance) =>
+        i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
+        i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
+    );
+  } else {
+    const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
+    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
+  }
+
+  if (!instance) {
+    showToast(
+      Toast.Style.Failure,
+      "Instance not found",
+      `No instance found with name or alias containing ${instanceName}`,
+    );
+    return;
+  }
 
   showToast(Toast.Style.Animated, `Searching sys_id in ${instance.alias}...`);
 
@@ -64,7 +85,42 @@ class ServiceNowClient {
 
       const data = await response.json();
       const cookies = response.headers.get("set-cookie");
-      return { ck: data.ck, cookies: cookies || "" };
+
+      //extract cookies from response
+      var jsessionid = "";
+      var glide_user_route = "";
+      var glide_session_store = "";
+      var BIGipServerpool = "";
+      var cookiesArray = ("" + cookies).split(";");
+      //iterate through all cookies, found interesing ones
+      for (var i = 0; i < cookiesArray.length; i++) {
+        if (cookiesArray[i].indexOf("JSESSIONID") > -1) {
+          jsessionid = cookiesArray[i].substring(cookiesArray[i].indexOf("JSESSIONID"), cookiesArray[i].length);
+        }
+        if (cookiesArray[i].indexOf("glide_user_route") > -1) {
+          glide_user_route = cookiesArray[i].substring(
+            cookiesArray[i].indexOf("glide_user_route"),
+            cookiesArray[i].length,
+          );
+        }
+        if (cookiesArray[i].indexOf("glide_session_store") > -1) {
+          glide_session_store = cookiesArray[i].substring(
+            cookiesArray[i].indexOf("glide_session_store"),
+            cookiesArray[i].length,
+          );
+        }
+        if (cookiesArray[i].indexOf("BIGipServerpool") > -1) {
+          BIGipServerpool = cookiesArray[i].substring(
+            cookiesArray[i].indexOf("BIGipServerpool"),
+            cookiesArray[i].length,
+          );
+        }
+      }
+
+      return {
+        ck: data.ck,
+        cookies: jsessionid + ";" + glide_user_route + ";" + glide_session_store + ";" + BIGipServerpool,
+      };
     } catch (error) {
       console.error("Authentication Failed:", error);
       showToast(
@@ -92,6 +148,7 @@ class ServiceNowClient {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: this.sessionData.cookies,
           "X-UserToken": this.sessionData.ck,
+          Accept: "application/json",
         },
         body: new URLSearchParams(body).toString(),
       });
