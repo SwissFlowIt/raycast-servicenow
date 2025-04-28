@@ -70,24 +70,18 @@
       "mode": "no-view"
     },
     {
-      "name": "open-current-url",
-      "title": "Open Current URL",
-      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the specified instance.",
+      "name": "open-current-page-instance",
+      "title": "Open Current Page in Instance",
+      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance name or alias is provided, it will open the page in the selected instance profile.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instanceName",
           "placeholder": "Instance name or alias",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
-    },
-    {
-      "name": "open-current-url-in-selected-instance",
-      "title": "Open Current URL in Selected Instance",
-      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the selected instance.",
-      "mode": "no-view"
     },
     {
       "name": "add-instance-profile",
@@ -142,7 +136,7 @@
     {
       "name": "search-sysid",
       "title": "Search sys_id",
-      "description": "Search for a sys_id in the current instance.",
+      "description": "Search for a sys_id in the current instance. Admins only",
       "mode": "no-view",
       "arguments": [
         {

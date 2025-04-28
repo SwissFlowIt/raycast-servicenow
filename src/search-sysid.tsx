@@ -70,7 +70,7 @@ class ServiceNowClient {
       showToast(
         Toast.Style.Failure,
         "Authentication Failed",
-        "Please verify your instance credentials and network connection",
+        "This command requires admin access in ServiceNow. Please verify your credentials and permissions.",
       );
       return null;
     }

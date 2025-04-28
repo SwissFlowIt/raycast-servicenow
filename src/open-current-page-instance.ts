@@ -12,12 +12,19 @@ export default async (props: LaunchProps) => {
     return;
   }
 
-  const instanceProfiles = JSON.parse(item) as Instance[];
-  const instance = instanceProfiles.find(
-    (i: Instance) =>
-      i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-      i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-  );
+  let instance;
+  if (instanceName) {
+    console.log("instanceName");
+    const instanceProfiles = JSON.parse(item) as Instance[];
+    instance = instanceProfiles.find(
+      (i: Instance) =>
+        i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
+        i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
+    );
+  } else {
+    const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
+    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
+  }
 
   if (!instance) {
     showToast(

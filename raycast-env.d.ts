@@ -28,10 +28,8 @@ declare namespace Preferences {
   export type OpenAllInstances = ExtensionPreferences & {}
   /** Preferences accessible in the `open-selected-instance` command */
   export type OpenSelectedInstance = ExtensionPreferences & {}
-  /** Preferences accessible in the `open-current-url` command */
-  export type OpenCurrentUrl = ExtensionPreferences & {}
-  /** Preferences accessible in the `open-current-url-in-selected-instance` command */
-  export type OpenCurrentUrlInSelectedInstance = ExtensionPreferences & {}
+  /** Preferences accessible in the `open-current-page-instance` command */
+  export type OpenCurrentPageInstance = ExtensionPreferences & {}
   /** Preferences accessible in the `add-instance-profile` command */
   export type AddInstanceProfile = ExtensionPreferences & {}
   /** Preferences accessible in the `explore-tables` command */
@@ -71,13 +69,11 @@ declare namespace Arguments {
   export type OpenAllInstances = {}
   /** Arguments passed to the `open-selected-instance` command */
   export type OpenSelectedInstance = {}
-  /** Arguments passed to the `open-current-url` command */
-  export type OpenCurrentUrl = {
+  /** Arguments passed to the `open-current-page-instance` command */
+  export type OpenCurrentPageInstance = {
   /** Instance name or alias */
   "instanceName": string
 }
-  /** Arguments passed to the `open-current-url-in-selected-instance` command */
-  export type OpenCurrentUrlInSelectedInstance = {}
   /** Arguments passed to the `add-instance-profile` command */
   export type AddInstanceProfile = {}
   /** Arguments passed to the `explore-tables` command */
