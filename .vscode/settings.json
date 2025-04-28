@@ -3,7 +3,9 @@
         "documate",
         "favorited",
         "globalsearch",
+        "ISNOTEMPTY",
         "raycast",
+        "runscript",
         "simplelist",
         "sysparm",
         "timeago"

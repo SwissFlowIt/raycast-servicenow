@@ -46,6 +46,8 @@ declare namespace Preferences {
   export type ExploreFavorites = ExtensionPreferences & {}
   /** Preferences accessible in the `explore-navigation-menu` command */
   export type ExploreNavigationMenu = ExtensionPreferences & {}
+  /** Preferences accessible in the `search-sysid` command */
+  export type SearchSysid = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -93,5 +95,10 @@ declare namespace Arguments {
   export type ExploreFavorites = {}
   /** Arguments passed to the `explore-navigation-menu` command */
   export type ExploreNavigationMenu = {}
+  /** Arguments passed to the `search-sysid` command */
+  export type SearchSysid = {
+  /** sys_id */
+  "sys_id": string
+}
 }
 
