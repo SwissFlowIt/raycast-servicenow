@@ -6,7 +6,6 @@ import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
 import { Data, Field, Record } from "../types";
-import useFavorites from "../hooks/useFavorites";
 import useInstances from "../hooks/useInstances";
 import FavoriteForm from "./FavoriteForm";
 

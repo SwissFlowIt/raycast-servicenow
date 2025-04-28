@@ -50,7 +50,7 @@ export function findSysID(sys_id) {
         if (grTable.getUniqueValue() != sys_id) return false; //Some tables don't have sys_id
         return grTable.getRecordClassName() + "^" + grTable.getClassDisplayValue() + " - " + grTable.getDisplayValue();
       }
-    } catch (err) { }
+    } catch (err) {}
     return false;
   }
 }

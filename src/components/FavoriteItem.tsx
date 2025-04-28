@@ -17,7 +17,7 @@ export default function FavoriteItem(props: {
   const { favorite: favorite, revalidate, removeFromFavorites, group = "", section = "" } = props;
   const { selectedInstance } = useInstances();
   const { name: instanceName = "", full } = selectedInstance || {};
-  const path = favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}` || "";
+  const path = (favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}`) || "";
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {

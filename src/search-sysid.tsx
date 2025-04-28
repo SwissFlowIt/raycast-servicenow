@@ -49,8 +49,8 @@ export default async (props: LaunchProps) => {
     const answer = response.match(/###(.*)###/);
     if (response.length == 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
     else if (answer != null && answer[1]) {
-      var table = answer[1].split("^")[0];
-      var path = table + ".do?sys_id=" + sys_id;
+      const table = answer[1].split("^")[0];
+      const path = table + ".do?sys_id=" + sys_id;
       open(`https://${instance.name}.service-now.com/${path}`);
     } else {
       showToast(Toast.Style.Failure, `sys_id not found on ${instance.alias}`);
@@ -87,12 +87,12 @@ class ServiceNowClient {
       const cookies = response.headers.get("set-cookie");
 
       //extract cookies from response
-      var jsessionid = "";
-      var glide_user_route = "";
-      var glide_session_store = "";
-      var BIGipServerpool = "";
-      var cookiesArray = ("" + cookies).split(";");
-      for (var i = 0; i < cookiesArray.length; i++) {
+      let jsessionid = "";
+      let glide_user_route = "";
+      let glide_session_store = "";
+      let BIGipServerpool = "";
+      const cookiesArray = ("" + cookies).split(";");
+      for (let i = 0; i < cookiesArray.length; i++) {
         if (cookiesArray[i].indexOf("JSESSIONID") > -1) {
           jsessionid = cookiesArray[i].substring(cookiesArray[i].indexOf("JSESSIONID"), cookiesArray[i].length);
         }

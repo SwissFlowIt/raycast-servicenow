@@ -140,10 +140,7 @@ export default function NavigationHistoryFull() {
                 const accessories: List.Item.Accessory[] = [
                   {
                     icon: Icon.Calendar,
-                    tooltip: format(
-                      new Date(historyEntry.sys_created_on + " UTC") || "",
-                      "EEEE d MMMM yyyy 'at' HH:mm",
-                    ),
+                    tooltip: format(new Date(historyEntry.sys_created_on + " UTC"), "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
                     icon: Icon.Link,
