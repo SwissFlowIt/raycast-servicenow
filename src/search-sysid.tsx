@@ -92,7 +92,6 @@ class ServiceNowClient {
       var glide_session_store = "";
       var BIGipServerpool = "";
       var cookiesArray = ("" + cookies).split(";");
-      //iterate through all cookies, found interesing ones
       for (var i = 0; i < cookiesArray.length; i++) {
         if (cookiesArray[i].indexOf("JSESSIONID") > -1) {
           jsessionid = cookiesArray[i].substring(cookiesArray[i].indexOf("JSESSIONID"), cookiesArray[i].length);
@@ -148,7 +147,6 @@ class ServiceNowClient {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: this.sessionData.cookies,
           "X-UserToken": this.sessionData.ck,
-          Accept: "application/json",
         },
         body: new URLSearchParams(body).toString(),
       });

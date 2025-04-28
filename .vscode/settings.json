@@ -4,8 +4,10 @@
         "favorited",
         "globalsearch",
         "ISNOTEMPTY",
+        "JSESSIONID",
         "raycast",
         "runscript",
+        "Serverpool",
         "simplelist",
         "sysparm",
         "timeago"
